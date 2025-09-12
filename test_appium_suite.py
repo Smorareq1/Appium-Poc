@@ -12,6 +12,7 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 
 
 class TestConfig:
+    """Configuración centralizada para tests"""
     APK_PATH = r"C:\Users\smora\Documents\PDC\flutter-poc\demo_appium\build\app\outputs\flutter-apk\app-release.apk"
     APPIUM_SERVER = "http://127.0.0.1:4723"
     DEVICE_NAME = "emulator-5554"
@@ -147,7 +148,8 @@ class TestUIInteractions:
         assert isinstance(clickable_elements, list), "Debe retornar una lista de elementos"
         print(f"✅ Elementos analizados: {len(elements_info)}")
 
-        return elements_info  # Retornar para uso en otros tests
+        # NO retornar nada para evitar warning
+        # return elements_info  <- REMOVIDO
 
     @pytest.mark.parametrize("click_count", [5, 10, 15])
     def test_multiple_clicks(self, appium_driver, screenshot_helper, click_count):

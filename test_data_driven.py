@@ -52,7 +52,7 @@ class TestDataDrivenSuite:
 
         return data
 
-    def test_click_scenarios_from_data(self, appium_driver, screenshot_helper, load_test_scenarios):
+    def test_click_scenarios_from_data(self, driver, screenshot, load_test_scenarios):
         """Test que ejecuta múltiples escenarios definidos en JSON"""
 
         scenarios = load_test_scenarios.get('click_scenarios', [])
@@ -68,10 +68,10 @@ class TestDataDrivenSuite:
             print(f"🧪 Ejecutando: {test_id} - {name} (Jira: {jira_ticket})")
 
             # Tomar screenshot inicial para este escenario
-            screenshot_helper(f"scenario_{test_id}_start")
+            screenshot(f"scenario_{test_id}_start")
 
             # Buscar elementos clickeables
-            clickable_elements = appium_driver.find_elements(AppiumBy.XPATH, "//*[@clickable='true']")
+            clickable_elements = driver.find_elements(AppiumBy.XPATH, "//*[@clickable='true']")
 
             successful_clicks = 0
 
@@ -88,13 +88,13 @@ class TestDataDrivenSuite:
                         print(f"❌ Click {i + 1} falló: {e}")
             else:
                 # Fallback a coordenadas
-                screen_size = appium_driver.get_window_size()
+                screen_size = driver.get_window_size()
                 center_x = screen_size["width"] // 2
                 center_y = screen_size["height"] // 2
 
                 for i in range(click_count):
                     try:
-                        appium_driver.tap([(center_x, center_y)], 100)
+                        driver.tap([(center_x, center_y)], 100)
                         successful_clicks += 1
                         import time
                         time.sleep(delay)
@@ -105,7 +105,7 @@ class TestDataDrivenSuite:
             actual_success_rate = successful_clicks / click_count
 
             # Screenshot final del escenario
-            screenshot_helper(f"scenario_{test_id}_end")
+            screenshot(f"scenario_{test_id}_end")
 
             # Assertion basada en los datos del escenario
             assert actual_success_rate >= expected_rate, \
@@ -118,7 +118,7 @@ class TestDataDrivenSuite:
         {"test_id": "TC002", "clicks": 7, "expected_rate": 0.9},
         {"test_id": "TC003", "clicks": 12, "expected_rate": 0.7},
     ])
-    def test_parametrized_clicks(self, appium_driver, screenshot_helper, scenario_data):
+    def test_parametrized_clicks(self, driver, screenshot, scenario_data):
         """Test parametrizado que simula casos definidos en Jira"""
 
         test_id = scenario_data["test_id"]
@@ -127,14 +127,14 @@ class TestDataDrivenSuite:
 
         print(f"🎯 Test parametrizado: {test_id} ({click_count} clicks)")
 
-        screenshot_helper(f"param_test_{test_id}_start")
+        screenshot(f"param_test_{test_id}_start")
 
         # Lógica del test
         successful_clicks = 0
 
         # Buscar botón o usar coordenadas
         try:
-            clickable_elements = appium_driver.find_elements(AppiumBy.XPATH, "//*[@clickable='true']")
+            clickable_elements = driver.find_elements(AppiumBy.XPATH, "//*[@clickable='true']")
             if clickable_elements:
                 element = clickable_elements[0]
                 for _ in range(click_count):
@@ -147,10 +147,10 @@ class TestDataDrivenSuite:
                         pass
             else:
                 # Fallback a tap en centro
-                screen_size = appium_driver.get_window_size()
+                screen_size = driver.get_window_size()
                 for _ in range(click_count):
                     try:
-                        appium_driver.tap([(screen_size["width"] // 2, screen_size["height"] // 2)], 100)
+                        driver.tap([(screen_size["width"] // 2, screen_size["height"] // 2)], 100)
                         successful_clicks += 1
                         import time
                         time.sleep(0.2)
@@ -159,7 +159,7 @@ class TestDataDrivenSuite:
         except Exception as e:
             pytest.fail(f"Error en test {test_id}: {e}")
 
-        screenshot_helper(f"param_test_{test_id}_end")
+        screenshot(f"param_test_{test_id}_end")
 
         # Validación
         actual_rate = successful_clicks / click_count
@@ -175,27 +175,27 @@ class TestCompatibilityJira:
 
     @pytest.mark.jira("PROJ-100")
     @pytest.mark.smoke
-    def test_critical_app_launch(self, appium_driver, screenshot_helper):
+    def test_critical_app_launch(self, driver, screenshot):
         """Test crítico mapeado a ticket Jira PROJ-100"""
-        screenshot_helper("critical_test_start")
+        screenshot("critical_test_start")
 
         # Verificar que la app se lanza
-        assert appium_driver.current_package is not None
-        assert appium_driver.current_activity is not None
+        assert driver.current_package is not None
+        assert driver.current_activity is not None
 
-        screenshot_helper("critical_test_end")
+        screenshot("critical_test_end")
 
         print("✅ Critical app launch test completed (Jira: PROJ-100)")
 
     @pytest.mark.jira("PROJ-101")
     @pytest.mark.regression
-    def test_ui_elements_visibility(self, appium_driver, screenshot_helper):
+    def test_ui_elements_visibility(self, driver, screenshot):
         """Test de regresión mapeado a ticket Jira PROJ-101"""
-        screenshot_helper("ui_elements_test")
+        screenshot("ui_elements_test")
 
         # Buscar elementos en la UI
-        all_elements = appium_driver.find_elements(AppiumBy.XPATH, "//*")
-        clickable_elements = appium_driver.find_elements(AppiumBy.XPATH, "//*[@clickable='true']")
+        all_elements = driver.find_elements(AppiumBy.XPATH, "//*")
+        clickable_elements = driver.find_elements(AppiumBy.XPATH, "//*[@clickable='true']")
 
         # Validaciones
         assert len(all_elements) > 0, "Should find at least some UI elements"
