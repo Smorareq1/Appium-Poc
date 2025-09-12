@@ -1,0 +1,4 @@
+.venv
+test_reports
+test_screenshots
+.env
