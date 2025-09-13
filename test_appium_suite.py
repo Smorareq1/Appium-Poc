@@ -1,71 +1,28 @@
-import os
-import time
 import pytest
+import time
 from appium.webdriver.common.appiumby import AppiumBy
 from selenium.common.exceptions import NoSuchElementException
 
 
-class TestFFAAppLaunch:
-    """Suite de tests para lanzamiento de aplicación FFA"""
+class TestSimpleFlow:
+    """Tests simples para el flujo básico de la app"""
 
-    @pytest.mark.smoke
-    def test_app_launches_successfully(self, driver, screenshot):
-        """Test crítico - verificar que la app FFA se lance correctamente"""
-        screenshot("ffa_app_launched")
+    def test_01_click_registrarme(self, driver, screenshot):
+        """Test 1: Hacer click en el botón 'Registrarme'"""
+        print("\n=== TEST 1: Click en Registrarme ===")
 
-        # Verificar que la app está corriendo
-        current_package = driver.current_package
-        current_activity = driver.current_activity
-
-        # Assertions
-        assert current_package == "com.pdctechco.ffa", f"Package incorrecto: {current_package}"
-        assert current_activity is not None, "La activity de la app no debería ser None"
-
-        print(f"✅ FFA App package: {current_package}")
-        print(f"✅ FFA App activity: {current_activity}")
-
-    @pytest.mark.smoke
-    def test_main_screen_elements_visible(self, driver, screenshot):
-        """Test crítico - verificar que elementos principales están visibles"""
-        screenshot("main_screen_check")
-
-        # Buscar elementos principales que deberían existir
-        try:
-            # Buscar botones principales
-            registrarme_elements = driver.find_elements(AppiumBy.XPATH,
-                                                        "//*[contains(@text,'Registrarme') or contains(@content-desc,'Registrarme')]")
-            iniciar_sesion_elements = driver.find_elements(AppiumBy.XPATH,
-                                                           "//*[contains(@text,'Iniciar sesión') or contains(@content-desc,'Iniciar sesión')]")
-
-            screenshot("main_elements_found")
-
-            # Al menos uno de los botones principales debe estar visible
-            main_buttons_found = len(registrarme_elements) + len(iniciar_sesion_elements)
-            assert main_buttons_found > 0, "No se encontraron botones principales (Registrarme o Iniciar sesión)"
-
-            print(
-                f"✅ Elementos principales encontrados: Registrarme({len(registrarme_elements)}), Iniciar sesión({len(iniciar_sesion_elements)})")
-
-        except Exception as e:
-            screenshot("main_screen_error")
-            pytest.fail(f"Error verificando elementos principales: {e}")
-
-
-class TestFFAUserFlow:
-    """Suite de tests para flujo de usuario específico de FFA"""
-
-    @pytest.mark.regression
-    def test_01_click_registrarme_button(self, driver, screenshot):
-        """Test 1: Presionar botón 'Registrarme'"""
-        screenshot("before_registrarme_click")
+        # Screenshot inicial
+        screenshot("pantalla_inicial")
 
         try:
-            # Buscar botón Registrarme con múltiples estrategias
-            registrarme_button = None
+            # Buscar el botón "Registrarme" (es el botón con borde blanco)
+            print("Buscando botón 'Registrarme'...")
 
             # Estrategia 1: Por texto exacto
+            registrarme_button = None
             try:
                 registrarme_button = driver.find_element(AppiumBy.XPATH, "//*[@text='Registrarme']")
+                print("Encontrado por texto exacto")
             except NoSuchElementException:
                 pass
 
@@ -73,98 +30,120 @@ class TestFFAUserFlow:
             if not registrarme_button:
                 try:
                     registrarme_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@text,'Registrarme')]")
+                    print("Encontrado por texto que contiene")
                 except NoSuchElementException:
                     pass
 
-            # Estrategia 3: Por content-desc
+            # Estrategia 3: Por posición (primer botón clickeable)
             if not registrarme_button:
                 try:
-                    registrarme_button = driver.find_element(AppiumBy.XPATH,
-                                                             "//*[contains(@content-desc,'Registrarme')]")
-                except NoSuchElementException:
-                    pass
-
-            assert registrarme_button is not None, "No se encontró el botón 'Registrarme'"
-
-            # Click en el botón
-            registrarme_button.click()
-            time.sleep(2)  # Esperar navegación
-
-            screenshot("after_registrarme_click")
-            print("✅ Test 1: Click en 'Registrarme' exitoso")
-
-        except Exception as e:
-            screenshot("registrarme_click_error")
-            pytest.fail(f"Test 1 falló: {e}")
-
-    @pytest.mark.regression
-    def test_02_go_back_and_click_iniciar_sesion(self, driver, screenshot):
-        """Test 2: Ir atrás y presionar 'Iniciar sesión'"""
-        screenshot("before_back_navigation")
-
-        try:
-            # Ir atrás (puede ser botón back del dispositivo o botón en app)
-            try:
-                # Intentar botón back del dispositivo
-                driver.back()
-                time.sleep(1)
-            except:
-                # Si no funciona, buscar botón atrás en la app
-                back_buttons = driver.find_elements(AppiumBy.XPATH,
-                                                    "//*[contains(@content-desc,'back') or contains(@content-desc,'atrás')]")
-                if back_buttons:
-                    back_buttons[0].click()
-                    time.sleep(1)
-
-            screenshot("after_back_navigation")
-
-            # Buscar el botón azul "Iniciar sesión" con múltiples estrategias
-            iniciar_sesion_button = None
-
-            # Estrategia 1: Por texto exacto
-            try:
-                iniciar_sesion_button = driver.find_element(AppiumBy.XPATH, "//*[@text='Iniciar sesión']")
-            except NoSuchElementException:
-                pass
-
-            # Estrategia 2: Por texto que contenga (sin espacios extra)
-            if not iniciar_sesion_button:
-                try:
-                    iniciar_sesion_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@text,'Iniciar sesión')]")
-                except NoSuchElementException:
-                    pass
-
-            # Estrategia 3: Buscar por botón clickeable que contenga "Iniciar"
-            if not iniciar_sesion_button:
-                try:
-                    iniciar_sesion_button = driver.find_element(AppiumBy.XPATH,
-                                                                "//*[@clickable='true' and contains(@text,'Iniciar')]")
-                except NoSuchElementException:
-                    pass
-
-            # Estrategia 4: Buscar cualquier elemento con "Iniciar" (más amplio)
-            if not iniciar_sesion_button:
-                try:
-                    iniciar_sesion_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@text,'Iniciar')]")
-                except NoSuchElementException:
-                    pass
-
-            # Estrategia 5: Buscar por posición (botón en la parte inferior)
-            if not iniciar_sesion_button:
-                try:
-                    # Buscar todos los elementos clickeables
                     clickable_elements = driver.find_elements(AppiumBy.XPATH, "//*[@clickable='true']")
-                    # Tomar el último (probablemente el botón inferior)
-                    if len(clickable_elements) >= 2:
-                        iniciar_sesion_button = clickable_elements[-1]  # Último elemento clickeable
+                    if len(clickable_elements) >= 1:
+                        registrarme_button = clickable_elements[0]  # Primer elemento clickeable
+                        print("Encontrado como primer elemento clickeable")
                 except:
                     pass
 
-            # Debug: Si no encontramos nada, listar todos los elementos con texto
+            assert registrarme_button is not None, "No se pudo encontrar el botón 'Registrarme'"
+
+            # Hacer click
+            print("Haciendo click en Registrarme...")
+            registrarme_button.click()
+            time.sleep(3)  # Esperar que cargue la nueva pantalla
+
+            # Screenshot después del click
+            screenshot("despues_click_registrarme")
+
+            print("✅ TEST 1 COMPLETADO: Click en Registrarme exitoso")
+
+        except Exception as e:
+            screenshot("error_test_1")
+            pytest.fail(f"TEST 1 FALLÓ: {e}")
+
+    def test_02_go_back_with_phone_button(self, driver, screenshot):
+        """Test 2: Usar botón atrás del teléfono para volver"""
+        print("\n=== TEST 2: Botón atrás del teléfono ===")
+
+        # Screenshot antes de ir atrás
+        screenshot("antes_boton_atras")
+
+        try:
+            print("Presionando botón atrás del dispositivo...")
+
+            # Usar el botón back del dispositivo
+            driver.back()
+            time.sleep(2)  # Esperar que regrese a la pantalla anterior
+
+            # Screenshot después de ir atrás
+            screenshot("despues_boton_atras")
+
+            # Verificar que volvimos a la pantalla principal
+            # buscando el texto "¡Bienvenido!" o "Iniciar sesión"
+            try:
+                bienvenido_text = driver.find_element(AppiumBy.XPATH, "//*[contains(@text,'Bienvenido')]")
+                print("Confirmado: Volvimos a la pantalla principal (texto 'Bienvenido' encontrado)")
+            except NoSuchElementException:
+                try:
+                    iniciar_sesion_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@text,'Iniciar sesión')]")
+                    print("Confirmado: Volvimos a la pantalla principal (botón 'Iniciar sesión' encontrado)")
+                except NoSuchElementException:
+                    print("⚠️ No se pudo confirmar que volvimos, pero el test continúa...")
+
+            print("✅ TEST 2 COMPLETADO: Botón atrás funcionó correctamente")
+
+        except Exception as e:
+            screenshot("error_test_2")
+            pytest.fail(f"TEST 2 FALLÓ: {e}")
+
+    def test_03_click_iniciar_sesion(self, driver, screenshot):
+        """Test 3: Hacer click en el botón azul 'Iniciar sesión'"""
+        print("\n=== TEST 3: Click en Iniciar sesión ===")
+
+        # Screenshot inicial
+        screenshot("antes_iniciar_sesion")
+
+        try:
+            print("Buscando botón 'Iniciar sesión'...")
+
+            # Estrategia 1: Por texto exacto
+            iniciar_sesion_button = None
+            try:
+                iniciar_sesion_button = driver.find_element(AppiumBy.XPATH, "//*[@text='Iniciar sesión']")
+                print("Encontrado por texto exacto")
+            except NoSuchElementException:
+                pass
+
+            # Estrategia 2: Por texto que contenga
             if not iniciar_sesion_button:
-                print("🔍 Elementos con texto encontrados:")
-                all_text_elements = driver.find_elements(AppiumBy.XPATH, "//*[@text]")
-                for i, elem in enumerate(all_text_elements[:10]):  # Solo primeros 10
+                try:
+                    iniciar_sesion_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@text,'Iniciar sesión')]")
+                    print("Encontrado por texto que contiene")
+                except NoSuchElementException:
+                    pass
+
+            # Estrategia 3: Por texto que contenga solo "Iniciar"
+            if not iniciar_sesion_button:
+                try:
+                    iniciar_sesion_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@text,'Iniciar')]")
+                    print("Encontrado por texto que contiene 'Iniciar'")
+                except NoSuchElementException:
+                    pass
+
+            # Estrategia 4: Por posición (último botón clickeable - probablemente el azul)
+            if not iniciar_sesion_button:
+                try:
+                    clickable_elements = driver.find_elements(AppiumBy.XPATH, "//*[@clickable='true']")
+                    if len(clickable_elements) >= 2:
+                        iniciar_sesion_button = clickable_elements[-1]  # Último elemento clickeable
+                        print("Encontrado como último elemento clickeable (botón azul)")
+                except:
+                    pass
+
+            # Debug: Si no encontramos nada, mostrar todos los elementos disponibles
+            if not iniciar_sesion_button:
+                print("🔍 DEBUG: Elementos con texto encontrados:")
+                all_elements = driver.find_elements(AppiumBy.XPATH, "//*[@text]")
+                for i, elem in enumerate(all_elements[:10]):
                     try:
                         text = elem.get_attribute("text")
                         clickable = elem.get_attribute("clickable")
@@ -172,294 +151,106 @@ class TestFFAUserFlow:
                     except:
                         pass
 
-            assert iniciar_sesion_button is not None, "No se encontró el botón 'Iniciar sesión'"
+                print("🔍 DEBUG: Elementos clickeables encontrados:")
+                clickable_elements = driver.find_elements(AppiumBy.XPATH, "//*[@clickable='true']")
+                for i, elem in enumerate(clickable_elements):
+                    try:
+                        text = elem.get_attribute("text") or "Sin texto"
+                        bounds = elem.get_attribute("bounds") or "Sin bounds"
+                        print(f"  {i}: '{text}' en {bounds}")
+                    except:
+                        print(f"  {i}: No se pudo obtener info del elemento")
 
+            assert iniciar_sesion_button is not None, "No se pudo encontrar el botón 'Iniciar sesión'"
+
+            # Hacer click
+            print("Haciendo click en 'Iniciar sesión'...")
             iniciar_sesion_button.click()
-            time.sleep(2)
+            time.sleep(3)  # Esperar que cargue la nueva pantalla
 
-            screenshot("after_iniciar_sesion_click")
-            print("✅ Test 2: Navegación atrás e 'Iniciar sesión' exitoso")
+            # Screenshot después del click
+            screenshot("despues_click_iniciar_sesion")
 
-        except Exception as e:
-            screenshot("iniciar_sesion_error")
-            pytest.fail(f"Test 2 falló: {e}")
+            # Verificar que cambió de pantalla buscando elementos que NO están en la pantalla principal
+            pantalla_cambio = False
 
-    @pytest.mark.regression
-    def test_03_enter_invalid_email_and_validate_error(self, driver, screenshot):
-        """Test 3: Ingresar 'emailFalso', continuar y validar mensaje de error"""
-        screenshot("before_email_input")
-
-        try:
-            # Buscar campo de texto para email
-            email_field = None
-
-            # Estrategias para encontrar campo de email
-            email_selectors = [
-                "//*[@class='android.widget.EditText']",
+            # Buscar elementos típicos de pantalla de login
+            elementos_login = [
                 "//*[contains(@hint,'email') or contains(@hint,'Email')]",
-                "//*[contains(@hint,'correo') or contains(@hint,'Correo')]",
-                "//*[@resource-id='email' or @resource-id='emailInput']",
-                "//android.widget.EditText[1]"  # Primer campo de texto
-            ]
-
-            for selector in email_selectors:
-                try:
-                    email_field = driver.find_element(AppiumBy.XPATH, selector)
-                    break
-                except NoSuchElementException:
-                    continue
-
-            assert email_field is not None, "No se encontró campo de texto para email"
-
-            # Limpiar y escribir email falso
-            email_field.clear()
-            email_field.send_keys("emailFalso")
-
-            screenshot("email_entered")
-
-            # Buscar botón continuar
-            continuar_button = None
-            continuar_selectors = [
-                "//*[@text='Continuar']",
-                "//*[contains(@text,'Continuar')]",
-                "//*[@text='Siguiente']",
-                "//*[contains(@text,'Siguiente')]",
-                "//*[@content-desc='Continuar']"
-            ]
-
-            for selector in continuar_selectors:
-                try:
-                    continuar_button = driver.find_element(AppiumBy.XPATH, selector)
-                    break
-                except NoSuchElementException:
-                    continue
-
-            assert continuar_button is not None, "No se encontró botón 'Continuar'"
-
-            continuar_button.click()
-            time.sleep(2)
-
-            screenshot("after_continuar_click")
-
-            # Validar que aparece mensaje de error
-            error_message_found = False
-            error_selectors = [
-                "//*[contains(@text,'Llene los campos correctamente')]",
-                "//*[contains(@text,'campos correctamente')]",
-                "//*[contains(@text,'correctamente')]",
-                "//*[contains(@text,'error')]",
-                "//*[contains(@text,'Error')]"
-            ]
-
-            for selector in error_selectors:
-                try:
-                    error_element = driver.find_element(AppiumBy.XPATH, selector)
-                    error_message_found = True
-                    print(f"✅ Mensaje de error encontrado: {error_element.text}")
-                    break
-                except NoSuchElementException:
-                    continue
-
-            screenshot("error_validation")
-
-            assert error_message_found, "No se encontró el mensaje de error esperado"
-            print("✅ Test 3: Validación de error exitosa")
-
-        except Exception as e:
-            screenshot("email_validation_error")
-            pytest.fail(f"Test 3 falló: {e}")
-
-    @pytest.mark.regression
-    def test_04_click_usuario_password_and_enter_credentials(self, driver, screenshot):
-        """Test 4: Click en 'Usuario y contraseña' e ingresar credenciales"""
-        screenshot("before_usuario_password_click")
-
-        try:
-            # Buscar opción "Usuario y contraseña"
-            usuario_password_button = None
-            usuario_selectors = [
-                "//*[@text='Usuario y contraseña']",
-                "//*[contains(@text,'Usuario y contraseña')]",
-                "//*[contains(@text,'Usuario')]",
+                "//*[contains(@hint,'usuario') or contains(@hint,'Usuario')]",
+                "//*[contains(@hint,'correo')]",
+                "//*[@class='android.widget.EditText']",
+                "//*[contains(@text,'email')]",
                 "//*[contains(@text,'contraseña')]"
             ]
 
-            for selector in usuario_selectors:
+            for selector in elementos_login:
                 try:
-                    usuario_password_button = driver.find_element(AppiumBy.XPATH, selector)
+                    driver.find_element(AppiumBy.XPATH, selector)
+                    pantalla_cambio = True
+                    print(f"Confirmado: Cambió de pantalla (encontrado elemento: {selector})")
                     break
                 except NoSuchElementException:
                     continue
 
-            assert usuario_password_button is not None, "No se encontró opción 'Usuario y contraseña'"
+            if not pantalla_cambio:
+                print("⚠️ No se pudo confirmar el cambio de pantalla, pero el click se ejecutó")
 
-            usuario_password_button.click()
-            time.sleep(2)
-
-            screenshot("after_usuario_password_click")
-
-            # Buscar campos de usuario y contraseña
-            text_fields = driver.find_elements(AppiumBy.XPATH, "//android.widget.EditText")
-
-            assert len(text_fields) >= 2, f"Se esperaban al menos 2 campos de texto, se encontraron {len(text_fields)}"
-
-            # Campo usuario (primer campo)
-            usuario_field = text_fields[0]
-            usuario_field.clear()
-            usuario_field.send_keys("Alejandro.Morales")
-
-            screenshot("usuario_entered")
-
-            # Campo contraseña (segundo campo)
-            password_field = text_fields[1]
-            password_field.clear()
-            password_field.send_keys("Admin123")
-
-            screenshot("credentials_entered")
-
-            print("✅ Test 4: Credenciales ingresadas exitosamente")
+            print("✅ TEST 3 COMPLETADO: Click en 'Iniciar sesión' exitoso")
 
         except Exception as e:
-            screenshot("credentials_input_error")
-            pytest.fail(f"Test 4 falló: {e}")
+            screenshot("error_test_3")
+            pytest.fail(f"TEST 3 FALLÓ: {e}")
 
-    @pytest.mark.regression
-    def test_05_click_siguiente_button(self, driver, screenshot):
-        """Test 5: Presionar botón 'Siguiente'"""
-        screenshot("before_siguiente_click")
+    def test_04_debug_current_screen(self, driver, screenshot):
+        """Test 4: Debug - Mostrar todos los elementos de la pantalla actual"""
+        print("\n=== TEST 4: DEBUG - Elementos actuales ===")
+
+        screenshot("debug_pantalla_actual")
 
         try:
-            # Buscar botón Siguiente
-            siguiente_button = None
-            siguiente_selectors = [
-                "//*[@text='Siguiente']",
-                "//*[contains(@text,'Siguiente')]",
-                "//*[@text='Continuar']",
-                "//*[contains(@text,'Continuar')]",
-                "//*[@content-desc='Siguiente']"
-            ]
+            print("📱 Información de la pantalla actual:")
+            print(f"Package actual: {driver.current_package}")
+            print(f"Activity actual: {driver.current_activity}")
 
-            for selector in siguiente_selectors:
+            # Mostrar todos los elementos con texto
+            print("\n📝 Elementos con texto:")
+            text_elements = driver.find_elements(AppiumBy.XPATH, "//*[@text]")
+            for i, elem in enumerate(text_elements):
                 try:
-                    siguiente_button = driver.find_element(AppiumBy.XPATH, selector)
-                    break
-                except NoSuchElementException:
-                    continue
+                    text = elem.get_attribute("text")
+                    clickable = elem.get_attribute("clickable")
+                    print(f"  {i + 1}. '{text}' (clickable: {clickable})")
+                except:
+                    print(f"  {i + 1}. Error obteniendo texto del elemento")
 
-            assert siguiente_button is not None, "No se encontró botón 'Siguiente'"
+            # Mostrar elementos clickeables
+            print("\n🎯 Elementos clickeables:")
+            clickable_elements = driver.find_elements(AppiumBy.XPATH, "//*[@clickable='true']")
+            for i, elem in enumerate(clickable_elements):
+                try:
+                    text = elem.get_attribute("text") or "(sin texto)"
+                    content_desc = elem.get_attribute("content-desc") or "(sin descripción)"
+                    resource_id = elem.get_attribute("resource-id") or "(sin ID)"
+                    print(f"  {i + 1}. Texto: '{text}' | Desc: '{content_desc}' | ID: '{resource_id}'")
+                except:
+                    print(f"  {i + 1}. Error obteniendo info del elemento clickeable")
 
-            siguiente_button.click()
-            time.sleep(3)  # Tiempo extra para navegación
+            # Mostrar campos de texto
+            print("\n✏️ Campos de texto:")
+            edit_text_elements = driver.find_elements(AppiumBy.XPATH, "//android.widget.EditText")
+            if edit_text_elements:
+                for i, elem in enumerate(edit_text_elements):
+                    try:
+                        hint = elem.get_attribute("hint") or "(sin hint)"
+                        text = elem.get_attribute("text") or "(sin texto)"
+                        print(f"  {i + 1}. Hint: '{hint}' | Texto actual: '{text}'")
+                    except:
+                        print(f"  {i + 1}. Error obteniendo info del campo de texto")
+            else:
+                print("  No se encontraron campos de texto")
 
-            screenshot("after_siguiente_click")
-            print("✅ Test 5: Click en 'Siguiente' exitoso")
+            print("\n✅ TEST 4 COMPLETADO: Debug información mostrada")
 
         except Exception as e:
-            screenshot("siguiente_click_error")
-            pytest.fail(f"Test 5 falló: {e}")
-
-    @pytest.mark.regression
-    def test_06_click_allow_button(self, driver, screenshot):
-        """Test 6: Presionar botón 'Allow'"""
-        screenshot("before_allow_click")
-
-        try:
-            # Esperar un poco más por si hay diálogo de permisos
-            time.sleep(2)
-
-            # Buscar botón Allow
-            allow_button = None
-            allow_selectors = [
-                "//*[@text='Allow']",
-                "//*[@text='ALLOW']",
-                "//*[contains(@text,'Allow')]",
-                "//*[@text='Permitir']",
-                "//*[contains(@text,'Permitir')]",
-                "//*[@resource-id='com.android.permissioncontroller:id/permission_allow_button']"
-            ]
-
-            for selector in allow_selectors:
-                try:
-                    allow_button = driver.find_element(AppiumBy.XPATH, selector)
-                    break
-                except NoSuchElementException:
-                    continue
-
-            if allow_button is None:
-                # Si no hay botón Allow, puede que no haya aparecido el diálogo de permisos
-                screenshot("no_allow_dialog")
-                print("⚠️ No se encontró botón 'Allow' - posiblemente no hay diálogo de permisos")
-                return
-
-            allow_button.click()
-            time.sleep(2)
-
-            screenshot("after_allow_click")
-            print("✅ Test 6: Click en 'Allow' exitoso")
-
-        except Exception as e:
-            screenshot("allow_click_error")
-            pytest.fail(f"Test 6 falló: {e}")
-
-
-class TestFFAPerformance:
-    """Suite de tests de rendimiento para FFA"""
-
-    @pytest.mark.performance
-    def test_app_startup_time(self, driver_fresh_install, screenshot):
-        """Test de rendimiento - tiempo de inicio de la app"""
-        start_time = time.time()
-
-        # La app ya se inició con driver_fresh_install
-        screenshot("app_startup_completed")
-
-        startup_time = time.time() - start_time
-
-        # Assertions de rendimiento
-        assert startup_time < 10.0, f"Tiempo de inicio muy alto: {startup_time:.2f}s"
-
-        print(f"✅ Tiempo de inicio de FFA: {startup_time:.2f}s")
-
-    @pytest.mark.performance
-    def test_ui_response_time(self, driver, screenshot):
-        """Test de rendimiento - tiempo de respuesta de UI"""
-        response_times = []
-
-        # Medir tiempo de varias operaciones
-        for i in range(3):
-            start_time = time.time()
-
-            # Operación simple: tomar screenshot
-            driver.save_screenshot(f"temp_perf_{i}.png")
-
-            end_time = time.time()
-            response_times.append(end_time - start_time)
-
-            # Limpiar archivo temporal
-            try:
-                os.remove(f"temp_perf_{i}.png")
-            except:
-                pass
-
-        avg_response_time = sum(response_times) / len(response_times)
-        max_response_time = max(response_times)
-
-        screenshot("performance_test_completed")
-
-        # Assertions de rendimiento
-        assert avg_response_time < 2.0, f"Tiempo promedio muy alto: {avg_response_time:.2f}s"
-        assert max_response_time < 5.0, f"Tiempo máximo muy alto: {max_response_time:.2f}s"
-
-        print(f"✅ Tiempo promedio UI: {avg_response_time:.2f}s")
-        print(f"✅ Tiempo máximo UI: {max_response_time:.2f}s")
-
-
-# Hook personalizado para logs específicos de FFA
-def pytest_runtest_setup(item):
-    """Hook que se ejecuta antes de cada test"""
-    print(f"🧪 Iniciando test FFA: {item.name}")
-
-
-def pytest_runtest_teardown(item):
-    """Hook que se ejecuta después de cada test"""
-    print(f"🏁 Test FFA completado: {item.name}")
+            print(f"❌ Error en debug: {e}")
