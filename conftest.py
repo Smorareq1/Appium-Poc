@@ -1,4 +1,4 @@
-# conftest.py - Configuración global de pytest (VERSIÓN CORREGIDA)
+# conftest.py - Configuración optimizada para usar solo APK
 import pytest
 import os
 import json
@@ -16,12 +16,14 @@ class TestEnvironment:
     """Clase para manejar configuración del entorno de testing"""
 
     def __init__(self):
-        # CAMBIAR ESTA RUTA POR LA TUYA:
-        self.apk_path = r"C:\Users\smora\Documents\PDC\flutter-poc\demo_appium\build\app\outputs\flutter-apk\app-release.apk"
+        self.apk_path = r"C:\Users\smora\Documents\Poc\appium-poc\app-release.apk"
         self.appium_server = "http://127.0.0.1:4723"
         self.device_name = "emulator-5554"
         self.platform_name = "Android"
         self.automation_name = "UiAutomator2"
+
+        self.app_package = "com.pdctechco.ffa"
+        self.app_activity = ".MainActivity"
 
         # Directorios
         self.screenshots_dir = "pytest_screenshots"
@@ -48,7 +50,7 @@ test_env = TestEnvironment()
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_environment():
     """Fixture automático que se ejecuta una vez por sesión completa"""
-    logger.info("🚀 Configurando entorno de testing...")
+    logger.info("🚀 Configurando entorno de testing para APK...")
 
     # Crear directorios
     test_env.create_directories()
@@ -68,20 +70,17 @@ def setup_test_environment():
     # Verificar que el APK existe
     if not os.path.exists(test_env.apk_path):
         logger.error(f"❌ APK no encontrado: {test_env.apk_path}")
-        pytest.exit("APK no encontrado. Ejecuta: 'flutter build apk --release'")
+        pytest.exit("APK no encontrado. Verifica la ruta en TestEnvironment")
 
     logger.info("✅ Entorno de testing configurado correctamente")
-
-    yield test_env  # Esto es lo que reciben las demás fixtures
-
-    # Cleanup después de todos los tests
+    yield test_env
     logger.info("🧹 Limpieza final del entorno de testing")
 
 
-@pytest.fixture(scope="function")
-def driver(setup_test_environment):
-    """Fixture principal para crear driver de Appium por cada test"""
-    logger.info("🚀 Iniciando driver de Appium...")
+@pytest.fixture(scope="class")
+def driver_fresh_install(setup_test_environment):
+    """Driver que instala la app desde cero cada vez"""
+    logger.info("🚀 Iniciando driver con instalación fresca...")
 
     options = UiAutomator2Options()
     options.platform_name = test_env.platform_name
@@ -89,12 +88,11 @@ def driver(setup_test_environment):
     options.app = test_env.apk_path
     options.automation_name = test_env.automation_name
     options.new_command_timeout = test_env.command_timeout
-    options.no_reset = True
-    options.full_reset = False
 
-    # Capacidades adicionales para mejor estabilidad
+    # Reinstalar app cada vez
+    options.no_reset = False
+    options.full_reset = True
     options.auto_grant_permissions = True
-    options.no_sign = True
 
     driver_instance = None
     try:
@@ -105,7 +103,7 @@ def driver(setup_test_environment):
         import time
         time.sleep(3)
 
-        logger.info("✅ Driver iniciado correctamente")
+        logger.info("✅ Driver iniciado con app instalada")
         yield driver_instance
 
     except Exception as e:
@@ -121,6 +119,69 @@ def driver(setup_test_environment):
                 logger.warning("⚠️ Error cerrando driver")
 
 
+@pytest.fixture(scope="class")
+def driver_reuse_app(setup_test_environment):
+    """Driver que reutiliza la app ya instalada (más rápido)"""
+    logger.info("🚀 Iniciando driver reutilizando app instalada...")
+
+    options = UiAutomator2Options()
+    options.platform_name = test_env.platform_name
+    options.device_name = test_env.device_name
+
+    # USAR PACKAGE/ACTIVITY en lugar de APK para reutilizar
+    options.app_package = test_env.app_package
+    options.app_activity = test_env.app_activity
+
+    options.automation_name = test_env.automation_name
+    options.new_command_timeout = test_env.command_timeout
+
+    # NO reinstalar
+    options.no_reset = True
+    options.full_reset = False
+
+    driver_instance = None
+    try:
+        driver_instance = webdriver.Remote(test_env.appium_server, options=options)
+        driver_instance.implicitly_wait(test_env.implicit_wait)
+
+        logger.info("✅ Driver iniciado reutilizando app")
+        yield driver_instance
+
+    except Exception as e:
+        logger.error(f"❌ Error iniciando driver: {e}")
+        # Fallback: intentar con instalación fresca
+        logger.info("🔄 Fallback: intentando instalación fresca...")
+
+        options.app = test_env.apk_path
+        options.no_reset = False
+        options.full_reset = True
+
+        try:
+            driver_instance = webdriver.Remote(test_env.appium_server, options=options)
+            driver_instance.implicitly_wait(test_env.implicit_wait)
+            import time
+            time.sleep(3)
+            logger.info("✅ Driver iniciado con fallback")
+            yield driver_instance
+        except Exception as e2:
+            pytest.fail(f"No se pudo inicializar el driver ni con fallback: {e2}")
+
+    finally:
+        if driver_instance:
+            try:
+                driver_instance.quit()
+                logger.info("🏁 Driver cerrado correctamente")
+            except:
+                logger.warning("⚠️ Error cerrando driver")
+
+
+# Alias para compatibilidad con tests existentes
+@pytest.fixture(scope="class")
+def driver(driver_reuse_app):
+    """Fixture principal - usa app reutilizada por defecto"""
+    yield driver_reuse_app
+
+
 @pytest.fixture
 def screenshot(driver, request):
     """Fixture para tomar screenshots automáticamente"""
@@ -129,7 +190,7 @@ def screenshot(driver, request):
     def take_screenshot(name=""):
         """Función helper para tomar screenshots"""
         test_name = request.node.name.replace(" ", "_")
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]  # milisegundos
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:-3]
 
         if name:
             filename = f"{test_name}_{name}_{timestamp}.png"
@@ -147,130 +208,49 @@ def screenshot(driver, request):
             logger.error(f"❌ Error tomando screenshot: {e}")
             return None
 
-    # Tomar screenshot automático al inicio del test
-    take_screenshot("test_start")
-
     yield take_screenshot
-
-    # Tomar screenshot automático al final (especialmente útil si el test falla)
-    take_screenshot("test_end")
-
-    logger.info(f"📸 Screenshots tomados para {request.node.name}: {len(screenshots_taken)}")
+    logger.info(f"📸 Screenshots tomados: {len(screenshots_taken)}")
 
 
-@pytest.fixture
-def test_data():
-    """Fixture para cargar datos de test desde archivos JSON"""
-    test_data_dir = "test_data"
-
-    def load_data(filename):
-        """Cargar datos desde archivo JSON"""
-        filepath = os.path.join(test_data_dir, f"{filename}.json")
-        if os.path.exists(filepath):
-            with open(filepath, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        else:
-            logger.warning(f"⚠️ Archivo de datos no encontrado: {filepath}")
-            return {}
-
-    return load_data
-
-
-@pytest.fixture
-def device_info(driver):
-    """Fixture para obtener información del dispositivo"""
+def get_app_package_from_apk(apk_path):
+    """Función helper para extraer package name del APK"""
     try:
-        info = {
-            "screen_size": driver.get_window_size(),
-            "current_package": driver.current_package,
-            "current_activity": driver.current_activity,
-            "device_time": driver.device_time,
-        }
+        import subprocess
+        result = subprocess.run([
+            'aapt', 'dump', 'badging', apk_path
+        ], capture_output=True, text=True)
 
-        # Intentar obtener más información si está disponible
-        try:
-            info["orientation"] = driver.orientation
-        except:
-            pass
+        for line in result.stdout.split('\n'):
+            if line.startswith('package:'):
+                # Extraer package name
+                package = line.split("name='")[1].split("'")[0]
+                return package
+    except:
+        pass
 
-        logger.info(f"📱 Device info: {info}")
-        return info
-    except Exception as e:
-        logger.error(f"❌ Error obteniendo info del dispositivo: {e}")
-        return {}
+    return None
 
 
-# Hooks de pytest para personalizar comportamiento
+def install_app_manually(device_id, apk_path):
+    """Función helper para instalar APK manualmente"""
+    try:
+        import subprocess
+        result = subprocess.run([
+            'adb', '-s', device_id, 'install', '-r', apk_path
+        ], capture_output=True, text=True)
 
-def pytest_runtest_setup(item):
-    """Hook que se ejecuta antes de cada test"""
-    logger.info(f"🧪 Iniciando test: {item.name}")
-
-    # Marcar tiempo de inicio
-    item.start_time = datetime.now()
-
-
-def pytest_runtest_teardown(item):
-    """Hook que se ejecuta después de cada test"""
-    if hasattr(item, 'start_time'):
-        duration = datetime.now() - item.start_time
-        logger.info(f"⏱️ Test {item.name} completado en {duration.total_seconds():.2f}s")
-
-
-def pytest_runtest_makereport(item, call):
-    """Hook para personalizar reportes de tests"""
-    if call.when == "call":
-        # Log resultado del test
-        if call.excinfo is None:
-            logger.info(f"✅ PASSED: {item.name}")
+        if result.returncode == 0:
+            logger.info(f"✅ APK instalado manualmente: {apk_path}")
+            return True
         else:
-            logger.error(f"❌ FAILED: {item.name} - {call.excinfo.value}")
+            logger.error(f"❌ Error instalando APK: {result.stderr}")
+            return False
+    except Exception as e:
+        logger.error(f"❌ Error en instalación manual: {e}")
+        return False
 
 
-def pytest_configure(config):
-    """Configuración que se ejecuta al inicio de pytest"""
-    # Agregar información al reporte HTML (VERSIÓN CORREGIDA)
-    config.metadata = {
-        'Project': 'Flutter Appium Testing',
-        'Test Environment': test_env.device_name,
-        'Appium Server': test_env.appium_server,
-        'Platform': test_env.platform_name,
-        'APK Path': test_env.apk_path
-    }
-
-    logger.info("🔧 Pytest configurado con metadata personalizada")
-
-
-def pytest_sessionstart(session):
-    """Hook al inicio de la sesión de testing"""
-    logger.info("=" * 60)
-    logger.info("🚀 INICIANDO SESIÓN DE TESTING CON PYTEST")
-    logger.info(f"📱 Device: {test_env.device_name}")
-    logger.info(f"📦 APK: {test_env.apk_path}")
-    logger.info(f"🔗 Appium Server: {test_env.appium_server}")
-    logger.info("=" * 60)
-
-
-def pytest_sessionfinish(session, exitstatus):
-    """Hook al final de la sesión de testing"""
-    # Recopilar estadísticas
-    total_tests = len(session.items) if hasattr(session, 'items') else 0
-
-    logger.info("=" * 60)
-    logger.info("🏁 SESIÓN DE TESTING COMPLETADA")
-    logger.info(f"📊 Tests totales: {total_tests}")
-    logger.info(f"🎯 Exit status: {exitstatus}")
-
-    # Contar screenshots generados
-    if os.path.exists(test_env.screenshots_dir):
-        screenshots = [f for f in os.listdir(test_env.screenshots_dir) if f.endswith('.png')]
-        logger.info(f"📸 Screenshots generados: {len(screenshots)}")
-
-    logger.info("=" * 60)
-
-
-# Funciones helper globales
-
+# Funciones helper mejoradas
 def wait_for_element(driver, locator, timeout=15):
     """Helper global para esperar elementos"""
     from selenium.webdriver.support.ui import WebDriverWait
@@ -294,3 +274,23 @@ def safe_click(element, max_attempts=3):
             import time
             time.sleep(1)
     return False
+
+
+# Hooks mejorados
+def pytest_sessionstart(session):
+    """Hook al inicio de la sesión de testing"""
+    logger.info("=" * 60)
+    logger.info("🚀 INICIANDO TESTING CON APK SOLAMENTE")
+    logger.info(f"📱 Device: {test_env.device_name}")
+    logger.info(f"📦 APK: {test_env.apk_path}")
+    logger.info(f"🔗 Appium Server: {test_env.appium_server}")
+
+    # Intentar detectar package name automáticamente
+    detected_package = get_app_package_from_apk(test_env.apk_path)
+    if detected_package:
+        logger.info(f"📋 Package detectado: {detected_package}")
+        test_env.app_package = detected_package
+    else:
+        logger.warning(f"⚠️ No se pudo detectar package. Usando: {test_env.app_package}")
+
+    logger.info("=" * 60)

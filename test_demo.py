@@ -579,7 +579,7 @@ class AppiumTestSuite:
 
 def main():
     # AJUSTAR ESTA RUTA A TU APK
-    apk_path = r"C:\Users\smora\Documents\PDC\flutter-poc\demo_appium\build\app\outputs\flutter-apk\app-release.apk"
+    apk_path = r"C:\Users\smora\Documents\Poc\appium-poc\app-release.apk"
 
     # Crear y ejecutar la suite de tests
     test_suite = AppiumTestSuite(apk_path)
