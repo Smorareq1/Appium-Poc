@@ -113,7 +113,24 @@ class TestSimpleFlow:
             except NoSuchElementException:
                 pass
 
-            # Estrategia 2: Por texto que contenga
+            # Estrategia 2: Por content description exacto
+            if not iniciar_sesion_button:
+                try:
+                    iniciar_sesion_button = driver.find_element(AppiumBy.XPATH, "//*[@content-desc='Iniciar sesión']")
+                    print("Encontrado por description exacto'")
+                except NoSuchElementException:
+                    pass
+
+            # Estrategia 3: Por content description que contenga
+            if not iniciar_sesion_button:
+                try:
+                    iniciar_sesion_button = driver.find_element(AppiumBy.XPATH,
+                                                                "//*[contains(@content-desc,'Iniciar')]")
+                    print("Encontrado por description que contiene")
+                except NoSuchElementException:
+                    pass
+
+            # Estrategia 4: Por texto que contenga
             if not iniciar_sesion_button:
                 try:
                     iniciar_sesion_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@text,'Iniciar sesión')]")
@@ -129,7 +146,7 @@ class TestSimpleFlow:
                 except NoSuchElementException:
                     pass
 
-            # Estrategia 4: Por posición (último botón clickeable - probablemente el azul)
+            # Estrategia 5: Por posición (último botón clickeable - probablemente el azul)
             if not iniciar_sesion_button:
                 try:
                     clickable_elements = driver.find_elements(AppiumBy.XPATH, "//*[@clickable='true']")

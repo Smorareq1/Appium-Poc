@@ -1,4 +1,7 @@
 .venv
 test_reports
 test_screenshots
+pytest_logs
+pytest_reports
+pytest_screenshots
 .env
