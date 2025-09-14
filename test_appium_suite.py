@@ -549,6 +549,154 @@ class TestSimpleFlow:
             # Screenshot al final del test
             screenshot("test_06_final")
 
+    def test_07_flujo_completo_productos_y_salir(self, driver, screenshot):
+        """Test 7: Flujo completo - Ver productos → PDC → Menu → Scroll → Salir"""
+        print("\n=== TEST 7: Flujo completo productos y salir ===")
+
+        try:
+            # Paso 1: Click en "Ver productos"
+            print("Paso 1: Buscando botón 'Ver productos'...")
+
+            ver_productos_button = None
+            try:
+                ver_productos_button = driver.find_element(AppiumBy.XPATH, "//*[@content-desc='Ver productos']")
+                print("Encontrado 'Ver productos' por content-desc exacto")
+            except NoSuchElementException:
+                try:
+                    ver_productos_button = driver.find_element(AppiumBy.XPATH,
+                                                               "//*[contains(@content-desc,'Ver productos')]")
+                    print("Encontrado 'Ver productos' por content-desc que contiene")
+                except NoSuchElementException:
+                    try:
+                        ver_productos_button = driver.find_element(AppiumBy.XPATH,
+                                                                   "//*[contains(@content-desc,'productos')]")
+                        print("Encontrado por content-desc que contiene 'productos'")
+                    except NoSuchElementException:
+                        pass
+
+            assert ver_productos_button is not None, "No se pudo encontrar el botón 'Ver productos'"
+
+            print("Haciendo click en 'Ver productos'...")
+            ver_productos_button.click()
+            time.sleep(2)
+
+            # Paso 2: Click en "PDC"
+            print("Paso 2: Buscando botón 'PDC'...")
+
+            pdc_button = None
+            try:
+                pdc_button = driver.find_element(AppiumBy.XPATH, "//*[@text='PDC']")
+                print("Encontrado 'PDC' por texto exacto")
+            except NoSuchElementException:
+                try:
+                    pdc_button = driver.find_element(AppiumBy.XPATH, "//*[@content-desc='PDC']")
+                    print("Encontrado 'PDC' por content-desc exacto")
+                except NoSuchElementException:
+                    try:
+                        pdc_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@text,'PDC')]")
+                        print("Encontrado 'PDC' por texto que contiene")
+                    except NoSuchElementException:
+                        try:
+                            pdc_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@content-desc,'PDC')]")
+                            print("Encontrado 'PDC' por content-desc que contiene")
+                        except NoSuchElementException:
+                            pass
+
+            assert pdc_button is not None, "No se pudo encontrar el botón 'PDC'"
+
+            print("Haciendo click en 'PDC'...")
+            pdc_button.click()
+            time.sleep(2)
+
+            # Paso 3: Esperar 1 segundo
+            print("Paso 3: Esperando 1 segundo...")
+            time.sleep(1)
+
+            # Paso 4: Click en "menu"
+            print("Paso 4: Buscando botón 'menu'...")
+
+            menu_button = None
+            try:
+                menu_button = driver.find_element(AppiumBy.XPATH, "//*[@content-desc='Menú']")
+                print("Encontrado 'Menú' por content-desc exacto")
+            except NoSuchElementException:
+                try:
+                    menu_button = driver.find_element(AppiumBy.XPATH, "//*[@text='Menú']")
+                    print("Encontrado 'Menú' por texto exacto")
+                except NoSuchElementException:
+                    try:
+                        menu_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@text,'Menú')]")
+                        print("Encontrado 'Menú' por texto que contiene")
+                    except NoSuchElementException:
+                        try:
+                            menu_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@content-desc,'Menú')]")
+                            print("Encontrado 'menu' por content-desc que contiene")
+                        except NoSuchElementException:
+                            try:
+                                menu_button = driver.find_element(AppiumBy.XPATH, "//*[@text='Menú']")
+                                print("Encontrado 'Menú' con mayúscula")
+                            except NoSuchElementException:
+                                pass
+
+            assert menu_button is not None, "No se pudo encontrar el botón 'Menú'"
+
+            print("Haciendo click en 'Menú'...")
+            menu_button.click()
+            time.sleep(2)
+
+            # Paso 5: Hacer scroll hacia abajo
+            print("Paso 5: Haciendo scroll hacia abajo...")
+
+            # Obtener dimensiones de la pantalla para el scroll
+            screen_size = driver.get_window_size()
+            screen_width = screen_size['width']
+            screen_height = screen_size['height']
+
+            # Scroll desde 80% hasta 20% de la altura de la pantalla
+            start_x = screen_width // 2
+            start_y = int(screen_height * 0.8)
+            end_x = screen_width // 2
+            end_y = int(screen_height * 0.2)
+
+            driver.swipe(start_x, start_y, end_x, end_y, 1000)  # 1 segundo de duración
+            time.sleep(1)
+            print("Scroll hacia abajo completado")
+
+            # Paso 6: Presionar "salir"
+            print("Paso 6: Buscando botón 'salir'...")
+
+            salir_button = None
+            try:
+                salir_button = driver.find_element(AppiumBy.XPATH, "//*[@content-desc='Salir']")
+                print("Encontrado 'salir' por content-desc exacto")
+            except NoSuchElementException:
+                try:
+                    salir_button = driver.find_element(AppiumBy.XPATH, "//*[@text='Salir']")
+                    print("Encontrado 'salir' por content-desc exacto")
+                except NoSuchElementException:
+                    try:
+                        salir_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@text,'Salir')]")
+                        print("Encontrado 'salir' por texto que contiene")
+                    except NoSuchElementException:
+                        pass
+
+            assert salir_button is not None, "No se pudo encontrar el botón 'salir'"
+
+            print("Haciendo click en coordenadas específicas del botón Salir...")
+            screen_size = driver.get_window_size()
+            click_x = int(screen_size['width'] * 0.25)
+            click_y = int(screen_size['height'] * 0.95)
+            driver.tap([(click_x, click_y)])
+            time.sleep(3)
+
+            print("✅ TEST 7 COMPLETADO: Flujo completo Ver productos → PDC → Menu → Scroll → Salir exitoso")
+
+        except Exception as e:
+            pytest.fail(f"TEST 7 FALLÓ: {e}")
+        finally:
+            # Screenshot al final del test
+            screenshot("test_07_final")
+
     def test_debug_current_screen(self, driver, screenshot):
         """ Debug - Mostrar todos los elementos de la pantalla actual"""
         print("\n=== DEBUG - Elementos actuales ===")
