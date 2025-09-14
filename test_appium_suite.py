@@ -219,7 +219,90 @@ class TestSimpleFlow:
             screenshot("error_test_3")
             pytest.fail(f"TEST 3 FALLÓ: {e}")
 
-    def test_04_debug_current_screen(self, driver, screenshot):
+    def test_04_escribir_email_y_continuar(self, driver, screenshot):
+        """Test 4: Escribir email falso y presionar continuar"""
+        print("\n=== TEST 4: Escribir email y continuar ===")
+
+        # Screenshot inicial
+        screenshot("antes_escribir_email")
+
+        try:
+            # Buscar el campo de texto con hint "Correo empresarial"
+            print("Buscando campo de correo empresarial...")
+
+            email_field = None
+            try:
+                email_field = driver.find_element(AppiumBy.XPATH, "//*[@hint='Correo empresarial']")
+                print("Encontrado campo por hint exacto")
+            except NoSuchElementException:
+                try:
+                    email_field = driver.find_element(AppiumBy.XPATH, "//*[contains(@hint,'Correo')]")
+                    print("Encontrado campo por hint que contiene 'Correo'")
+                except NoSuchElementException:
+                    try:
+                        # Buscar cualquier EditText
+                        email_field = driver.find_element(AppiumBy.XPATH, "//android.widget.EditText")
+                        print("Encontrado como EditText genérico")
+                    except NoSuchElementException:
+                        pass
+
+            assert email_field is not None, "No se pudo encontrar el campo de correo"
+
+            # Hacer click en el campo para asegurar que esté enfocado
+            print("Haciendo click en el campo de email...")
+            email_field.click()
+            time.sleep(1)
+
+            # Limpiar el campo
+            email_field.clear()
+            time.sleep(0.5)
+
+            # Escribir el email caracter por caracter lentamente
+            email_text = "emailFalso@gmail.com"
+            print("Escribiendo email caracter por caracter...")
+
+            for i, char in enumerate(email_text):
+                email_field.send_keys(char)
+                print(f"Escribiendo: {char} ({i + 1}/{len(email_text)})")
+                time.sleep(0.3)  # Pausa de 300ms entre cada caracter
+
+            # Pausa adicional después de terminar de escribir
+            time.sleep(2)
+
+            # Screenshot después de escribir
+            screenshot("despues_escribir_email")
+
+            # Buscar el botón "Continuar"
+            print("Buscando botón 'Continuar'...")
+
+            continuar_button = None
+            try:
+                continuar_button = driver.find_element(AppiumBy.XPATH, "//*[@content-desc='Continuar']")
+                print("Encontrado por content-desc exacto")
+            except NoSuchElementException:
+                try:
+                    continuar_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@content-desc,'Continuar')]")
+                    print("Encontrado por content-desc que contiene 'Continuar'")
+                except NoSuchElementException:
+                    pass
+
+            assert continuar_button is not None, "No se pudo encontrar el botón 'Continuar'"
+
+            # Hacer click en continuar
+            print("Haciendo click en 'Continuar'...")
+            continuar_button.click()
+            time.sleep(3)  # Esperar que cargue la nueva pantalla
+
+            # Screenshot después del click
+            screenshot("despues_click_continuar")
+
+            print("✅ TEST 4 COMPLETADO: Email escrito lentamente y botón continuar presionado")
+
+        except Exception as e:
+            screenshot("error_test_4")
+            pytest.fail(f"TEST 4 FALLÓ: {e}")
+
+    def test_05_debug_current_screen(self, driver, screenshot):
         """Test 4: Debug - Mostrar todos los elementos de la pantalla actual"""
         print("\n=== TEST 4: DEBUG - Elementos actuales ===")
 
