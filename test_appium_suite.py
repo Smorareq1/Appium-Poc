@@ -11,9 +11,6 @@ class TestSimpleFlow:
         """Test 1: Hacer click en el botón 'Registrarme'"""
         print("\n=== TEST 1: Click en Registrarme ===")
 
-        # Screenshot inicial
-        screenshot("pantalla_inicial")
-
         try:
             # Buscar el botón "Registrarme" (es el botón con borde blanco)
             print("Buscando botón 'Registrarme'...")
@@ -51,21 +48,17 @@ class TestSimpleFlow:
             registrarme_button.click()
             time.sleep(3)  # Esperar que cargue la nueva pantalla
 
-            # Screenshot después del click
-            screenshot("despues_click_registrarme")
-
             print("✅ TEST 1 COMPLETADO: Click en Registrarme exitoso")
 
         except Exception as e:
-            screenshot("error_test_1")
             pytest.fail(f"TEST 1 FALLÓ: {e}")
+        finally:
+            # Screenshot al final del test
+            screenshot("test_01_final")
 
     def test_02_go_back_with_phone_button(self, driver, screenshot):
         """Test 2: Usar botón atrás del teléfono para volver"""
         print("\n=== TEST 2: Botón atrás del teléfono ===")
-
-        # Screenshot antes de ir atrás
-        screenshot("antes_boton_atras")
 
         try:
             print("Presionando botón atrás del dispositivo...")
@@ -73,9 +66,6 @@ class TestSimpleFlow:
             # Usar el botón back del dispositivo
             driver.back()
             time.sleep(2)  # Esperar que regrese a la pantalla anterior
-
-            # Screenshot después de ir atrás
-            screenshot("despues_boton_atras")
 
             # Verificar que volvimos a la pantalla principal
             # buscando el texto "¡Bienvenido!" o "Iniciar sesión"
@@ -92,15 +82,14 @@ class TestSimpleFlow:
             print("✅ TEST 2 COMPLETADO: Botón atrás funcionó correctamente")
 
         except Exception as e:
-            screenshot("error_test_2")
             pytest.fail(f"TEST 2 FALLÓ: {e}")
+        finally:
+            # Screenshot al final del test
+            screenshot("test_02_final")
 
     def test_03_click_iniciar_sesion(self, driver, screenshot):
         """Test 3: Hacer click en el botón azul 'Iniciar sesión'"""
         print("\n=== TEST 3: Click en Iniciar sesión ===")
-
-        # Screenshot inicial
-        screenshot("antes_iniciar_sesion")
 
         try:
             print("Buscando botón 'Iniciar sesión'...")
@@ -138,7 +127,7 @@ class TestSimpleFlow:
                 except NoSuchElementException:
                     pass
 
-            # Estrategia 3: Por texto que contenga solo "Iniciar"
+            # Estrategia 5: Por texto que contenga solo "Iniciar"
             if not iniciar_sesion_button:
                 try:
                     iniciar_sesion_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@text,'Iniciar')]")
@@ -146,7 +135,7 @@ class TestSimpleFlow:
                 except NoSuchElementException:
                     pass
 
-            # Estrategia 5: Por posición (último botón clickeable - probablemente el azul)
+            # Estrategia 6: Por posición (último botón clickeable - probablemente el azul)
             if not iniciar_sesion_button:
                 try:
                     clickable_elements = driver.find_elements(AppiumBy.XPATH, "//*[@clickable='true']")
@@ -185,9 +174,6 @@ class TestSimpleFlow:
             iniciar_sesion_button.click()
             time.sleep(3)  # Esperar que cargue la nueva pantalla
 
-            # Screenshot después del click
-            screenshot("despues_click_iniciar_sesion")
-
             # Verificar que cambió de pantalla buscando elementos que NO están en la pantalla principal
             pantalla_cambio = False
 
@@ -216,15 +202,14 @@ class TestSimpleFlow:
             print("✅ TEST 3 COMPLETADO: Click en 'Iniciar sesión' exitoso")
 
         except Exception as e:
-            screenshot("error_test_3")
             pytest.fail(f"TEST 3 FALLÓ: {e}")
+        finally:
+            # Screenshot al final del test
+            screenshot("test_03_final")
 
     def test_04_escribir_email_y_continuar(self, driver, screenshot):
         """Test 4: Escribir email falso y presionar continuar"""
         print("\n=== TEST 4: Escribir email y continuar ===")
-
-        # Screenshot inicial
-        screenshot("antes_escribir_email")
 
         try:
             # Buscar el campo de texto con hint "Correo empresarial"
@@ -268,9 +253,21 @@ class TestSimpleFlow:
 
             # Pausa adicional después de terminar de escribir
             time.sleep(2)
+            print("Email escrito completamente. Ocultando teclado...")
 
-            # Screenshot después de escribir
-            screenshot("despues_escribir_email")
+            # Ocultar el teclado
+            try:
+                driver.hide_keyboard()
+                print("Teclado ocultado con hide_keyboard()")
+            except:
+                try:
+                    # Alternativa: usar botón atrás para cerrar teclado
+                    driver.back()
+                    print("Teclado ocultado con botón atrás")
+                except:
+                    print("⚠️ No se pudo ocultar el teclado, continuando...")
+
+            time.sleep(1)  # Pequeña pausa después de ocultar teclado
 
             # Buscar el botón "Continuar"
             print("Buscando botón 'Continuar'...")
@@ -293,20 +290,17 @@ class TestSimpleFlow:
             continuar_button.click()
             time.sleep(3)  # Esperar que cargue la nueva pantalla
 
-            # Screenshot después del click
-            screenshot("despues_click_continuar")
-
             print("✅ TEST 4 COMPLETADO: Email escrito lentamente y botón continuar presionado")
 
         except Exception as e:
-            screenshot("error_test_4")
             pytest.fail(f"TEST 4 FALLÓ: {e}")
+        finally:
+            # Screenshot al final del test
+            screenshot("test_04_final")
 
     def test_05_debug_current_screen(self, driver, screenshot):
-        """Test 4: Debug - Mostrar todos los elementos de la pantalla actual"""
-        print("\n=== TEST 4: DEBUG - Elementos actuales ===")
-
-        screenshot("debug_pantalla_actual")
+        """Test 5: Debug - Mostrar todos los elementos de la pantalla actual"""
+        print("\n=== TEST 5: DEBUG - Elementos actuales ===")
 
         try:
             print("📱 Información de la pantalla actual:")
@@ -350,7 +344,10 @@ class TestSimpleFlow:
             else:
                 print("  No se encontraron campos de texto")
 
-            print("\n✅ TEST 4 COMPLETADO: Debug información mostrada")
+            print("\n✅ TEST 5 COMPLETADO: Debug información mostrada")
 
         except Exception as e:
             print(f"❌ Error en debug: {e}")
+        finally:
+            # Screenshot al final del test
+            screenshot("test_05_final")
