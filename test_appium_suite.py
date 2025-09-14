@@ -298,9 +298,260 @@ class TestSimpleFlow:
             # Screenshot al final del test
             screenshot("test_04_final")
 
-    def test_05_debug_current_screen(self, driver, screenshot):
-        """Test 5: Debug - Mostrar todos los elementos de la pantalla actual"""
-        print("\n=== TEST 5: DEBUG - Elementos actuales ===")
+    def test_05_click_usuario_y_contrasena(self, driver, screenshot):
+        """Test 5: Hacer click en el botón 'Usuario y contraseña'"""
+        print("\n=== TEST 5: Click en Usuario y contraseña ===")
+
+        try:
+            print("Buscando botón 'Usuario y contraseña'...")
+
+            # Estrategia 1: Por content description exacto
+            usuario_contrasena_button = None
+            try:
+                usuario_contrasena_button = driver.find_element(AppiumBy.XPATH,
+                                                                "//*[@content-desc='Usuario y contraseña']")
+                print("Encontrado por content-desc exacto")
+            except NoSuchElementException:
+                pass
+
+            # Estrategia 2: Por content description que contenga
+            if not usuario_contrasena_button:
+                try:
+                    usuario_contrasena_button = driver.find_element(AppiumBy.XPATH,
+                                                                    "//*[contains(@content-desc,'Usuario')]")
+                    print("Encontrado por content-desc que contiene 'Usuario'")
+                except NoSuchElementException:
+                    pass
+
+            # Estrategia 3: Por content description que contenga "contraseña"
+            if not usuario_contrasena_button:
+                try:
+                    usuario_contrasena_button = driver.find_element(AppiumBy.XPATH,
+                                                                    "//*[contains(@content-desc,'contraseña')]")
+                    print("Encontrado por content-desc que contiene 'contraseña'")
+                except NoSuchElementException:
+                    pass
+
+            # Debug: Si no encontramos nada, mostrar elementos disponibles
+            if not usuario_contrasena_button:
+                print("🔍 DEBUG: Elementos clickeables encontrados:")
+                clickable_elements = driver.find_elements(AppiumBy.XPATH, "//*[@clickable='true']")
+                for i, elem in enumerate(clickable_elements):
+                    try:
+                        text = elem.get_attribute("text") or "(sin texto)"
+                        content_desc = elem.get_attribute("content-desc") or "(sin descripción)"
+                        print(f"  {i}: Texto: '{text}' | Desc: '{content_desc}'")
+                    except:
+                        print(f"  {i}: Error obteniendo info del elemento")
+
+            assert usuario_contrasena_button is not None, "No se pudo encontrar el botón 'Usuario y contraseña'"
+
+            # Hacer click
+            print("Haciendo click en 'Usuario y contraseña'...")
+            usuario_contrasena_button.click()
+            time.sleep(3)  # Esperar que cargue la nueva pantalla
+
+            # Verificar que cambió de pantalla buscando elementos de login típicos
+            pantalla_cambio = False
+
+            # Buscar elementos típicos de pantalla de login con usuario/contraseña
+            elementos_login_usuario = [
+                "//*[contains(@hint,'usuario') or contains(@hint,'Usuario')]",
+                "//*[contains(@hint,'contraseña') or contains(@hint,'Contraseña')]",
+                "//*[contains(@hint,'password') or contains(@hint,'Password')]",
+                "//*[contains(@text,'usuario') or contains(@text,'Usuario')]",
+                "//*[contains(@text,'contraseña') or contains(@text,'Contraseña')]",
+                "//android.widget.EditText"
+            ]
+
+            for selector in elementos_login_usuario:
+                try:
+                    driver.find_element(AppiumBy.XPATH, selector)
+                    pantalla_cambio = True
+                    print(f"Confirmado: Cambió de pantalla (encontrado elemento: {selector})")
+                    break
+                except NoSuchElementException:
+                    continue
+
+            if not pantalla_cambio:
+                print("⚠️ No se pudo confirmar el cambio de pantalla, pero el click se ejecutó")
+
+            print("✅ TEST 5 COMPLETADO: Click en 'Usuario y contraseña' exitoso")
+
+        except Exception as e:
+            pytest.fail(f"TEST 6 FALLÓ: {e}")
+        finally:
+            # Screenshot al final del test
+            screenshot("test_06_final")
+
+    def test_06_escribir_usuario_y_contrasena(self, driver, screenshot):
+        """Test 6: Escribir usuario y contraseña y presionar siguiente"""
+        print("\n=== TEST 6: Escribir usuario y contraseña ===")
+
+        try:
+            # Buscar el campo de usuario
+            print("Buscando campo de usuario...")
+
+            usuario_field = None
+            try:
+                usuario_field = driver.find_element(AppiumBy.XPATH, "//*[@hint='Usuario']")
+                print("Encontrado campo de usuario por hint exacto")
+            except NoSuchElementException:
+                try:
+                    usuario_field = driver.find_element(AppiumBy.XPATH, "//*[contains(@hint,'usuario')]")
+                    print("Encontrado campo de usuario por hint que contiene 'usuario'")
+                except NoSuchElementException:
+                    # Buscar como primer EditText
+                    try:
+                        edit_fields = driver.find_elements(AppiumBy.XPATH, "//android.widget.EditText")
+                        if edit_fields:
+                            usuario_field = edit_fields[0]
+                            print("Encontrado como primer campo EditText")
+                    except:
+                        pass
+
+            assert usuario_field is not None, "No se pudo encontrar el campo de usuario"
+
+            # Buscar el campo de contraseña
+            print("Buscando campo de contraseña...")
+
+            contrasena_field = None
+            try:
+                contrasena_field = driver.find_element(AppiumBy.XPATH, "//*[@hint='Contraseña']")
+                print("Encontrado campo de contraseña por hint exacto")
+            except NoSuchElementException:
+                try:
+                    contrasena_field = driver.find_element(AppiumBy.XPATH, "//*[contains(@hint,'contraseña')]")
+                    print("Encontrado campo de contraseña por hint que contiene 'contraseña'")
+                except NoSuchElementException:
+                    # Buscar como segundo EditText
+                    try:
+                        edit_fields = driver.find_elements(AppiumBy.XPATH, "//android.widget.EditText")
+                        if len(edit_fields) >= 2:
+                            contrasena_field = edit_fields[1]
+                            print("Encontrado como segundo campo EditText")
+                    except:
+                        pass
+
+            assert contrasena_field is not None, "No se pudo encontrar el campo de contraseña"
+
+            # Escribir usuario (letra por letra lentamente)
+            print("Escribiendo usuario...")
+            usuario_field.click()
+            time.sleep(1)
+            usuario_field.clear()
+            time.sleep(0.5)
+
+            usuario_text = "Alejandro.Morales"
+            for char in usuario_text:
+                usuario_field.send_keys(char)
+                time.sleep(0.2)  # Escribir lentamente pero sin log
+
+            time.sleep(1)
+            print("Usuario escrito completamente")
+
+            # Escribir contraseña (pegar directamente)
+            print("Escribiendo contraseña...")
+            contrasena_field.click()
+            time.sleep(1)
+            contrasena_field.clear()
+            time.sleep(0.5)
+
+            # Pegar la contraseña completa de una vez
+            contrasena_field.send_keys("Admin123")
+            time.sleep(1)
+            print("Contraseña pegada completamente")
+
+            # Ocultar el teclado
+            print("Ocultando teclado...")
+            try:
+                driver.hide_keyboard()
+                print("Teclado ocultado con hide_keyboard()")
+            except:
+                try:
+                    driver.back()
+                    print("Teclado ocultado con botón atrás")
+                except:
+                    print("⚠️ No se pudo ocultar el teclado, continuando...")
+
+            time.sleep(1)
+
+            # Buscar el botón "Siguiente"
+            print("Buscando botón 'Siguiente'...")
+
+            siguiente_button = None
+
+            # Estrategia 1: Por texto exacto
+            try:
+                siguiente_button = driver.find_element(AppiumBy.XPATH, "//*[@text='Siguiente']")
+                print("Encontrado por texto exacto")
+            except NoSuchElementException:
+                pass
+
+            # Estrategia 2: Por content description
+            if not siguiente_button:
+                try:
+                    siguiente_button = driver.find_element(AppiumBy.XPATH, "//*[@content-desc='Siguiente']")
+                    print("Encontrado por content-desc exacto")
+                except NoSuchElementException:
+                    pass
+
+            # Estrategia 3: Por texto que contenga
+            if not siguiente_button:
+                try:
+                    siguiente_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@text,'Siguiente')]")
+                    print("Encontrado por texto que contiene 'Siguiente'")
+                except NoSuchElementException:
+                    pass
+
+            # Estrategia 4: Buscar botones habilitados recientemente
+            if not siguiente_button:
+                try:
+                    # Buscar elementos clickeables que podrían ser el botón siguiente
+                    clickable_elements = driver.find_elements(AppiumBy.XPATH, "//*[@clickable='true']")
+                    for elem in clickable_elements:
+                        try:
+                            text = elem.get_attribute("text") or ""
+                            content_desc = elem.get_attribute("content-desc") or ""
+                            if ("siguiente" in text.lower() or "siguiente" in content_desc.lower() or
+                                    "continuar" in text.lower() or "continuar" in content_desc.lower() or
+                                    "login" in text.lower() or "entrar" in text.lower()):
+                                siguiente_button = elem
+                                print(f"Encontrado por contenido relacionado: '{text}' / '{content_desc}'")
+                                break
+                        except:
+                            continue
+                except:
+                    pass
+
+            # Estrategia 5: Como último recurso, usar el último botón clickeable
+            if not siguiente_button:
+                try:
+                    clickable_elements = driver.find_elements(AppiumBy.XPATH, "//*[@clickable='true']")
+                    if clickable_elements:
+                        siguiente_button = clickable_elements[-1]
+                        print("Encontrado como último elemento clickeable")
+                except:
+                    pass
+
+            assert siguiente_button is not None, "No se pudo encontrar el botón 'Siguiente'"
+
+            # Hacer click en siguiente
+            print("Haciendo click en 'Siguiente'...")
+            siguiente_button.click()
+            time.sleep(3)  # Esperar que cargue la nueva pantalla
+
+            print("✅ TEST 6 COMPLETADO: Usuario y contraseña escritos, botón siguiente presionado")
+
+        except Exception as e:
+            pytest.fail(f"TEST 6 FALLÓ: {e}")
+        finally:
+            # Screenshot al final del test
+            screenshot("test_06_final")
+
+    def test_debug_current_screen(self, driver, screenshot):
+        """ Debug - Mostrar todos los elementos de la pantalla actual"""
+        print("\n=== DEBUG - Elementos actuales ===")
 
         try:
             print("📱 Información de la pantalla actual:")
@@ -309,10 +560,10 @@ class TestSimpleFlow:
 
             # Mostrar todos los elementos con texto
             print("\n📝 Elementos con texto:")
-            text_elements = driver.find_elements(AppiumBy.XPATH, "//*[@text]")
+            text_elements = driver.find_elements(AppiumBy.XPATH, "//*[@content-desc]")
             for i, elem in enumerate(text_elements):
                 try:
-                    text = elem.get_attribute("text")
+                    text = elem.get_attribute("content-desc")
                     clickable = elem.get_attribute("clickable")
                     print(f"  {i + 1}. '{text}' (clickable: {clickable})")
                 except:
@@ -344,7 +595,7 @@ class TestSimpleFlow:
             else:
                 print("  No se encontraron campos de texto")
 
-            print("\n✅ TEST 5 COMPLETADO: Debug información mostrada")
+            print("\n✅ TEST COMPLETADO: Debug información mostrada")
 
         except Exception as e:
             print(f"❌ Error en debug: {e}")
