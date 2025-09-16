@@ -619,6 +619,10 @@ class TestSimpleFlow:
             print("Paso 3: Esperando 1 segundo...")
             time.sleep(1)
 
+            #Parte nueva para esta version --Click en
+            print("Paso adicional - Boton FFA")
+            # Fin parte nueva
+
             # Paso 4: Click en "menu"
             print("Paso 4: Buscando botón 'menu'...")
 

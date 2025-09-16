@@ -21,15 +21,13 @@ class TestEnvironment:
     """Clase centralizada para manejar la configuración del entorno de testing."""
 
     def __init__(self):
-        self.apk_path = r"C:\Users\smora\Documents\Poc\appium-poc\app-release.apk"
+        self.apk_path = r"C:\Users\smora\Documents\poc\appium-flutter\app-release 11.apk"
         self.appium_server = "http://127.0.0.1:4723"
         self.device_name = "emulator-5554"
         self.platform_name = "Android"
 
-        self.platform_version = "15"
+        self.platform_version = "16"
         self.automation_name = "UiAutomator2"
-        self.app_package = "com.pdctechco.ffa"
-        self.app_activity = "com.pdctechco.ffa.MainActivity"
         self.screenshots_dir = "pytest_screenshots"
         self.reports_dir = "pytest_reports"
         self.logs_dir = "pytest_logs"
@@ -47,14 +45,14 @@ def _run_adb_command(command):
         return subprocess.run(command, capture_output=True, text=True, check=True)
     except FileNotFoundError:
         pytest.exit(
-            "❌ Error: 'adb' no encontrado. Asegúrate de que el SDK de Android (platform-tools) esté en el PATH del sistema.")
+            "❌ Error: 'adb' no encontrado. Asegúrate de que el SDK de Android (platform-tools) esté en el PATH del sistema."
+        )
     except subprocess.CalledProcessError as e:
         logger.error(f"❌ Falló el comando ADB: {' '.join(command)}\nError: {e.stderr}")
         return None
 
 
 def check_device_is_ready(device_name, timeout=30):
-
     logger.info(f"Verificando que el dispositivo '{device_name}' esté listo y autorizado...")
     end_time = time.time() + timeout
     last_known_output = "No se pudo obtener la lista de dispositivos."
@@ -115,15 +113,13 @@ def setup_test_environment():
 
 @pytest.fixture(scope="session")
 def driver(request):
-    """
-    Fixture que crea el driver de Appium UNA SOLA VEZ por sesión de pruebas.
-    """
+    """Fixture que crea el driver de Appium UNA SOLA VEZ por sesión de pruebas."""
     logger.info("🚀 Iniciando driver de Appium para TODA LA SESIÓN DE PRUEBAS...")
 
     options = UiAutomator2Options()
     options.platform_name = test_env.platform_name
     options.device_name = test_env.device_name
-    options.app = test_env.apk_path
+    options.app = test_env.apk_path  # 👈 Aquí le decimos que use el APK
     options.automation_name = test_env.automation_name
     options.platform_version = test_env.platform_version
     options.new_command_timeout = test_env.command_timeout
@@ -169,4 +165,3 @@ def screenshot(request, driver):
             logger.error(f"❌ Error al guardar screenshot '{filename}': {e}")
 
     return take_screenshot
-
