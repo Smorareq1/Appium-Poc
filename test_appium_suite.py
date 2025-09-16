@@ -7,6 +7,7 @@ from selenium.common.exceptions import NoSuchElementException
 class TestSimpleFlow:
     """Tests simples para el flujo básico de la app"""
 
+    @pytest.mark.xray("APPTEST-10")
     def test_01_click_registrarme(self, driver, screenshot):
         """Test 1: Hacer click en el botón 'Registrarme'"""
         print("\n=== TEST 1: Click en Registrarme ===")
@@ -56,6 +57,7 @@ class TestSimpleFlow:
             # Screenshot al final del test
             screenshot("test_01_final")
 
+    @pytest.mark.xray("APPTEST-11")
     def test_02_go_back_with_phone_button(self, driver, screenshot):
         """Test 2: Usar botón atrás del teléfono para volver"""
         print("\n=== TEST 2: Botón atrás del teléfono ===")
@@ -87,6 +89,7 @@ class TestSimpleFlow:
             # Screenshot al final del test
             screenshot("test_02_final")
 
+    @pytest.mark.xray("APPTEST-12")
     def test_03_click_iniciar_sesion(self, driver, screenshot):
         """Test 3: Hacer click en el botón azul 'Iniciar sesión'"""
         print("\n=== TEST 3: Click en Iniciar sesión ===")
@@ -207,6 +210,7 @@ class TestSimpleFlow:
             # Screenshot al final del test
             screenshot("test_03_final")
 
+    @pytest.mark.xray("APPTEST-13")
     def test_04_escribir_email_y_continuar(self, driver, screenshot):
         """Test 4: Escribir email falso y presionar continuar"""
         print("\n=== TEST 4: Escribir email y continuar ===")
@@ -298,6 +302,7 @@ class TestSimpleFlow:
             # Screenshot al final del test
             screenshot("test_04_final")
 
+    @pytest.mark.xray("APPTEST-14")
     def test_05_click_usuario_y_contrasena(self, driver, screenshot):
         """Test 5: Hacer click en el botón 'Usuario y contraseña'"""
         print("\n=== TEST 5: Click en Usuario y contraseña ===")
@@ -384,6 +389,7 @@ class TestSimpleFlow:
             # Screenshot al final del test
             screenshot("test_06_final")
 
+    @pytest.mark.xray("APPTEST-15")
     def test_06_escribir_usuario_y_contrasena(self, driver, screenshot):
         """Test 6: Escribir usuario y contraseña y presionar siguiente"""
         print("\n=== TEST 6: Escribir usuario y contraseña ===")
@@ -549,6 +555,7 @@ class TestSimpleFlow:
             # Screenshot al final del test
             screenshot("test_06_final")
 
+    @pytest.mark.xray("APPTEST-16")
     def test_07_flujo_completo_productos_y_salir(self, driver, screenshot):
         """Test 7: Flujo completo - Ver productos → PDC → Menu → Scroll → Salir"""
         print("\n=== TEST 7: Flujo completo productos y salir ===")
@@ -697,6 +704,7 @@ class TestSimpleFlow:
             # Screenshot al final del test
             screenshot("test_07_final")
 
+    @pytest.mark.xray("APPTEST-17")
     def test_debug_current_screen(self, driver, screenshot):
         """ Debug - Mostrar todos los elementos de la pantalla actual"""
         print("\n=== DEBUG - Elementos actuales ===")
