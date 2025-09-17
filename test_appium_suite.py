@@ -10,7 +10,7 @@ class TestSimpleFlow:
     # UI Tests
     #Test 1: Hacer click en el botón 'Registrarme'
     @pytest.mark.xray("APPTEST-10")
-    def test_01_click_registrarme(self, driver, screenshot):
+    def test_01_click_registrarme(self, driver, video_recorder):
 
         print("\n=== TEST 1: Click en Registrarme ===")
 
@@ -39,12 +39,15 @@ class TestSimpleFlow:
         except Exception as e:
             pytest.fail(f"TEST 1 FALLÓ: {e}")
         finally:
-            # Screenshot al final del test
-            screenshot("test_01_final")
+            # El video se detiene automáticamente al finalizar el test
+            video_path = video_recorder()
+            if video_path:
+                print(f"📹 Video evidencia guardado: {video_path}")
+
     # UI Tests
     #Test 2: Usar botón atrás del teléfono para volver
     @pytest.mark.xray("APPTEST-11")
-    def test_02_go_back_with_phone_button(self, driver, screenshot):
+    def test_02_go_back_with_phone_button(self, driver, video_recorder):
 
         print("\n=== TEST 2: Botón atrás del teléfono ===")
 
@@ -72,12 +75,15 @@ class TestSimpleFlow:
         except Exception as e:
             pytest.fail(f"TEST 2 FALLÓ: {e}")
         finally:
-            # Screenshot al final del test
-            screenshot("test_02_final")
+            # El video se detiene automáticamente al finalizar el test
+            video_path = video_recorder()
+            if video_path:
+                print(f"📹 Video evidencia guardado: {video_path}")
+
     # UI Tests
     #Test 3: Hacer click en el botón azul 'Iniciar sesión'
     @pytest.mark.xray("APPTEST-12")
-    def test_03_click_iniciar_sesion(self, driver, screenshot):
+    def test_03_click_iniciar_sesion(self, driver, video_recorder):
 
         print("\n=== TEST 3: Click en Iniciar sesión ===")
 
@@ -112,12 +118,15 @@ class TestSimpleFlow:
         except Exception as e:
             pytest.fail(f"TEST 3 FALLÓ: {e}")
         finally:
-            # Screenshot al final del test
-            screenshot("test_03_final")
+            # El video se detiene automáticamente al finalizar el test
+            video_path = video_recorder()
+            if video_path:
+                print(f"📹 Video evidencia guardado: {video_path}")
+
     # UI Tests
     #Test 4: Escribir email falso y presionar continuar
     @pytest.mark.xray("APPTEST-13")
-    def test_04_escribir_email_y_continuar(self, driver, screenshot):
+    def test_04_escribir_email_y_continuar(self, driver, video_recorder):
 
         print("\n=== TEST 4: Escribir email y continuar ===")
 
@@ -205,12 +214,15 @@ class TestSimpleFlow:
         except Exception as e:
             pytest.fail(f"TEST 4 FALLÓ: {e}")
         finally:
-            # Screenshot al final del test
-            screenshot("test_04_final")
+            # El video se detiene automáticamente al finalizar el test
+            video_path = video_recorder()
+            if video_path:
+                print(f"📹 Video evidencia guardado: {video_path}")
+
     # UI Tests
     #Test 5: Hacer click en el botón 'Usuario y contraseña'
     @pytest.mark.xray("APPTEST-14")
-    def test_05_click_usuario_y_contrasena(self, driver, screenshot):
+    def test_05_click_usuario_y_contrasena(self, driver, video_recorder):
 
         print("\n=== TEST 5: Click en Usuario y contraseña ===")
 
@@ -293,12 +305,15 @@ class TestSimpleFlow:
         except Exception as e:
             pytest.fail(f"TEST 6 FALLÓ: {e}")
         finally:
-            # Screenshot al final del test
-            screenshot("test_06_final")
+            # El video se detiene automáticamente al finalizar el test
+            video_path = video_recorder()
+            if video_path:
+                print(f"📹 Video evidencia guardado: {video_path}")
+
     # UI Tests
     #Test 6: Escribir usuario y contraseña y presionar siguiente
     @pytest.mark.xray("APPTEST-15")
-    def test_06_escribir_usuario_y_contrasena(self, driver, screenshot):
+    def test_06_escribir_usuario_y_contrasena(self, driver, video_recorder):
 
         print("\n=== TEST 6: Escribir usuario y contraseña ===")
 
@@ -453,12 +468,15 @@ class TestSimpleFlow:
         except Exception as e:
             pytest.fail(f"TEST 6 FALLÓ: {e}")
         finally:
-            # Screenshot al final del test
-            screenshot("test_06_final")
+            # El video se detiene automáticamente al finalizar el test
+            video_path = video_recorder()
+            if video_path:
+                print(f"📹 Video evidencia guardado: {video_path}")
+
     # UI Tests + Gestos
     #Test 7: Flujo completo - Ver productos → PDC -> FFA → Menu → Scroll → Salir
     @pytest.mark.xray("APPTEST-16")
-    def test_07_flujo_completo_productos_y_salir(self, driver, screenshot):
+    def test_07_flujo_completo_productos_y_salir(self, driver, video_recorder):
 
         print("\n=== TEST 7: Flujo completo productos y salir ===")
 
@@ -622,11 +640,14 @@ class TestSimpleFlow:
         except Exception as e:
             pytest.fail(f"TEST 7 FALLÓ: {e}")
         finally:
-            # Screenshot al final del test
-            screenshot("test_07_final")
+            # El video se detiene automáticamente al finalizar el test
+            video_path = video_recorder()
+            if video_path:
+                print(f"📹 Video evidencia guardado: {video_path}")
+
     # Test de Inspección de Elementos
     @pytest.mark.xray("APPTEST-17")
-    def test_debug_current_screen(self, driver, screenshot):
+    def test_debug_current_screen(self, driver, video_recorder):
         """ Debug - Mostrar todos los elementos de la pantalla actual"""
         print("\n=== DEBUG - Elementos actuales ===")
 
@@ -677,5 +698,7 @@ class TestSimpleFlow:
         except Exception as e:
             print(f"❌ Error en debug: {e}")
         finally:
-            # Screenshot al final del test
-            screenshot("test_05_final")
+            # El video se detiene automáticamente al finalizar el test
+            video_path = video_recorder()
+            if video_path:
+                print(f"📹 Video evidencia guardado: {video_path}")

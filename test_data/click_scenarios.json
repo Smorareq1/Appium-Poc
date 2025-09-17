@@ -1,0 +1,28 @@
+{
+  "click_scenarios": [
+    {
+      "test_id": "TC001",
+      "name": "Quick Clicks Test",
+      "click_count": 5,
+      "delay_between_clicks": 0.3,
+      "expected_success_rate": 0.8,
+      "jira_ticket": "PROJ-123"
+    },
+    {
+      "test_id": "TC002",
+      "name": "Standard Clicks Test",
+      "click_count": 10,
+      "delay_between_clicks": 0.5,
+      "expected_success_rate": 0.9,
+      "jira_ticket": "PROJ-124"
+    },
+    {
+      "test_id": "TC003",
+      "name": "Stress Clicks Test",
+      "click_count": 15,
+      "delay_between_clicks": 0.2,
+      "expected_success_rate": 0.7,
+      "jira_ticket": "PROJ-125"
+    }
+  ]
+}

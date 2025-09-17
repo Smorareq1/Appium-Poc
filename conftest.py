@@ -3,10 +3,15 @@ import os
 import logging
 import subprocess
 import time
+import threading
 from datetime import datetime
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
 import requests
+from dotenv import load_dotenv
+
+# Cargar variables del .env
+load_dotenv()
 
 # Configuración del logging
 logging.basicConfig(
@@ -16,17 +21,17 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-#Clase centralizada para manejar la configuración del entorno de testing
+
+# Clase centralizada para manejar la configuración del entorno de testing
 class TestEnvironment:
     def __init__(self):
         self.apk_path = os.getenv('APK_PATH', r"C:\Users\smora\Documents\Poc\appium-poc\app-release.apk")
-        self.platform_version = os.getenv('PLATFORM_VERSION', "16")
+        self.platform_version = os.getenv('PLATFORM_VERSION', "15")
         self.device_name = os.getenv('DEVICE_NAME', "emulator-5554")
+        self.appium_server = os.getenv('APPIUM_SERVER', "http://127.0.0.1:4723")
         self.platform_name = "Android"
-
-        self.platform_version = "15"
         self.automation_name = "UiAutomator2"
-        self.screenshots_dir = "pytest_screenshots"
+        self.videos_dir = "pytest_videos"
         self.reports_dir = "pytest_reports"
         self.logs_dir = "pytest_logs"
         self.implicit_wait = 5
@@ -36,7 +41,71 @@ class TestEnvironment:
 # Instancia global del entorno
 test_env = TestEnvironment()
 
-#Función helper para ejecutar comandos ADB y manejar errores
+
+class VideoRecorder:
+    """Clase para manejar la grabación de video durante los tests"""
+
+    def __init__(self, device_name):
+        self.device_name = device_name
+        self.recording_process = None
+        self.video_path_device = None
+        self.video_path_local = None
+        self.is_recording = False
+
+    def start_recording(self, test_name):
+        """Inicia la grabación de video"""
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.video_path_device = f"/sdcard/{test_name}_{timestamp}.mp4"
+        self.video_path_local = os.path.join(test_env.videos_dir, f"{test_name}_{timestamp}.mp4")
+
+        # Comando para grabar video
+        cmd = ['adb', '-s', self.device_name, 'shell', 'screenrecord', self.video_path_device]
+
+        try:
+            self.recording_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            self.is_recording = True
+            logger.info(f"🎥 Iniciando grabación de video: {self.video_path_device}")
+            time.sleep(1)  # Pequeña pausa para asegurar que la grabación inicie
+            return True
+        except Exception as e:
+            logger.error(f"❌ Error al iniciar grabación: {e}")
+            return False
+
+    def stop_recording(self):
+        """Detiene la grabación y descarga el video"""
+        if not self.is_recording or not self.recording_process:
+            return None
+
+        try:
+            # Terminar la grabación enviando SIGINT (Ctrl+C)
+            self.recording_process.terminate()
+            self.recording_process.wait(timeout=10)
+            self.is_recording = False
+
+            time.sleep(2)  # Esperar que el archivo se guarde completamente
+
+            # Descargar el video del dispositivo
+            pull_cmd = ['adb', '-s', self.device_name, 'pull', self.video_path_device, self.video_path_local]
+            result = subprocess.run(pull_cmd, capture_output=True, text=True)
+
+            if result.returncode == 0:
+                logger.info(f"✅ Video descargado: {self.video_path_local}")
+
+                # Limpiar el video del dispositivo
+                cleanup_cmd = ['adb', '-s', self.device_name, 'shell', 'rm', self.video_path_device]
+                subprocess.run(cleanup_cmd, capture_output=True)
+
+                return self.video_path_local
+            else:
+                logger.error(f"❌ Error al descargar video: {result.stderr}")
+                return None
+
+        except Exception as e:
+            logger.error(f"❌ Error al detener grabación: {e}")
+            return None
+
+
+# Función helper para ejecutar comandos ADB y manejar errores
 def _run_adb_command(command):
     try:
         return subprocess.run(command, capture_output=True, text=True, check=True)
@@ -47,6 +116,7 @@ def _run_adb_command(command):
     except subprocess.CalledProcessError as e:
         logger.error(f"❌ Falló el comando ADB: {' '.join(command)}\nError: {e.stderr}")
         return None
+
 
 # Función para verificar que el dispositivo esté listo y autorizado
 def check_device_is_ready(device_name, timeout=30):
@@ -78,6 +148,7 @@ def check_device_is_ready(device_name, timeout=30):
         f"3. El estado es 'offline'. Reinicia el emulador."
     )
 
+
 # Fixture de configuración del entorno - Se ejecuta UNA VEZ por sesión
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_environment():
@@ -85,7 +156,7 @@ def setup_test_environment():
     logger.info("=" * 60)
     logger.info("🚀 CONFIGURANDO ENTORNO DE TESTING (UNA SOLA VEZ POR SESIÓN)")
 
-    os.makedirs(test_env.screenshots_dir, exist_ok=True)
+    os.makedirs(test_env.videos_dir, exist_ok=True)
     os.makedirs(test_env.reports_dir, exist_ok=True)
     os.makedirs(test_env.logs_dir, exist_ok=True)
 
@@ -108,7 +179,7 @@ def setup_test_environment():
     logger.info("=" * 60)
 
 
-#Smoke test - Valida que el driver se inicie correctamente
+# Smoke test - Valida que el driver se inicie correctamente
 @pytest.fixture(scope="session")
 def driver(request):
     """Fixture que crea el driver de Appium UNA SOLA VEZ por sesión de pruebas."""
@@ -145,21 +216,33 @@ def driver(request):
     except Exception as e:
         pytest.fail(f"❌ CRÍTICO: No se pudo inicializar el driver de Appium. Error: {e}")
 
-# Fixture para tomar screenshots
+
+# Fixture para grabar videos
 @pytest.fixture
-def screenshot(request, driver):
-    """Fixture para tomar screenshots en puntos clave o al fallar."""
+def video_recorder(request, driver):
+    """Fixture para grabar video durante la ejecución del test."""
 
-    def take_screenshot(name):
-        test_name = request.node.name
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{test_name}_{name}_{timestamp}.png"
-        filepath = os.path.join(test_env.screenshots_dir, filename)
+    recorder = VideoRecorder(test_env.device_name)
+    test_name = request.node.name
+    video_path = None
 
-        try:
-            driver.save_screenshot(filepath)
-            logger.info(f"📸 Screenshot guardado: {filepath}")
-        except Exception as e:
-            logger.error(f"❌ Error al guardar screenshot '{filename}': {e}")
+    # Iniciar grabación al comenzar el test
+    if recorder.start_recording(test_name):
+        logger.info(f"🎥 Grabación iniciada para el test: {test_name}")
+    else:
+        logger.warning(f"⚠️ No se pudo iniciar la grabación para: {test_name}")
 
-    return take_screenshot
+    def stop_and_save():
+        nonlocal video_path
+        video_path = recorder.stop_recording()
+        if video_path:
+            logger.info(f"✅ Video guardado: {video_path}")
+        else:
+            logger.warning(f"⚠️ No se pudo guardar el video del test: {test_name}")
+        return video_path
+
+    # Registrar función para detener grabación al final del test
+    request.addfinalizer(stop_and_save)
+
+    # Retornar función para obtener la ruta del video
+    return lambda: video_path

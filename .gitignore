@@ -4,4 +4,5 @@ test_screenshots
 pytest_logs
 pytest_reports
 pytest_screenshots
+pytest_videos
 .env
