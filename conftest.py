@@ -16,17 +16,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
+#Clase centralizada para manejar la configuración del entorno de testing
 class TestEnvironment:
-    """Clase centralizada para manejar la configuración del entorno de testing."""
-
     def __init__(self):
-        self.apk_path = r"C:\Users\smora\Documents\poc\appium-flutter\app-release 11.apk"
-        self.appium_server = "http://127.0.0.1:4723"
-        self.device_name = "emulator-5554"
+        self.apk_path = os.getenv('APK_PATH', r"C:\Users\smora\Documents\Poc\appium-poc\app-release.apk")
+        self.platform_version = os.getenv('PLATFORM_VERSION', "16")
+        self.device_name = os.getenv('DEVICE_NAME', "emulator-5554")
         self.platform_name = "Android"
 
-        self.platform_version = "16"
+        self.platform_version = "15"
         self.automation_name = "UiAutomator2"
         self.screenshots_dir = "pytest_screenshots"
         self.reports_dir = "pytest_reports"
@@ -38,9 +36,8 @@ class TestEnvironment:
 # Instancia global del entorno
 test_env = TestEnvironment()
 
-
+#Función helper para ejecutar comandos ADB y manejar errores
 def _run_adb_command(command):
-    """Función helper para ejecutar comandos ADB y manejar errores."""
     try:
         return subprocess.run(command, capture_output=True, text=True, check=True)
     except FileNotFoundError:
@@ -51,7 +48,7 @@ def _run_adb_command(command):
         logger.error(f"❌ Falló el comando ADB: {' '.join(command)}\nError: {e.stderr}")
         return None
 
-
+# Función para verificar que el dispositivo esté listo y autorizado
 def check_device_is_ready(device_name, timeout=30):
     logger.info(f"Verificando que el dispositivo '{device_name}' esté listo y autorizado...")
     end_time = time.time() + timeout
@@ -81,7 +78,7 @@ def check_device_is_ready(device_name, timeout=30):
         f"3. El estado es 'offline'. Reinicia el emulador."
     )
 
-
+# Fixture de configuración del entorno - Se ejecuta UNA VEZ por sesión
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_environment():
     """Fixture que se ejecuta UNA VEZ por sesión para preparar todo el entorno."""
@@ -111,6 +108,7 @@ def setup_test_environment():
     logger.info("=" * 60)
 
 
+#Smoke test - Valida que el driver se inicie correctamente
 @pytest.fixture(scope="session")
 def driver(request):
     """Fixture que crea el driver de Appium UNA SOLA VEZ por sesión de pruebas."""
@@ -147,7 +145,7 @@ def driver(request):
     except Exception as e:
         pytest.fail(f"❌ CRÍTICO: No se pudo inicializar el driver de Appium. Error: {e}")
 
-
+# Fixture para tomar screenshots
 @pytest.fixture
 def screenshot(request, driver):
     """Fixture para tomar screenshots en puntos clave o al fallar."""
