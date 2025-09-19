@@ -3,12 +3,13 @@ import time
 from appium.webdriver.common.appiumby import AppiumBy
 from selenium.common.exceptions import NoSuchElementException
 
-class TestSimpleFlow:
-    #El flujo completo de pruebas es una prueba de regresión
+
+class Login:
+    # El flujo completo de pruebas es una prueba de regresión
     # que abarca desde la pantalla inicial hasta el cierre de sesión.
 
     # UI Tests
-    #Test 1: Hacer click en el botón 'Registrarme'
+    # Test 1: Hacer click en el botón 'Registrarme'
     @pytest.mark.xray("APPTEST-10")
     def test_01_click_registrarme(self, driver, video_recorder):
 
@@ -29,10 +30,10 @@ class TestSimpleFlow:
             assert registrarme_button is not None, "No se pudo encontrar el botón 'Registrarme'"
 
             # Hacer click
-            time.sleep(2)  # Pequeña pausa antes de hacer click
+            time.sleep(1)
             print("Haciendo click en Registrarme...")
             registrarme_button.click()
-            time.sleep(2)  # Esperar que cargue la nueva pantalla
+            time.sleep(1)
 
             print("✅ TEST 1 COMPLETADO: Click en Registrarme exitoso")
 
@@ -45,7 +46,7 @@ class TestSimpleFlow:
                 print(f"📹 Video evidencia guardado: {video_path}")
 
     # UI Tests
-    #Test 2: Usar botón atrás del teléfono para volver
+    # Test 2: Usar botón atrás del teléfono para volver
     @pytest.mark.xray("APPTEST-11")
     def test_02_go_back_with_phone_button(self, driver, video_recorder):
 
@@ -56,7 +57,7 @@ class TestSimpleFlow:
 
             # Usar el botón back del dispositivo
             driver.back()
-            time.sleep(2)  # Esperar que regrese a la pantalla anterior
+            time.sleep(1)  # Reducido de 2 a 1
 
             # Verificar que volvimos a la pantalla principal
             # buscando el texto "¡Bienvenido!" o "Iniciar sesión"
@@ -81,7 +82,7 @@ class TestSimpleFlow:
                 print(f"📹 Video evidencia guardado: {video_path}")
 
     # UI Tests
-    #Test 3: Hacer click en el botón azul 'Iniciar sesión'
+    # Test 3: Hacer click en el botón azul 'Iniciar sesión'
     @pytest.mark.xray("APPTEST-12")
     def test_03_click_iniciar_sesion(self, driver, video_recorder):
 
@@ -101,7 +102,8 @@ class TestSimpleFlow:
             # Estrategia 2: Por content description que contenga "Iniciar"
             if not iniciar_sesion_button:
                 try:
-                    iniciar_sesion_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@content-desc,'Iniciar')]")
+                    iniciar_sesion_button = driver.find_element(AppiumBy.XPATH,
+                                                                "//*[contains(@content-desc,'Iniciar')]")
                     print("Encontrado por description con contains Iniciar'")
                 except NoSuchElementException:
                     pass
@@ -111,7 +113,7 @@ class TestSimpleFlow:
             # Hacer click
             print("Haciendo click en 'Iniciar sesión'...")
             iniciar_sesion_button.click()
-            time.sleep(3)  # Esperar que cargue la nueva pantalla
+            time.sleep(2)  # Reducido de 3 a 2
 
             print("✅ TEST 3 COMPLETADO: Click en 'Iniciar sesión' exitoso")
 
@@ -124,7 +126,7 @@ class TestSimpleFlow:
                 print(f"📹 Video evidencia guardado: {video_path}")
 
     # UI Tests
-    #Test 4: Escribir email falso y presionar continuar
+    # Test 4: Escribir email falso y presionar continuar
     @pytest.mark.xray("APPTEST-13")
     def test_04_escribir_email_y_continuar(self, driver, video_recorder):
 
@@ -155,23 +157,25 @@ class TestSimpleFlow:
             # Hacer click en el campo para asegurar que esté enfocado
             print("Haciendo click en el campo de email...")
             email_field.click()
-            time.sleep(1)
+            time.sleep(0.5)  # Reducido de 1 a 0.5
 
             # Limpiar el campo
             email_field.clear()
-            time.sleep(0.5)
+            time.sleep(0.3)  # Reducido de 0.5 a 0.3
 
-            # Escribir el email caracter por caracter lentamente
+            # Escribir el email más rápido
             email_text = "emailFalso@gmail.com"
-            print("Escribiendo email caracter por caracter...")
+            print("Escribiendo email más rápido...")
 
-            for i, char in enumerate(email_text):
-                email_field.send_keys(char)
-                print(f"Escribiendo: {char} ({i + 1}/{len(email_text)})")
-                time.sleep(0.3)  # Pausa de 300ms entre cada caracter
+            # Escribir de 3 en 3 caracteres para acelerar
+            for i in range(0, len(email_text), 3):
+                chunk = email_text[i:i + 3]
+                email_field.send_keys(chunk)
+                print(f"Escribiendo: {chunk}")
+                time.sleep(0.1)  # Reducido significativamente
 
-            # Pausa adicional después de terminar de escribir
-            time.sleep(2)
+            # Pausa después de terminar de escribir
+            time.sleep(1)  # Reducido de 2 a 1
             print("Email escrito completamente. Ocultando teclado...")
 
             # Ocultar el teclado
@@ -186,7 +190,7 @@ class TestSimpleFlow:
                 except:
                     print("⚠️ No se pudo ocultar el teclado, continuando...")
 
-            time.sleep(1)  # Pequeña pausa después de ocultar teclado
+            time.sleep(0.5)  # Reducido de 1 a 0.5
 
             # Buscar el botón "Continuar"
             print("Buscando botón 'Continuar'...")
@@ -207,9 +211,9 @@ class TestSimpleFlow:
             # Hacer click en continuar
             print("Haciendo click en 'Continuar'...")
             continuar_button.click()
-            time.sleep(3)  # Esperar que cargue la nueva pantalla
+            time.sleep(2)  # Reducido de 3 a 2
 
-            print("✅ TEST 4 COMPLETADO: Email escrito lentamente y botón continuar presionado")
+            print("✅ TEST 4 COMPLETADO: Email escrito más rápido y botón continuar presionado")
 
         except Exception as e:
             pytest.fail(f"TEST 4 FALLÓ: {e}")
@@ -220,7 +224,7 @@ class TestSimpleFlow:
                 print(f"📹 Video evidencia guardado: {video_path}")
 
     # UI Tests
-    #Test 5: Hacer click en el botón 'Usuario y contraseña'
+    # Test 5: Hacer click en el botón 'Usuario y contraseña'
     @pytest.mark.xray("APPTEST-14")
     def test_05_click_usuario_y_contrasena(self, driver, video_recorder):
 
@@ -273,7 +277,7 @@ class TestSimpleFlow:
             # Hacer click
             print("Haciendo click en 'Usuario y contraseña'...")
             usuario_contrasena_button.click()
-            time.sleep(3)  # Esperar que cargue la nueva pantalla
+            time.sleep(2)  # Reducido de 3 a 2
 
             # Verificar que cambió de pantalla buscando elementos de login típicos
             pantalla_cambio = False
@@ -303,7 +307,7 @@ class TestSimpleFlow:
             print("✅ TEST 5 COMPLETADO: Click en 'Usuario y contraseña' exitoso")
 
         except Exception as e:
-            pytest.fail(f"TEST 6 FALLÓ: {e}")
+            pytest.fail(f"TEST 5 FALLÓ: {e}")
         finally:
             # El video se detiene automáticamente al finalizar el test
             video_path = video_recorder()
@@ -311,7 +315,7 @@ class TestSimpleFlow:
                 print(f"📹 Video evidencia guardado: {video_path}")
 
     # UI Tests
-    #Test 6: Escribir usuario y contraseña y presionar siguiente
+    # Test 6: Escribir usuario y contraseña y presionar siguiente
     @pytest.mark.xray("APPTEST-15")
     def test_06_escribir_usuario_y_contrasena(self, driver, video_recorder):
 
@@ -364,31 +368,29 @@ class TestSimpleFlow:
 
             assert contrasena_field is not None, "No se pudo encontrar el campo de contraseña"
 
-            # Escribir usuario (letra por letra lentamente)
+            # Escribir usuario más rápido
             print("Escribiendo usuario...")
             usuario_field.click()
-            time.sleep(1)
+            time.sleep(0.5)  # Reducido de 1 a 0.5
             usuario_field.clear()
-            time.sleep(0.5)
+            time.sleep(0.3)  # Reducido de 0.5 a 0.3
 
+            # Escribir usuario directamente (más rápido)
             usuario_text = "Alejandro.Morales"
-            for char in usuario_text:
-                usuario_field.send_keys(char)
-                time.sleep(0.2)  # Escribir lentamente pero sin log
-
-            time.sleep(1)
+            usuario_field.send_keys(usuario_text)
+            time.sleep(0.5)  # Reducido de 1 a 0.5
             print("Usuario escrito completamente")
 
-            # Escribir contraseña (pegar directamente)
+            # Escribir contraseña
             print("Escribiendo contraseña...")
             contrasena_field.click()
-            time.sleep(1)
+            time.sleep(0.5)  # Reducido de 1 a 0.5
             contrasena_field.clear()
-            time.sleep(0.5)
+            time.sleep(0.3)  # Reducido de 0.5 a 0.3
 
             # Pegar la contraseña completa de una vez
             contrasena_field.send_keys("Admin123")
-            time.sleep(1)
+            time.sleep(0.5)  # Reducido de 1 a 0.5
             print("Contraseña pegada completamente")
 
             # Ocultar el teclado
@@ -403,7 +405,7 @@ class TestSimpleFlow:
                 except:
                     print("⚠️ No se pudo ocultar el teclado, continuando...")
 
-            time.sleep(1)
+            time.sleep(0.5)  # Reducido de 1 a 0.5
 
             # Buscar el botón "Siguiente"
             print("Buscando botón 'Siguiente'...")
@@ -461,9 +463,9 @@ class TestSimpleFlow:
             # Hacer click en siguiente
             print("Haciendo click en 'Siguiente'...")
             siguiente_button.click()
-            time.sleep(3)  # Esperar que cargue la nueva pantalla
+            time.sleep(2)  # Reducido de 3 a 2
 
-            print("✅ TEST 6 COMPLETADO: Usuario y contraseña escritos, botón siguiente presionado")
+            print("✅ TEST 6 COMPLETADO: Usuario y contraseña escritos más rápido, botón siguiente presionado")
 
         except Exception as e:
             pytest.fail(f"TEST 6 FALLÓ: {e}")
@@ -474,11 +476,11 @@ class TestSimpleFlow:
                 print(f"📹 Video evidencia guardado: {video_path}")
 
     # UI Tests + Gestos
-    #Test 7: Flujo completo - Ver productos → PDC -> FFA → Menu → Scroll → Salir
+    # Test 7: Flujo productos - Ver productos → PDC → FFA
     @pytest.mark.xray("APPTEST-16")
-    def test_07_flujo_completo_productos_y_salir(self, driver, video_recorder):
+    def test_07_flujo_productos(self, driver, video_recorder):
 
-        print("\n=== TEST 7: Flujo completo productos y salir ===")
+        print("\n=== TEST 7: Flujo productos (Ver productos → PDC → FFA) ===")
 
         try:
             # Paso 1: Click en "Ver productos"
@@ -505,7 +507,7 @@ class TestSimpleFlow:
 
             print("Haciendo click en 'Ver productos'...")
             ver_productos_button.click()
-            time.sleep(2)
+            time.sleep(1.5)  # Reducido de 2 a 1.5
 
             # Paso 2: Click en "PDC"
             print("Paso 2: Buscando botón 'PDC'...")
@@ -533,14 +535,14 @@ class TestSimpleFlow:
 
             print("Haciendo click en 'PDC'...")
             pdc_button.click()
-            time.sleep(2)
+            time.sleep(1.5)  # Reducido de 2 a 1.5
 
-            # Paso 3: Esperar 1 segundo
-            print("Paso 3: Esperando 1 segundo...")
-            time.sleep(1)
+            # Paso 3: Esperar menos tiempo
+            print("Paso 3: Esperando...")
+            time.sleep(0.5)  # Reducido de 1 a 0.5
 
-            #Parte nueva para esta version --Click en FFA
-            print("Paso adicional - Boton FFA")
+            # Paso 4: Click en FFA
+            print("Paso 4: Buscando botón 'FFA'...")
             ffa_button = None
             try:
                 ffa_button = driver.find_element(AppiumBy.XPATH, "//*[@content-desc='FFA']")
@@ -552,13 +554,14 @@ class TestSimpleFlow:
                 except NoSuchElementException:
                     print("⚠️ No se pudo encontrar el botón 'FFA'")
                     pass
-            assert pdc_button is not None, "No se pudo encontrar el botón 'FFA'"
+
+            assert ffa_button is not None, "No se pudo encontrar el botón 'FFA'"
+
             print("Haciendo click en 'FFA'...")
             ffa_button.click()
-            time.sleep(2)
-            # Fin parte nueva
+            time.sleep(1.5)  # Reducido de 2 a 1.5
 
-            print("✅ TEST 7 COMPLETADO: Flujo completo Ver productos → PDC → Menu → Scroll → Salir exitoso")
+            print("✅ TEST 7 COMPLETADO: Flujo Ver productos → PDC → FFA exitoso")
 
         except Exception as e:
             pytest.fail(f"TEST 7 FALLÓ: {e}")
@@ -568,8 +571,103 @@ class TestSimpleFlow:
             if video_path:
                 print(f"📹 Video evidencia guardado: {video_path}")
 
-    # Test de Inspección de Elementos
+    # UI Tests + Gestos
+    # Test 8: Flujo menú y salir - Menu → Scroll → Salir
     @pytest.mark.xray("APPTEST-17")
+    def test_08_flujo_menu_y_salir(self, driver, video_recorder):
+
+        print("\n=== TEST 8: Flujo menú y salir (Menu → Scroll → Salir) ===")
+
+        try:
+            # Paso 1: Click en "menu"
+            print("Paso 1: Buscando botón 'menu'...")
+
+            menu_button = None
+            try:
+                menu_button = driver.find_element(AppiumBy.XPATH, "//*[@content-desc='Menú']")
+                print("Encontrado 'Menú' por content-desc exacto")
+            except NoSuchElementException:
+                try:
+                    menu_button = driver.find_element(AppiumBy.XPATH, "//*[@text='Menú']")
+                    print("Encontrado 'Menú' por texto exacto")
+                except NoSuchElementException:
+                    try:
+                        menu_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@text,'Menú')]")
+                        print("Encontrado 'Menú' por texto que contiene")
+                    except NoSuchElementException:
+                        try:
+                            menu_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@content-desc,'Menú')]")
+                            print("Encontrado 'menu' por content-desc que contiene")
+                        except NoSuchElementException:
+                            try:
+                                menu_button = driver.find_element(AppiumBy.XPATH, "//*[@text='Menú']")
+                                print("Encontrado 'Menú' con mayúscula")
+                            except NoSuchElementException:
+                                pass
+
+            assert menu_button is not None, "No se pudo encontrar el botón 'Menú'"
+
+            print("Haciendo click en 'Menú'...")
+            menu_button.click()
+            time.sleep(1.5)  # Reducido de 2 a 1.5
+
+            # Paso 2: Hacer scroll hacia abajo
+            print("Paso 2: Haciendo scroll hacia abajo...")
+
+            # Obtener dimensiones de la pantalla para el scroll
+            screen_size = driver.get_window_size()
+            screen_width = screen_size['width']
+            screen_height = screen_size['height']
+
+            # Scroll desde 80% hasta 20% de la altura de la pantalla
+            start_x = screen_width // 2
+            start_y = int(screen_height * 0.8)
+            end_x = screen_width // 2
+            end_y = int(screen_height * 0.2)
+
+            driver.swipe(start_x, start_y, end_x, end_y, 800)  # Reducido de 1000 a 800ms
+            time.sleep(0.5)  # Reducido de 1 a 0.5
+            print("Scroll hacia abajo completado")
+
+            # Paso 3: Presionar "salir"
+            print("Paso 3: Buscando botón 'salir'...")
+
+            salir_button = None
+            try:
+                salir_button = driver.find_element(AppiumBy.XPATH, "//*[@content-desc='Salir']")
+                print("Encontrado 'salir' por content-desc exacto")
+            except NoSuchElementException:
+                try:
+                    salir_button = driver.find_element(AppiumBy.XPATH, "//*[@text='Salir']")
+                    print("Encontrado 'salir' por texto exacto")
+                except NoSuchElementException:
+                    try:
+                        salir_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@text,'Salir')]")
+                        print("Encontrado 'salir' por texto que contiene")
+                    except NoSuchElementException:
+                        pass
+
+            assert salir_button is not None, "No se pudo encontrar el botón 'salir'"
+
+            print("Haciendo click en coordenadas específicas del botón Salir...")
+            screen_size = driver.get_window_size()
+            click_x = int(screen_size['width'] * 0.25)
+            click_y = int(screen_size['height'] * 0.95)
+            driver.tap([(click_x, click_y)])
+            time.sleep(2)  # Reducido de 3 a 2
+
+            print("✅ TEST 8 COMPLETADO: Flujo Menu → Scroll → Salir exitoso")
+
+        except Exception as e:
+            pytest.fail(f"TEST 8 FALLÓ: {e}")
+        finally:
+            # El video se detiene automáticamente al finalizar el test
+            video_path = video_recorder()
+            if video_path:
+                print(f"📹 Video evidencia guardado: {video_path}")
+
+    # Test de Inspección de Elementos
+    @pytest.mark.xray("APPTEST-18")
     def test_debug_current_screen(self, driver, video_recorder):
         """ Debug - Mostrar todos los elementos de la pantalla actual"""
         print("\n=== DEBUG - Elementos actuales ===")

@@ -31,9 +31,15 @@ class TestEnvironment:
         self.appium_server = os.getenv('APPIUM_SERVER', "http://127.0.0.1:4723")
         self.platform_name = "Android"
         self.automation_name = "UiAutomator2"
-        self.videos_dir = "pytest_videos"
-        self.reports_dir = "pytest_reports"
-        self.logs_dir = "pytest_logs"
+
+        # Directorios organizados por módulo
+        self.module_name = os.getenv('PYTEST_MODULE_NAME', 'general')
+        self.reports_dir = os.getenv('PYTEST_REPORTS_DIR', 'pytest_reports')
+
+        # Crear subdirectorios específicos para este módulo
+        self.videos_dir = os.path.join("pytest_videos", self.module_name)
+        self.logs_dir = os.path.join("pytest_logs", self.module_name)
+
         self.implicit_wait = 5
         self.command_timeout = 120
 
@@ -45,8 +51,9 @@ test_env = TestEnvironment()
 class VideoRecorder:
     """Clase para manejar la grabación de video durante los tests"""
 
-    def __init__(self, device_name):
+    def __init__(self, device_name, module_name="general"):
         self.device_name = device_name
+        self.module_name = module_name
         self.recording_process = None
         self.video_path_device = None
         self.video_path_local = None
@@ -55,8 +62,12 @@ class VideoRecorder:
     def start_recording(self, test_name):
         """Inicia la grabación de video"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        self.video_path_device = f"/sdcard/{test_name}_{timestamp}.mp4"
-        self.video_path_local = os.path.join(test_env.videos_dir, f"{test_name}_{timestamp}.mp4")
+        self.video_path_device = f"/sdcard/{self.module_name}_{test_name}_{timestamp}.mp4"
+
+        # Organizar videos por módulo
+        module_video_dir = os.path.join(test_env.videos_dir)
+        os.makedirs(module_video_dir, exist_ok=True)
+        self.video_path_local = os.path.join(module_video_dir, f"{test_name}_{timestamp}.mp4")
 
         # Comando para grabar video
         cmd = ['adb', '-s', self.device_name, 'shell', 'screenrecord', self.video_path_device]
@@ -64,11 +75,11 @@ class VideoRecorder:
         try:
             self.recording_process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             self.is_recording = True
-            logger.info(f"🎥 Iniciando grabación de video: {self.video_path_device}")
+            logger.info(f"🎥 [{self.module_name}] Iniciando grabación: {self.video_path_device}")
             time.sleep(1)  # Pequeña pausa para asegurar que la grabación inicie
             return True
         except Exception as e:
-            logger.error(f"❌ Error al iniciar grabación: {e}")
+            logger.error(f"❌ [{self.module_name}] Error al iniciar grabación: {e}")
             return False
 
     def stop_recording(self):
@@ -89,7 +100,7 @@ class VideoRecorder:
             result = subprocess.run(pull_cmd, capture_output=True, text=True)
 
             if result.returncode == 0:
-                logger.info(f"✅ Video descargado: {self.video_path_local}")
+                logger.info(f"✅ [{self.module_name}] Video descargado: {self.video_path_local}")
 
                 # Limpiar el video del dispositivo
                 cleanup_cmd = ['adb', '-s', self.device_name, 'shell', 'rm', self.video_path_device]
@@ -97,11 +108,11 @@ class VideoRecorder:
 
                 return self.video_path_local
             else:
-                logger.error(f"❌ Error al descargar video: {result.stderr}")
+                logger.error(f"❌ [{self.module_name}] Error al descargar video: {result.stderr}")
                 return None
 
         except Exception as e:
-            logger.error(f"❌ Error al detener grabación: {e}")
+            logger.error(f"❌ [{self.module_name}] Error al detener grabación: {e}")
             return None
 
 
@@ -149,13 +160,26 @@ def check_device_is_ready(device_name, timeout=30):
     )
 
 
+# Hook de pytest para personalizar el nombre de la suite según el módulo
+def pytest_configure(config):
+    """Configura pytest con información del módulo actual"""
+    module_name = test_env.module_name
+
+    # Configurar junit suite name dinámicamente
+    if hasattr(config.option, 'junit_suite_name'):
+        config.option.junit_suite_name = f"AppiumTests_{module_name}"
+
+    logger.info(f"🏷️ Configurando tests para módulo: {module_name}")
+
+
 # Fixture de configuración del entorno - Se ejecuta UNA VEZ por sesión
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_environment():
     """Fixture que se ejecuta UNA VEZ por sesión para preparar todo el entorno."""
     logger.info("=" * 60)
-    logger.info("🚀 CONFIGURANDO ENTORNO DE TESTING (UNA SOLA VEZ POR SESIÓN)")
+    logger.info(f"🚀 CONFIGURANDO ENTORNO PARA MÓDULO: {test_env.module_name}")
 
+    # Crear directorios específicos del módulo
     os.makedirs(test_env.videos_dir, exist_ok=True)
     os.makedirs(test_env.reports_dir, exist_ok=True)
     os.makedirs(test_env.logs_dir, exist_ok=True)
@@ -171,11 +195,11 @@ def setup_test_environment():
 
     check_device_is_ready(test_env.device_name)
 
-    logger.info("✅ Entorno configurado correctamente.")
+    logger.info(f"✅ Entorno configurado para módulo: {test_env.module_name}")
     logger.info("=" * 60)
     yield
     logger.info("=" * 60)
-    logger.info("🧹 LIMPIEZA FINAL DEL ENTORNO DE TESTING")
+    logger.info(f"🧹 LIMPIEZA FINAL DEL MÓDULO: {test_env.module_name}")
     logger.info("=" * 60)
 
 
@@ -183,12 +207,12 @@ def setup_test_environment():
 @pytest.fixture(scope="session")
 def driver(request):
     """Fixture que crea el driver de Appium UNA SOLA VEZ por sesión de pruebas."""
-    logger.info("🚀 Iniciando driver de Appium para TODA LA SESIÓN DE PRUEBAS...")
+    logger.info(f"🚀 [{test_env.module_name}] Iniciando driver de Appium...")
 
     options = UiAutomator2Options()
     options.platform_name = test_env.platform_name
     options.device_name = test_env.device_name
-    options.app = test_env.apk_path  # 👈 Aquí le decimos que use el APK
+    options.app = test_env.apk_path
     options.automation_name = test_env.automation_name
     options.platform_version = test_env.platform_version
     options.new_command_timeout = test_env.command_timeout
@@ -200,45 +224,45 @@ def driver(request):
     try:
         driver_instance = webdriver.Remote(test_env.appium_server, options=options)
         driver_instance.implicitly_wait(test_env.implicit_wait)
-        logger.info("✅ Driver iniciado exitosamente. La app se mantendrá abierta.")
+        logger.info(f"✅ [{test_env.module_name}] Driver iniciado exitosamente")
 
         def finalizer():
             if driver_instance:
                 try:
                     driver_instance.quit()
-                    logger.info("🏁 Driver cerrado correctamente al final de la sesión.")
+                    logger.info(f"🏁 [{test_env.module_name}] Driver cerrado correctamente")
                 except Exception as e:
-                    logger.warning(f"⚠️ No se pudo cerrar el driver correctamente: {e}")
+                    logger.warning(f"⚠️ [{test_env.module_name}] No se pudo cerrar el driver: {e}")
 
         request.addfinalizer(finalizer)
 
         return driver_instance
     except Exception as e:
-        pytest.fail(f"❌ CRÍTICO: No se pudo inicializar el driver de Appium. Error: {e}")
+        pytest.fail(f"❌ CRÍTICO [{test_env.module_name}]: No se pudo inicializar el driver. Error: {e}")
 
 
-# Fixture para grabar videos
+# Fixture para grabar videos organizados por módulo
 @pytest.fixture
 def video_recorder(request, driver):
-    """Fixture para grabar video durante la ejecución del test."""
+    """Fixture para grabar video durante la ejecución del test, organizado por módulo."""
 
-    recorder = VideoRecorder(test_env.device_name)
+    recorder = VideoRecorder(test_env.device_name, test_env.module_name)
     test_name = request.node.name
     video_path = None
 
     # Iniciar grabación al comenzar el test
     if recorder.start_recording(test_name):
-        logger.info(f"🎥 Grabación iniciada para el test: {test_name}")
+        logger.info(f"🎥 [{test_env.module_name}] Grabación iniciada para: {test_name}")
     else:
-        logger.warning(f"⚠️ No se pudo iniciar la grabación para: {test_name}")
+        logger.warning(f"⚠️ [{test_env.module_name}] No se pudo iniciar grabación para: {test_name}")
 
     def stop_and_save():
         nonlocal video_path
         video_path = recorder.stop_recording()
         if video_path:
-            logger.info(f"✅ Video guardado: {video_path}")
+            logger.info(f"✅ [{test_env.module_name}] Video guardado: {video_path}")
         else:
-            logger.warning(f"⚠️ No se pudo guardar el video del test: {test_name}")
+            logger.warning(f"⚠️ [{test_env.module_name}] No se pudo guardar video de: {test_name}")
         return video_path
 
     # Registrar función para detener grabación al final del test
@@ -246,3 +270,15 @@ def video_recorder(request, driver):
 
     # Retornar función para obtener la ruta del video
     return lambda: video_path
+
+
+# Hook para agregar información del módulo a los reportes
+def pytest_html_report_title(report):
+    """Personaliza el título del reporte HTML"""
+    report.title = f"Reporte de Tests - Módulo: {test_env.module_name}"
+
+
+def pytest_html_results_summary(prefix, summary, postfix):
+    """Personaliza el resumen del reporte HTML"""
+    prefix.extend([f"<p><strong>Módulo:</strong> {test_env.module_name}</p>"])
+    prefix.extend([f"<p><strong>Fecha:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>"])
