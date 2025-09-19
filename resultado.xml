@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="AppiumMobileTests" errors="0" failures="0" skipped="0" tests="8" time="132.579" timestamp="2025-09-16T23:59:47.534823-06:00" hostname="SEBAS"><testcase classname="test_appium_suite.TestSimpleFlow" name="test_01_click_registrarme" time="14.762"><system-out>--------------------------------- Captured Log ---------------------------------
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="AppiumMobileTests" errors="0" failures="1" skipped="0" tests="8" time="131.415" timestamp="2025-09-17T08:34:38.960198-06:00" hostname="GT_FAB_L31"><testcase classname="test_appium_suite.TestSimpleFlow" name="test_01_click_registrarme" time="21.727"><system-out>--------------------------------- Captured Log ---------------------------------
 #x1B[32mINFO    #x1B[0m conftest:conftest.py:156 ============================================================
 #x1B[32mINFO    #x1B[0m conftest:conftest.py:157 #x1F680 CONFIGURANDO ENTORNO DE TESTING (UNA SOLA VEZ POR SESIÓN)
 #x1B[32mINFO    #x1B[0m conftest:conftest.py:165 ✅ Appium server está corriendo en http://127.0.0.1:4723
@@ -8,238 +8,88 @@
 #x1B[32mINFO    #x1B[0m conftest:conftest.py:175 ============================================================
 #x1B[32mINFO    #x1B[0m conftest:conftest.py:186 #x1F680 Iniciando driver de Appium para TODA LA SESIÓN DE PRUEBAS...
 #x1B[32mINFO    #x1B[0m conftest:conftest.py:203 ✅ Driver iniciado exitosamente. La app se mantendrá abierta.
-#x1B[32mINFO    #x1B[0m conftest:conftest.py:67 #x1F3A5 Iniciando grabación de video: /sdcard/test_01_click_registrarme_20250916_235953.mp4
+#x1B[32mINFO    #x1B[0m conftest:conftest.py:67 #x1F3A5 Iniciando grabación de video: /sdcard/test_01_click_registrarme_20250917_083451.mp4
 #x1B[32mINFO    #x1B[0m conftest:conftest.py:231 #x1F3A5 Grabación iniciada para el test: test_01_click_registrarme
-#x1B[32mINFO    #x1B[0m conftest:conftest.py:92 ✅ Video descargado: pytest_videos\test_01_click_registrarme_20250916_235953.mp4
-#x1B[32mINFO    #x1B[0m conftest:conftest.py:239 ✅ Video guardado: pytest_videos\test_01_click_registrarme_20250916_235953.mp4
+#x1B[32mINFO    #x1B[0m conftest:conftest.py:92 ✅ Video descargado: pytest_videos\test_01_click_registrarme_20250917_083451.mp4
+#x1B[32mINFO    #x1B[0m conftest:conftest.py:239 ✅ Video guardado: pytest_videos\test_01_click_registrarme_20250917_083451.mp4
 --------------------------------- Captured Out ---------------------------------
 
-=== TEST 1: Click en Registrarme ===
-Buscando botón 'Registrarme'...
-Encontrado por texto exacto
-Haciendo click en Registrarme...
-✅ TEST 1 COMPLETADO: Click en Registrarme exitoso
-
 </system-out><system-err>--------------------------------- Captured Err ---------------------------------
-2025-09-16 23:59:47 [INFO] ============================================================
-2025-09-16 23:59:47 [INFO] #x1F680 CONFIGURANDO ENTORNO DE TESTING (UNA SOLA VEZ POR SESIÓN)
-2025-09-16 23:59:47 [INFO] ✅ Appium server está corriendo en http://127.0.0.1:4723
-2025-09-16 23:59:47 [INFO] Verificando que el dispositivo 'emulator-5554' esté listo y autorizado...
-2025-09-16 23:59:47 [INFO] ✅ Dispositivo 'emulator-5554' está en línea y autorizado.
-2025-09-16 23:59:49 [INFO] ✅ Entorno configurado correctamente.
-2025-09-16 23:59:49 [INFO] ============================================================
-2025-09-16 23:59:49 [INFO] #x1F680 Iniciando driver de Appium para TODA LA SESIÓN DE PRUEBAS...
-2025-09-16 23:59:53 [INFO] ✅ Driver iniciado exitosamente. La app se mantendrá abierta.
-2025-09-16 23:59:53 [INFO] #x1F3A5 Iniciando grabación de video: /sdcard/test_01_click_registrarme_20250916_235953.mp4
-2025-09-16 23:59:54 [INFO] #x1F3A5 Grabación iniciada para el test: test_01_click_registrarme
-2025-09-17 00:00:02 [INFO] ✅ Video descargado: pytest_videos\test_01_click_registrarme_20250916_235953.mp4
-2025-09-17 00:00:02 [INFO] ✅ Video guardado: pytest_videos\test_01_click_registrarme_20250916_235953.mp4
 
-</system-err></testcase><testcase classname="test_appium_suite.TestSimpleFlow" name="test_02_go_back_with_phone_button" time="15.178"><system-out>--------------------------------- Captured Log ---------------------------------
-#x1B[32mINFO    #x1B[0m conftest:conftest.py:67 #x1F3A5 Iniciando grabación de video: /sdcard/test_02_go_back_with_phone_button_20250917_000002.mp4
+</system-err></testcase><testcase classname="test_appium_suite.TestSimpleFlow" name="test_02_go_back_with_phone_button" time="15.371"><system-out>--------------------------------- Captured Log ---------------------------------
+#x1B[32mINFO    #x1B[0m conftest:conftest.py:67 #x1F3A5 Iniciando grabación de video: /sdcard/test_02_go_back_with_phone_button_20250917_083500.mp4
 #x1B[32mINFO    #x1B[0m conftest:conftest.py:231 #x1F3A5 Grabación iniciada para el test: test_02_go_back_with_phone_button
-#x1B[32mINFO    #x1B[0m conftest:conftest.py:92 ✅ Video descargado: pytest_videos\test_02_go_back_with_phone_button_20250917_000002.mp4
-#x1B[32mINFO    #x1B[0m conftest:conftest.py:239 ✅ Video guardado: pytest_videos\test_02_go_back_with_phone_button_20250917_000002.mp4
+#x1B[32mINFO    #x1B[0m conftest:conftest.py:92 ✅ Video descargado: pytest_videos\test_02_go_back_with_phone_button_20250917_083500.mp4
+#x1B[32mINFO    #x1B[0m conftest:conftest.py:239 ✅ Video guardado: pytest_videos\test_02_go_back_with_phone_button_20250917_083500.mp4
 --------------------------------- Captured Out ---------------------------------
 
-=== TEST 2: Botón atrás del teléfono ===
-Presionando botón atrás del dispositivo...
-⚠️ No se pudo confirmar que volvimos, pero el test continúa...
-✅ TEST 2 COMPLETADO: Botón atrás funcionó correctamente
-
 </system-out><system-err>--------------------------------- Captured Err ---------------------------------
-2025-09-17 00:00:02 [INFO] #x1F3A5 Iniciando grabación de video: /sdcard/test_02_go_back_with_phone_button_20250917_000002.mp4
-2025-09-17 00:00:03 [INFO] #x1F3A5 Grabación iniciada para el test: test_02_go_back_with_phone_button
-2025-09-17 00:00:17 [INFO] ✅ Video descargado: pytest_videos\test_02_go_back_with_phone_button_20250917_000002.mp4
-2025-09-17 00:00:17 [INFO] ✅ Video guardado: pytest_videos\test_02_go_back_with_phone_button_20250917_000002.mp4
 
-</system-err></testcase><testcase classname="test_appium_suite.TestSimpleFlow" name="test_03_click_iniciar_sesion" time="6.934"><system-out>--------------------------------- Captured Log ---------------------------------
-#x1B[32mINFO    #x1B[0m conftest:conftest.py:67 #x1F3A5 Iniciando grabación de video: /sdcard/test_03_click_iniciar_sesion_20250917_000017.mp4
+</system-err></testcase><testcase classname="test_appium_suite.TestSimpleFlow" name="test_03_click_iniciar_sesion" time="7.160"><system-out>--------------------------------- Captured Log ---------------------------------
+#x1B[32mINFO    #x1B[0m conftest:conftest.py:67 #x1F3A5 Iniciando grabación de video: /sdcard/test_03_click_iniciar_sesion_20250917_083516.mp4
 #x1B[32mINFO    #x1B[0m conftest:conftest.py:231 #x1F3A5 Grabación iniciada para el test: test_03_click_iniciar_sesion
-#x1B[32mINFO    #x1B[0m conftest:conftest.py:92 ✅ Video descargado: pytest_videos\test_03_click_iniciar_sesion_20250917_000017.mp4
-#x1B[32mINFO    #x1B[0m conftest:conftest.py:239 ✅ Video guardado: pytest_videos\test_03_click_iniciar_sesion_20250917_000017.mp4
+#x1B[32mINFO    #x1B[0m conftest:conftest.py:92 ✅ Video descargado: pytest_videos\test_03_click_iniciar_sesion_20250917_083516.mp4
+#x1B[32mINFO    #x1B[0m conftest:conftest.py:239 ✅ Video guardado: pytest_videos\test_03_click_iniciar_sesion_20250917_083516.mp4
 --------------------------------- Captured Out ---------------------------------
 
-=== TEST 3: Click en Iniciar sesión ===
-Buscando botón 'Iniciar sesión'...
-Encontrado por content desc exacto
-Haciendo click en 'Iniciar sesión'...
-✅ TEST 3 COMPLETADO: Click en 'Iniciar sesión' exitoso
-
 </system-out><system-err>--------------------------------- Captured Err ---------------------------------
-2025-09-17 00:00:17 [INFO] #x1F3A5 Iniciando grabación de video: /sdcard/test_03_click_iniciar_sesion_20250917_000017.mp4
-2025-09-17 00:00:18 [INFO] #x1F3A5 Grabación iniciada para el test: test_03_click_iniciar_sesion
-2025-09-17 00:00:24 [INFO] ✅ Video descargado: pytest_videos\test_03_click_iniciar_sesion_20250917_000017.mp4
-2025-09-17 00:00:24 [INFO] ✅ Video guardado: pytest_videos\test_03_click_iniciar_sesion_20250917_000017.mp4
 
-</system-err></testcase><testcase classname="test_appium_suite.TestSimpleFlow" name="test_04_escribir_email_y_continuar" time="24.137"><system-out>--------------------------------- Captured Log ---------------------------------
-#x1B[32mINFO    #x1B[0m conftest:conftest.py:67 #x1F3A5 Iniciando grabación de video: /sdcard/test_04_escribir_email_y_continuar_20250917_000024.mp4
+</system-err></testcase><testcase classname="test_appium_suite.TestSimpleFlow" name="test_04_escribir_email_y_continuar" time="27.967"><system-out>--------------------------------- Captured Log ---------------------------------
+#x1B[32mINFO    #x1B[0m conftest:conftest.py:67 #x1F3A5 Iniciando grabación de video: /sdcard/test_04_escribir_email_y_continuar_20250917_083523.mp4
 #x1B[32mINFO    #x1B[0m conftest:conftest.py:231 #x1F3A5 Grabación iniciada para el test: test_04_escribir_email_y_continuar
-#x1B[32mINFO    #x1B[0m conftest:conftest.py:92 ✅ Video descargado: pytest_videos\test_04_escribir_email_y_continuar_20250917_000024.mp4
-#x1B[32mINFO    #x1B[0m conftest:conftest.py:239 ✅ Video guardado: pytest_videos\test_04_escribir_email_y_continuar_20250917_000024.mp4
+#x1B[32mINFO    #x1B[0m conftest:conftest.py:92 ✅ Video descargado: pytest_videos\test_04_escribir_email_y_continuar_20250917_083523.mp4
+#x1B[32mINFO    #x1B[0m conftest:conftest.py:239 ✅ Video guardado: pytest_videos\test_04_escribir_email_y_continuar_20250917_083523.mp4
 --------------------------------- Captured Out ---------------------------------
 
-=== TEST 4: Escribir email y continuar ===
-Buscando campo de correo empresarial...
-Encontrado campo por hint exacto
-Haciendo click en el campo de email...
-Escribiendo email caracter por caracter...
-Escribiendo: e (1/20)
-Escribiendo: m (2/20)
-Escribiendo: a (3/20)
-Escribiendo: i (4/20)
-Escribiendo: l (5/20)
-Escribiendo: F (6/20)
-Escribiendo: a (7/20)
-Escribiendo: l (8/20)
-Escribiendo: s (9/20)
-Escribiendo: o (10/20)
-Escribiendo: @ (11/20)
-Escribiendo: g (12/20)
-Escribiendo: m (13/20)
-Escribiendo: a (14/20)
-Escribiendo: i (15/20)
-Escribiendo: l (16/20)
-Escribiendo: . (17/20)
-Escribiendo: c (18/20)
-Escribiendo: o (19/20)
-Escribiendo: m (20/20)
-Email escrito completamente. Ocultando teclado...
-Teclado ocultado con hide_keyboard()
-Buscando botón 'Continuar'...
-Encontrado por content-desc exacto
-Haciendo click en 'Continuar'...
-✅ TEST 4 COMPLETADO: Email escrito lentamente y botón continuar presionado
-
 </system-out><system-err>--------------------------------- Captured Err ---------------------------------
-2025-09-17 00:00:24 [INFO] #x1F3A5 Iniciando grabación de video: /sdcard/test_04_escribir_email_y_continuar_20250917_000024.mp4
-2025-09-17 00:00:25 [INFO] #x1F3A5 Grabación iniciada para el test: test_04_escribir_email_y_continuar
-2025-09-17 00:00:48 [INFO] ✅ Video descargado: pytest_videos\test_04_escribir_email_y_continuar_20250917_000024.mp4
-2025-09-17 00:00:48 [INFO] ✅ Video guardado: pytest_videos\test_04_escribir_email_y_continuar_20250917_000024.mp4
 
-</system-err></testcase><testcase classname="test_appium_suite.TestSimpleFlow" name="test_05_click_usuario_y_contrasena" time="6.956"><system-out>--------------------------------- Captured Log ---------------------------------
-#x1B[32mINFO    #x1B[0m conftest:conftest.py:67 #x1F3A5 Iniciando grabación de video: /sdcard/test_05_click_usuario_y_contrasena_20250917_000048.mp4
+</system-err></testcase><testcase classname="test_appium_suite.TestSimpleFlow" name="test_05_click_usuario_y_contrasena" time="7.287"><system-out>--------------------------------- Captured Log ---------------------------------
+#x1B[32mINFO    #x1B[0m conftest:conftest.py:67 #x1F3A5 Iniciando grabación de video: /sdcard/test_05_click_usuario_y_contrasena_20250917_083551.mp4
 #x1B[32mINFO    #x1B[0m conftest:conftest.py:231 #x1F3A5 Grabación iniciada para el test: test_05_click_usuario_y_contrasena
-#x1B[32mINFO    #x1B[0m conftest:conftest.py:92 ✅ Video descargado: pytest_videos\test_05_click_usuario_y_contrasena_20250917_000048.mp4
-#x1B[32mINFO    #x1B[0m conftest:conftest.py:239 ✅ Video guardado: pytest_videos\test_05_click_usuario_y_contrasena_20250917_000048.mp4
+#x1B[32mINFO    #x1B[0m conftest:conftest.py:92 ✅ Video descargado: pytest_videos\test_05_click_usuario_y_contrasena_20250917_083551.mp4
+#x1B[32mINFO    #x1B[0m conftest:conftest.py:239 ✅ Video guardado: pytest_videos\test_05_click_usuario_y_contrasena_20250917_083551.mp4
 --------------------------------- Captured Out ---------------------------------
 
-=== TEST 5: Click en Usuario y contraseña ===
-Buscando botón 'Usuario y contraseña'...
-Encontrado por content-desc exacto
-Haciendo click en 'Usuario y contraseña'...
-Confirmado: Cambió de pantalla (encontrado elemento: //*[contains(@hint,'usuario') or contains(@hint,'Usuario')])
-✅ TEST 5 COMPLETADO: Click en 'Usuario y contraseña' exitoso
-
 </system-out><system-err>--------------------------------- Captured Err ---------------------------------
-2025-09-17 00:00:48 [INFO] #x1F3A5 Iniciando grabación de video: /sdcard/test_05_click_usuario_y_contrasena_20250917_000048.mp4
-2025-09-17 00:00:49 [INFO] #x1F3A5 Grabación iniciada para el test: test_05_click_usuario_y_contrasena
-2025-09-17 00:00:55 [INFO] ✅ Video descargado: pytest_videos\test_05_click_usuario_y_contrasena_20250917_000048.mp4
-2025-09-17 00:00:55 [INFO] ✅ Video guardado: pytest_videos\test_05_click_usuario_y_contrasena_20250917_000048.mp4
 
-</system-err></testcase><testcase classname="test_appium_suite.TestSimpleFlow" name="test_06_escribir_usuario_y_contrasena" time="24.952"><system-out>--------------------------------- Captured Log ---------------------------------
-#x1B[32mINFO    #x1B[0m conftest:conftest.py:67 #x1F3A5 Iniciando grabación de video: /sdcard/test_06_escribir_usuario_y_contrasena_20250917_000055.mp4
+</system-err></testcase><testcase classname="test_appium_suite.TestSimpleFlow" name="test_06_escribir_usuario_y_contrasena" time="27.787"><system-out>--------------------------------- Captured Log ---------------------------------
+#x1B[32mINFO    #x1B[0m conftest:conftest.py:67 #x1F3A5 Iniciando grabación de video: /sdcard/test_06_escribir_usuario_y_contrasena_20250917_083558.mp4
 #x1B[32mINFO    #x1B[0m conftest:conftest.py:231 #x1F3A5 Grabación iniciada para el test: test_06_escribir_usuario_y_contrasena
-#x1B[32mINFO    #x1B[0m conftest:conftest.py:92 ✅ Video descargado: pytest_videos\test_06_escribir_usuario_y_contrasena_20250917_000055.mp4
-#x1B[32mINFO    #x1B[0m conftest:conftest.py:239 ✅ Video guardado: pytest_videos\test_06_escribir_usuario_y_contrasena_20250917_000055.mp4
+#x1B[32mINFO    #x1B[0m conftest:conftest.py:92 ✅ Video descargado: pytest_videos\test_06_escribir_usuario_y_contrasena_20250917_083558.mp4
+#x1B[32mINFO    #x1B[0m conftest:conftest.py:239 ✅ Video guardado: pytest_videos\test_06_escribir_usuario_y_contrasena_20250917_083558.mp4
 --------------------------------- Captured Out ---------------------------------
 
-=== TEST 6: Escribir usuario y contraseña ===
-Buscando campo de usuario...
-Encontrado campo de usuario por hint exacto
-Buscando campo de contraseña...
-Encontrado campo de contraseña por hint exacto
-Escribiendo usuario...
-Usuario escrito completamente
-Escribiendo contraseña...
-Contraseña pegada completamente
-Ocultando teclado...
-Teclado ocultado con hide_keyboard()
-Buscando botón 'Siguiente'...
-Encontrado por content-desc exacto
-Haciendo click en 'Siguiente'...
-✅ TEST 6 COMPLETADO: Usuario y contraseña escritos, botón siguiente presionado
-
 </system-out><system-err>--------------------------------- Captured Err ---------------------------------
-2025-09-17 00:00:55 [INFO] #x1F3A5 Iniciando grabación de video: /sdcard/test_06_escribir_usuario_y_contrasena_20250917_000055.mp4
-2025-09-17 00:00:56 [INFO] #x1F3A5 Grabación iniciada para el test: test_06_escribir_usuario_y_contrasena
-2025-09-17 00:01:20 [INFO] ✅ Video descargado: pytest_videos\test_06_escribir_usuario_y_contrasena_20250917_000055.mp4
-2025-09-17 00:01:20 [INFO] ✅ Video guardado: pytest_videos\test_06_escribir_usuario_y_contrasena_20250917_000055.mp4
 
-</system-err></testcase><testcase classname="test_appium_suite.TestSimpleFlow" name="test_07_flujo_completo_productos_y_salir" time="30.795"><system-out>--------------------------------- Captured Log ---------------------------------
-#x1B[32mINFO    #x1B[0m conftest:conftest.py:67 #x1F3A5 Iniciando grabación de video: /sdcard/test_07_flujo_completo_productos_y_salir_20250917_000120.mp4
+</system-err></testcase><testcase classname="test_appium_suite.TestSimpleFlow" name="test_07_flujo_completo_productos_y_salir" time="18.264"><failure message="Failed: TEST 7 FALLÓ: No se pudo encontrar el botón 'Ver productos'&#10;assert None is not None">test_appium_suite.py:505: in test_07_flujo_completo_productos_y_salir
+    assert ver_productos_button is not None, "No se pudo encontrar el botón 'Ver productos'"
+E   AssertionError: No se pudo encontrar el botón 'Ver productos'
+E   assert None is not None
+
+During handling of the above exception, another exception occurred:
+test_appium_suite.py:642: in test_07_flujo_completo_productos_y_salir
+    pytest.fail(f"TEST 7 FALLÓ: {e}")
+E   Failed: TEST 7 FALLÓ: No se pudo encontrar el botón 'Ver productos'
+E   assert None is not None</failure><system-out>--------------------------------- Captured Log ---------------------------------
+#x1B[32mINFO    #x1B[0m conftest:conftest.py:67 #x1F3A5 Iniciando grabación de video: /sdcard/test_07_flujo_completo_productos_y_salir_20250917_083626.mp4
 #x1B[32mINFO    #x1B[0m conftest:conftest.py:231 #x1F3A5 Grabación iniciada para el test: test_07_flujo_completo_productos_y_salir
-#x1B[32mINFO    #x1B[0m conftest:conftest.py:92 ✅ Video descargado: pytest_videos\test_07_flujo_completo_productos_y_salir_20250917_000120.mp4
-#x1B[32mINFO    #x1B[0m conftest:conftest.py:239 ✅ Video guardado: pytest_videos\test_07_flujo_completo_productos_y_salir_20250917_000120.mp4
+#x1B[32mINFO    #x1B[0m conftest:conftest.py:92 ✅ Video descargado: pytest_videos\test_07_flujo_completo_productos_y_salir_20250917_083626.mp4
+#x1B[32mINFO    #x1B[0m conftest:conftest.py:239 ✅ Video guardado: pytest_videos\test_07_flujo_completo_productos_y_salir_20250917_083626.mp4
 --------------------------------- Captured Out ---------------------------------
 
-=== TEST 7: Flujo completo productos y salir ===
-Paso 1: Buscando botón 'Ver productos'...
-Encontrado 'Ver productos' por content-desc que contiene
-Haciendo click en 'Ver productos'...
-Paso 2: Buscando botón 'PDC'...
-Encontrado 'PDC' por content-desc exacto
-Haciendo click en 'PDC'...
-Paso 3: Esperando 1 segundo...
-Paso adicional - Boton FFA
-Encontrado 'FFA' por content-desc exacto
-Haciendo click en 'FFA'...
-Paso 4: Buscando botón 'menu'...
-Encontrado 'Menú' por content-desc exacto
-Haciendo click en 'Menú'...
-Paso 5: Haciendo scroll hacia abajo...
-Scroll hacia abajo completado
-Paso 6: Buscando botón 'salir'...
-Encontrado 'salir' por content-desc exacto
-Haciendo click en coordenadas específicas del botón Salir...
-✅ TEST 7 COMPLETADO: Flujo completo Ver productos → PDC → Menu → Scroll → Salir exitoso
-
 </system-out><system-err>--------------------------------- Captured Err ---------------------------------
-2025-09-17 00:01:20 [INFO] #x1F3A5 Iniciando grabación de video: /sdcard/test_07_flujo_completo_productos_y_salir_20250917_000120.mp4
-2025-09-17 00:01:21 [INFO] #x1F3A5 Grabación iniciada para el test: test_07_flujo_completo_productos_y_salir
-2025-09-17 00:01:51 [INFO] ✅ Video descargado: pytest_videos\test_07_flujo_completo_productos_y_salir_20250917_000120.mp4
-2025-09-17 00:01:51 [INFO] ✅ Video guardado: pytest_videos\test_07_flujo_completo_productos_y_salir_20250917_000120.mp4
 
-</system-err></testcase><testcase classname="test_appium_suite.TestSimpleFlow" name="test_debug_current_screen" time="8.817"><system-out>--------------------------------- Captured Log ---------------------------------
-#x1B[32mINFO    #x1B[0m conftest:conftest.py:67 #x1F3A5 Iniciando grabación de video: /sdcard/test_debug_current_screen_20250917_000151.mp4
+</system-err></testcase><testcase classname="test_appium_suite.TestSimpleFlow" name="test_debug_current_screen" time="5.637"><system-out>--------------------------------- Captured Log ---------------------------------
+#x1B[32mINFO    #x1B[0m conftest:conftest.py:67 #x1F3A5 Iniciando grabación de video: /sdcard/test_debug_current_screen_20250917_083644.mp4
 #x1B[32mINFO    #x1B[0m conftest:conftest.py:231 #x1F3A5 Grabación iniciada para el test: test_debug_current_screen
-#x1B[32mINFO    #x1B[0m conftest:conftest.py:92 ✅ Video descargado: pytest_videos\test_debug_current_screen_20250917_000151.mp4
-#x1B[32mINFO    #x1B[0m conftest:conftest.py:239 ✅ Video guardado: pytest_videos\test_debug_current_screen_20250917_000151.mp4
+#x1B[32mINFO    #x1B[0m conftest:conftest.py:92 ✅ Video descargado: pytest_videos\test_debug_current_screen_20250917_083644.mp4
+#x1B[32mINFO    #x1B[0m conftest:conftest.py:239 ✅ Video guardado: pytest_videos\test_debug_current_screen_20250917_083644.mp4
 #x1B[32mINFO    #x1B[0m conftest:conftest.py:209 #x1F3C1 Driver cerrado correctamente al final de la sesión.
 #x1B[32mINFO    #x1B[0m conftest:conftest.py:177 ============================================================
 #x1B[32mINFO    #x1B[0m conftest:conftest.py:178 #x1F9F9 LIMPIEZA FINAL DEL ENTORNO DE TESTING
 #x1B[32mINFO    #x1B[0m conftest:conftest.py:179 ============================================================
 --------------------------------- Captured Out ---------------------------------
 
-=== DEBUG - Elementos actuales ===
-#x1F4F1 Información de la pantalla actual:
-Package actual: com.pdctechco.ffa
-Activity actual: .MainActivity
-
-#x1F4DD Elementos con texto:
-  1. '¡Bienvenido!' (clickable: false)
-  2. 'Stage 1.0.13' (clickable: false)
-  3. 'Registrarme' (clickable: true)
-  4. '¿Ya tienes cuenta?' (clickable: false)
-  5. 'Iniciar sesión' (clickable: true)
-
-#x1F3AF Elementos clickeables:
-  1. Texto: '(sin texto)' | Desc: 'Registrarme' | ID: '(sin ID)'
-  2. Texto: '(sin texto)' | Desc: 'Iniciar sesión' | ID: '(sin ID)'
-
-✏️ Campos de texto:
-  No se encontraron campos de texto
-
-✅ TEST COMPLETADO: Debug información mostrada
-
 </system-out><system-err>--------------------------------- Captured Err ---------------------------------
-2025-09-17 00:01:51 [INFO] #x1F3A5 Iniciando grabación de video: /sdcard/test_debug_current_screen_20250917_000151.mp4
-2025-09-17 00:01:52 [INFO] #x1F3A5 Grabación iniciada para el test: test_debug_current_screen
-2025-09-17 00:01:59 [INFO] ✅ Video descargado: pytest_videos\test_debug_current_screen_20250917_000151.mp4
-2025-09-17 00:01:59 [INFO] ✅ Video guardado: pytest_videos\test_debug_current_screen_20250917_000151.mp4
-2025-09-17 00:02:00 [INFO] #x1F3C1 Driver cerrado correctamente al final de la sesión.
-2025-09-17 00:02:00 [INFO] ============================================================
-2025-09-17 00:02:00 [INFO] #x1F9F9 LIMPIEZA FINAL DEL ENTORNO DE TESTING
-2025-09-17 00:02:00 [INFO] ============================================================
 
 </system-err></testcase></testsuite></testsuites>
