@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Script de gestión para ejecutar tests con reportes separados por módulo
 Permite ejecutar tests individuales, por carpeta, o todos con reportes organizados
@@ -9,6 +8,7 @@ import sys
 import subprocess
 import argparse
 import glob
+import shutil  # ## NUEVO: Módulo para limpieza de directorios ##
 from datetime import datetime
 from pathlib import Path
 
@@ -24,6 +24,31 @@ class TestRunner:
         # Crear directorios base
         for dir_path in [self.base_reports_dir, self.base_videos_dir, self.base_logs_dir]:
             os.makedirs(dir_path, exist_ok=True)
+
+    def clean_module_artifacts(self, module_name):
+        """
+        ## NUEVO: Limpia los directorios de artefactos para un módulo específico.
+        Esto asegura que cada ejecución parta de un estado limpio.
+        """
+        print(f"\n{'=' * 60}")
+        print(f"🧹 LIMPIANDO ARTEFACTOS ANTERIORES PARA: {module_name}")
+
+        dirs_to_clean = [
+            os.path.join(self.base_reports_dir, module_name),
+            os.path.join(self.base_videos_dir, module_name),
+            os.path.join(self.base_logs_dir, module_name)
+        ]
+
+        for dir_path in dirs_to_clean:
+            if os.path.exists(dir_path):
+                try:
+                    shutil.rmtree(dir_path)
+                    print(f"   - Directorio eliminado: {dir_path}")
+                except OSError as e:
+                    print(f"   - ❌ Error al eliminar {dir_path}: {e}")
+
+        print(f"✅ Limpieza completada para {module_name}")
+        print(f"{'=' * 60}")
 
     def get_test_modules(self):
         """Obtiene lista de módulos de test disponibles"""
@@ -60,7 +85,10 @@ class TestRunner:
         if not module_name:
             module_name = self.get_module_name(module_path)
 
-        # Crear subdirectorio para este módulo
+        # ## AÑADIDO: Limpieza de artefactos antes de la ejecución ##
+        self.clean_module_artifacts(module_name)
+
+        # Crear subdirectorio para este módulo (se recrea si fue borrado)
         module_reports_dir = os.path.join(self.base_reports_dir, module_name)
         os.makedirs(module_reports_dir, exist_ok=True)
 

@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 # Clase centralizada para manejar la configuración del entorno de testing
 class TestEnvironment:
     def __init__(self):
-        self.apk_path = os.getenv('APK_PATH', r"C:\Users\smora\Documents\Poc\appium-poc\app-release.apk")
+        self.apk_path = os.getenv('APK_PATH')
         self.platform_version = os.getenv('PLATFORM_VERSION', "15")
         self.device_name = os.getenv('DEVICE_NAME', "emulator-5554")
         self.appium_server = os.getenv('APPIUM_SERVER', "http://127.0.0.1:4723")
