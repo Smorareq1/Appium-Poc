@@ -4,7 +4,7 @@ from appium.webdriver.common.appiumby import AppiumBy
 from selenium.common.exceptions import NoSuchElementException
 
 
-class Login:
+class test_Login:
     # El flujo completo de pruebas es una prueba de regresión
     # que abarca desde la pantalla inicial hasta el cierre de sesión.
 
