@@ -72,6 +72,7 @@ class Test_Venta_Completa:
             hacer_scroll_hacia_abajo(driver)
 
             # Paso 3: Agregar el producto al carrito
+            agregar_producto_al_carrito(driver)
 
             print("\n✅ TEST COMPLETADO: Producto configurado exitosamente.")
 
