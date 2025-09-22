@@ -20,7 +20,11 @@ from tests.ventas.acciones.acciones_producto import (
 from tests.ventas.acciones.acciones_carrito import (
     abrir_carrito,
     hacer_swipe_en_resumen_compra,
-    hacer_clic_en_descuento_puntual
+    hacer_clic_en_descuento_puntual,
+    seleccionar_primera_direccion_entrega,
+    escribir_comentario_pedido,
+    aceptar_pedido,
+    click_ok
 )
 
 # Importamos las acciones del descuento puntual
@@ -200,7 +204,13 @@ class Test_Venta_Completa:
         print("\n=== INICIO TEST: Validaciones carrito final ===")
 
         try:
-            pass
+            hacer_scroll_hacia_abajo(driver)
+            seleccionar_primera_direccion_entrega(driver)
+            escribir_comentario_pedido(driver)
+            abrir_carrito(driver)
+            aceptar_pedido(driver)
+            click_ok(driver)
+
 
         except Exception as e:
             pytest.fail(f"TEST FALLÓ al estar dentro del carrito {e}")

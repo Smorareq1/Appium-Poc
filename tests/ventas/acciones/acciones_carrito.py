@@ -108,279 +108,155 @@ def hacer_clic_en_descuento_puntual(driver):
 
 def seleccionar_primera_direccion_entrega(driver):
     """
-    Encuentra el botón clickeable dentro de la sección de dirección de entrega
-    basado en la estructura XML específica.
+    Encuentra y hace clic en el botón de dirección de entrega, luego selecciona la primera opción.
     """
-    print("\n--- ACCIÓN: Seleccionar primera dirección (botón específico) ---")
+    print("\n--- ACCIÓN: Seleccionar primera dirección de entrega ---")
 
     try:
         wait = WebDriverWait(driver, 15)
 
         # PASO 1: Encontrar el contenedor "Información de entrega"
-        print("🔍 Paso 1: Localizando contenedor 'Información de entrega'...")
-        xpath_contenedor = "//*[contains(@content-desc, 'Información de entrega')]"
-
+        print("🔍 Localizando contenedor 'Información de entrega'...")
         contenedor_info_entrega = wait.until(
-            EC.presence_of_element_located((AppiumBy.XPATH, xpath_contenedor))
+            EC.presence_of_element_located((AppiumBy.XPATH, "//*[contains(@content-desc, 'Información de entrega')]"))
         )
-        print("✅ Contenedor 'Información de entrega' encontrado")
+        print("✅ Contenedor encontrado")
 
-        # PASO 2: Buscar el botón clickeable específico de la dirección
-        print("🔍 Paso 2: Buscando botón clickeable de dirección...")
+        # PASO 2: Buscar el botón clickeable de dirección
+        print("🔍 Buscando botón de dirección...")
+        xpath_boton = "//*[contains(@hint, 'Dirección de entrega')]//android.widget.Button[@clickable='true']"
 
-        # Estrategias específicas basadas en la estructura XML:
-        xpaths_boton_direccion = [
-            # A. Buscar Button clickeable que esté dentro de elementos con hint "Dirección de entrega"
-            "//*[contains(@hint, 'Dirección de entrega')]//android.widget.Button[@clickable='true']",
+        boton_direccion = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, xpath_boton))
+        )
+        print("✅ Botón de dirección encontrado")
 
-            # B. Buscar Button clickeable después del contenedor "Información de entrega"
-            xpath_contenedor + "/following::android.widget.Button[@clickable='true'][1]",
-
-            # C. Buscar Button clickeable que esté cerca geográficamente del contenedor
-            "//android.widget.Button[@clickable='true' and @bounds]",
-
-            # D. Buscar cualquier elemento clickeable con hint de dirección
-            "//*[contains(@hint, 'Dirección')]/*[@clickable='true'] | //*[contains(@hint, 'entrega')]/*[@clickable='true']",
-        ]
-
-        boton_direccion = None
-        estrategia_usada = ""
-
-        for i, xpath_boton in enumerate(xpaths_boton_direccion, 1):
-            try:
-                print(f"   Probando estrategia {i}: {xpath_boton}")
-
-                if i == 3:  # Estrategia C - buscar por proximidad geográfica
-                    # Obtener posición del contenedor
-                    contenedor_location = contenedor_info_entrega.location
-                    contenedor_bottom = contenedor_location['y'] + contenedor_info_entrega.size['height']
-
-                    botones_candidatos = driver.find_elements(AppiumBy.XPATH, xpath_boton)
-                    print(f"   Encontrados {len(botones_candidatos)} botones clickeables")
-
-                    # Filtrar botones que estén cerca del contenedor (dentro de 500px hacia abajo)
-                    for boton in botones_candidatos:
-                        try:
-                            boton_y = boton.location['y']
-                            distancia = boton_y - contenedor_bottom
-
-                            print(
-                                f"   Botón en Y: {boton_y}, Contenedor bottom: {contenedor_bottom}, Distancia: {distancia}")
-
-                            # Si está dentro de un rango razonable después del contenedor
-                            if 0 <= distancia <= 500:
-                                boton_direccion = boton
-                                estrategia_usada = f"Estrategia {i} - Por proximidad (distancia: {distancia}px)"
-                                print(f"   ✅ {estrategia_usada}")
-                                break
-                        except:
-                            continue
-                else:
-                    # Estrategias directas por XPath
-                    boton_direccion = driver.find_element(AppiumBy.XPATH, xpath_boton)
-                    estrategia_usada = f"Estrategia {i}"
-                    print(f"   ✅ {estrategia_usada} exitosa")
-
-                if boton_direccion:
-                    break
-
-            except Exception as e:
-                print(f"   ⚠️ Estrategia {i} falló: {e}")
-                continue
-
-        if not boton_direccion:
-            print("🔍 Estrategia de respaldo: Buscar por coordenadas específicas...")
-
-            # Basado en la estructura XML, sabemos que el botón está aproximadamente en [912,1340][1038,1466]
-            # Buscar botones clickeables en esa área general
-            todos_botones = driver.find_elements(AppiumBy.XPATH, "//android.widget.Button[@clickable='true']")
-            print(f"   Total botones clickeables: {len(todos_botones)}")
-
-            for boton in todos_botones:
-                try:
-                    bounds_str = boton.get_attribute('bounds')
-                    if bounds_str:
-                        # Extraer coordenadas del bounds [x1,y1][x2,y2]
-                        import re
-                        matches = re.findall(r'\[(\d+),(\d+)\]', bounds_str)
-                        if len(matches) >= 2:
-                            x1, y1 = int(matches[0][0]), int(matches[0][1])
-                            x2, y2 = int(matches[1][0]), int(matches[1][1])
-
-                            # Verificar si está en el área esperada de la dirección (lado derecho, medio-abajo)
-                            if x1 > 800 and y1 > 1200 and y1 < 1600:  # Área aproximada del botón de dirección
-                                boton_direccion = boton
-                                estrategia_usada = f"Respaldo - Por área geográfica (bounds: {bounds_str})"
-                                print(f"   ✅ {estrategia_usada}")
-                                break
-                except:
-                    continue
-
-        if not boton_direccion:
-            raise Exception("No se encontró el botón clickeable de dirección con ninguna estrategia")
-
-        # PASO 3: Información del botón encontrado y hacer clic
-        print("✅ Botón de dirección encontrado:")
-
-        try:
-            texto = boton_direccion.get_attribute('text') or '(sin texto)'
-            desc = boton_direccion.get_attribute('content-desc') or '(sin descripción)'
-            bounds = boton_direccion.get_attribute('bounds') or '(sin bounds)'
-            clase = boton_direccion.get_attribute('class') or '(sin clase)'
-
-            print(f"   Estrategia: {estrategia_usada}")
-            print(f"   Clase: {clase}")
-            print(f"   Texto: '{texto}'")
-            print(f"   Descripción: '{desc}'")
-            print(f"   Bounds: {bounds}")
-
-            # Verificar que NO sea el elemento de productos (evitar el error anterior)
-            if "Productos:" in desc or "Subtotal:" in desc:
-                print("   ⚠️ ADVERTENCIA: Este parece ser el elemento de productos, no de dirección")
-                print("   Intentando encontrar otro elemento...")
-                raise Exception("Elemento incorrecto detectado (productos en lugar de dirección)")
-
-        except Exception as info_error:
-            print(f"   ⚠️ Error obteniendo información del elemento: {info_error}")
-            if "Elemento incorrecto" in str(info_error):
-                raise info_error
-
+        # PASO 3: Hacer clic en el botón
         print("🎯 Haciendo clic en el botón de dirección...")
         boton_direccion.click()
-        time.sleep(3)  # Esperar a que se abra el dropdown
+        time.sleep(3)
+        print("✅ Clic realizado")
 
-        print("✅ Clic realizado en el botón de dirección")
+        # PASO 4: Buscar y seleccionar primera opción del dropdown
+        print("🔍 Buscando opciones del dropdown...")
+        xpath_opciones = "//android.widget.ScrollView//android.view.View[@clickable='true' and (contains(@text, 'Palencia') or contains(@content-desc, 'Palencia') or contains(@text, 'Testing'))]"
 
-        # PASO 4: Buscar y seleccionar opciones del dropdown
-        print("🔍 Paso 4: Buscando opciones del dropdown de direcciones...")
+        opciones = wait.until(
+            EC.presence_of_all_elements_located((AppiumBy.XPATH, xpath_opciones))
+        )
+        print(f"✅ Encontradas {len(opciones)} opciones")
 
-        # Esperar un poco más para la animación
+        # Seleccionar primera opción
+        print("🎯 Seleccionando primera opción...")
+        primera_opcion = opciones[0]
+        primera_opcion.click()
         time.sleep(2)
 
-        # Buscar opciones específicas del dropdown de direcciones
-        xpaths_opciones_direccion = [
-            # A. Opciones en ScrollView que contengan información de dirección
-            "//android.widget.ScrollView//android.view.View[@clickable='true' and (contains(@text, 'Palencia') or contains(@content-desc, 'Palencia') or contains(@text, 'Testing'))]",
+        print("✅ Primera dirección de entrega seleccionada exitosamente")
 
-            # B. Cualquier opción clickeable en ScrollView después del clic
-            "//android.widget.ScrollView//android.view.View[@clickable='true']",
-
-            # C. Elementos clickeables nuevos que aparecieron
-            "//*[@clickable='true' and string-length(@text) > 0 and not(contains(@text, 'Menú')) and not(contains(@text, 'Cliente')) and not(contains(@content-desc, 'Productos'))]",
-        ]
-
-        opciones_direccion = []
-
-        for i, xpath_opcion in enumerate(xpaths_opciones_direccion, 1):
-            try:
-                print(f"   Buscando opciones con estrategia {i}...")
-                opciones_temp = driver.find_elements(AppiumBy.XPATH, xpath_opcion)
-
-                if opciones_temp:
-                    # Filtrar opciones que realmente sean direcciones
-                    for opcion in opciones_temp:
-                        try:
-                            texto_op = opcion.get_attribute('text') or ''
-                            desc_op = opcion.get_attribute('content-desc') or ''
-
-                            # Evitar elementos que claramente no son direcciones
-                            if any(keyword in desc_op.lower() for keyword in
-                                   ['producto', 'subtotal', 'descuento', 'total', 'gtq']):
-                                continue
-
-                            opciones_direccion.append(opcion)
-                        except:
-                            opciones_direccion.append(
-                                opcion)  # Agregar de todas formas si no se pueden obtener atributos
-
-                    if opciones_direccion:
-                        print(f"   ✅ Encontradas {len(opciones_direccion)} opciones de dirección")
-                        break
-            except Exception as e:
-                print(f"   ⚠️ Error en estrategia {i}: {e}")
-                continue
-
-        if opciones_direccion:
-            print("🎯 Seleccionando primera opción de dirección...")
-            primera_opcion = opciones_direccion[0]
-
-            try:
-                texto_opcion = primera_opcion.get_attribute('text') or '(sin texto)'
-                desc_opcion = primera_opcion.get_attribute('content-desc') or '(sin descripción)'
-                print(f"   Primera opción - Texto: '{texto_opcion}' | Desc: '{desc_opcion[:100]}...'")
-            except:
-                print("   Primera opción encontrada (sin detalles)")
-
-            primera_opcion.click()
-            time.sleep(2)
-
-            print("✅ Primera dirección de entrega seleccionada exitosamente")
-        else:
-            print("⚠️ No se encontraron opciones del dropdown, pero el clic en el botón se realizó")
-            print("   (Es posible que ya estuviera seleccionada la dirección correcta)")
-
+    except TimeoutException:
+        pytest.fail("Timeout: No se encontró el botón de dirección o las opciones del dropdown")
     except Exception as e:
-        print(f"\n❌ Error en seleccionar_primera_direccion_entrega: {e}")
-
-        # Debug adicional específico para direcciones
-        try:
-            print("\n🔍 DEBUG - Elementos relacionados con dirección:")
-            elementos_direccion = driver.find_elements(AppiumBy.XPATH,
-                                                       "//*[contains(@hint, 'Dirección') or contains(@hint, 'entrega') or contains(@content-desc, 'Información de entrega')]")
-
-            for i, elem in enumerate(elementos_direccion, 1):
-                try:
-                    clase = elem.get_attribute('class')
-                    texto = elem.get_attribute('text') or '(sin texto)'
-                    desc = elem.get_attribute('content-desc') or '(sin desc)'
-                    hint = elem.get_attribute('hint') or '(sin hint)'
-                    clickeable = elem.get_attribute('clickable')
-                    bounds = elem.get_attribute('bounds')
-
-                    print(f"   [{i}] Clase: {clase} | Clickeable: {clickeable}")
-                    print(f"       Texto: '{texto}' | Desc: '{desc}'")
-                    print(f"       Hint: '{hint}' | Bounds: {bounds}")
-                    print("       ---")
-                except:
-                    print(f"   [{i}] Error obteniendo información")
-        except:
-            pass
-
         pytest.fail(f"Error al seleccionar dirección de entrega: {e}")
-def debug_estructura_direccion_xml(driver):
+
+def escribir_comentario_pedido(driver, comentario="Entrega urgente - Favor contactar antes de llegar"):
     """
-    Debug específico basado en la estructura XML mostrada
+    Encuentra el campo de comentarios y escribe un comentario de ejemplo.
     """
-    print("\n🔍 === DEBUG ESTRUCTURA XML DIRECCIÓN ===")
+    print("\n--- ACCIÓN: Escribir comentario en el pedido ---")
 
     try:
-        # Buscar el elemento "Información de entrega"
-        info_entrega = driver.find_element(AppiumBy.XPATH, "//*[contains(@content-desc, 'Información de entrega')]")
-        print("✅ Elemento 'Información de entrega' encontrado")
-        print(f"   Bounds: {info_entrega.get_attribute('bounds')}")
-        print(f"   Clickeable: {info_entrega.get_attribute('clickable')}")
+        wait = WebDriverWait(driver, 10)
 
-        # Buscar elementos con hint "Dirección de entrega"
-        print("\n🔍 Elementos con hint 'Dirección de entrega':")
-        elementos_hint = driver.find_elements(AppiumBy.XPATH, "//*[contains(@hint, 'Dirección de entrega')]")
+        # Buscar el campo de comentarios por hint
+        print("🔍 Buscando campo de comentarios...")
+        xpath_comentarios = "//*[contains(@hint, 'Comentarios')]"
 
-        for i, elem in enumerate(elementos_hint, 1):
-            print(f"   [{i}] Clase: {elem.get_attribute('class')}")
-            print(f"       Texto: '{elem.get_attribute('text')}' | Hint: '{elem.get_attribute('hint')}'")
-            print(f"       Bounds: {elem.get_attribute('bounds')} | Clickeable: {elem.get_attribute('clickable')}")
+        campo_comentarios = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, xpath_comentarios))
+        )
+        print("✅ Campo de comentarios encontrado")
 
-        # Buscar botones clickeables en la zona
-        print(f"\n🔍 Botones clickeables después de 'Información de entrega':")
-        botones = driver.find_elements(AppiumBy.XPATH, "//android.widget.Button[@clickable='true']")
+        # Hacer clic en el campo
+        print("🎯 Haciendo clic en el campo...")
+        campo_comentarios.click()
+        time.sleep(1)
 
-        info_y = info_entrega.location['y']
-        for i, boton in enumerate(botones, 1):
-            boton_y = boton.location['y']
-            if boton_y > info_y:  # Solo botones que estén después del elemento "Información de entrega"
-                distancia = boton_y - info_y
-                print(f"   [{i}] Bounds: {boton.get_attribute('bounds')} | Distancia: {distancia}px")
-                print(f"       Texto: '{boton.get_attribute('text')}' | Desc: '{boton.get_attribute('content-desc')}'")
+        # Limpiar campo y escribir comentario
+        print(f"✏️ Escribiendo comentario: '{comentario}'")
+        campo_comentarios.clear()
+        campo_comentarios.send_keys(comentario)
+        time.sleep(1)
 
+        print("✅ Comentario escrito exitosamente")
+
+        # Opcional: Ocultar teclado
+        try:
+            driver.hide_keyboard()
+        except:
+            pass  # Ignorar si no hay teclado visible
+
+    except TimeoutException:
+        pytest.fail("Timeout: No se encontró el campo de comentarios")
     except Exception as e:
-        print(f"Error en debug_estructura_direccion_xml: {e}")
+        pytest.fail(f"Error al escribir comentario: {e}")
 
+def aceptar_pedido(driver):
+    """
+    Encuentra y hace clic en el botón para aceptar y finalizar el pedido.
+    """
+    print("\n--- ACCIÓN: Aceptar y finalizar pedido ---")
+
+    try:
+        wait = WebDriverWait(driver, 10)
+
+        # Buscar el botón de aceptar pedido por description
+        print("🔍 Buscando botón 'Aceptar pedido'...")
+        xpath_boton_aceptar = "//*[@content-desc='Aceptar']"
+
+        boton_aceptar = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, xpath_boton_aceptar))
+        )
+        print("✅ Botón 'Aceptar pedido' encontrado")
+
+        # Hacer clic en el botón
+        print("🎯 Haciendo clic en 'Aceptar pedido'...")
+        boton_aceptar.click()
+        time.sleep(5)
+
+        print("✅ Pedido aceptado y finalizado exitosamente")
+
+    except TimeoutException:
+        pytest.fail("Timeout: No se encontró el botón 'Aceptar pedido'")
+    except Exception as e:
+        pytest.fail(f"Error al aceptar el pedido: {e}")
+
+def click_ok(driver):
+    """
+    Encuentra y hace clic en el botón OK de cualquier diálogo emergente.
+    """
+    print("\n--- ACCIÓN: Clic en botón OK ---")
+
+    try:
+        wait = WebDriverWait(driver, 10)
+
+        # Buscar el botón OK por content-desc
+        print("🔍 Buscando botón 'OK'...")
+        xpath_boton_ok = "//*[@content-desc='Ok']"
+
+        boton_ok = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, xpath_boton_ok))
+        )
+        print("✅ Botón 'OK' encontrado")
+
+        # Hacer clic en el botón
+        print("🎯 Haciendo clic en 'OK'...")
+        boton_ok.click()
+        time.sleep(2)
+
+        print("✅ Clic en 'OK' realizado exitosamente")
+
+    except TimeoutException:
+        pytest.fail("Timeout: No se encontró el botón 'OK'")
+    except Exception as e:
+        pytest.fail(f"Error al hacer clic en 'OK': {e}")
