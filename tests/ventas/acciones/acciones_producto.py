@@ -9,7 +9,7 @@ dentro de la pantalla de detalle de un producto.
 """
 
 """
-Consultar por que con 200 no se aplica el descuento
+Consultar por que con 200 no se aplica el descuento // 120800280
 """
 
 
@@ -60,6 +60,43 @@ def hacer_scroll_hacia_abajo(driver):
         time.sleep(2)
     except Exception as e:
         pytest.fail(f"Ocurrió un error al intentar hacer scroll: {e}")
+
+
+def obtener_unidades_a_bonificar(driver):
+    """
+    Localiza el texto 'Unidades a bonificar' y extrae el número de la línea siguiente.
+    Devuelve el número de unidades como un entero.
+    """
+    print("\n--- ACCIÓN: Obteniendo unidades a bonificar ---")
+    try:
+        # 1. Localizar el elemento padre que contiene el texto
+        xpath_selector = "//*[contains(@content-desc, 'Unidades a bonificar')]"
+        elemento_contenedor = driver.find_element(AppiumBy.XPATH, xpath_selector)
+
+        # 2. Obtener la descripción completa
+        descripcion_completa = elemento_contenedor.get_attribute('content-desc')
+
+        # 3. Procesar el texto para encontrar el número
+        lineas = descripcion_completa.split('\n')
+
+        # Encontrar el índice de la línea que nos interesa
+        indice = lineas.index('Unidades a bonificar')
+
+        # El número está en la línea siguiente
+        numero_bonificacion_str = lineas[indice + 1].strip()
+
+        # 4. Convertir a entero y devolver
+        numero_bonificacion_int = int(numero_bonificacion_str)
+        print(f"✅ Unidades a bonificar encontradas: {numero_bonificacion_int}")
+        return numero_bonificacion_int
+
+    except NoSuchElementException:
+        pytest.fail("No se encontró el elemento que contiene 'Unidades a bonificar'.")
+    except (ValueError, IndexError):
+        pytest.fail(
+            "Se encontró el texto 'Unidades a bonificar', pero no se pudo extraer el número de la línea siguiente.")
+    except Exception as e:
+        pytest.fail(f"Ocurrió un error al obtener las unidades a bonificar: {e}")
 
 
 def agregar_producto_al_carrito(driver):

@@ -12,9 +12,14 @@ from tests.ventas.acciones.acciones_busqueda import (
 from tests.ventas.acciones.acciones_producto import (
     ingresar_cantidad_producto,
     hacer_scroll_hacia_abajo,
+    obtener_unidades_a_bonificar,
     agregar_producto_al_carrito
 )
 
+# Importamos las acciones del carrito
+from tests.ventas.acciones.acciones_carrito import (
+    abrir_carrito,
+)
 
 class Test_Venta_Completa:
 
@@ -27,7 +32,7 @@ class Test_Venta_Completa:
         print("\n=== INICIO TEST: Flujo de Búsqueda y Selección ===")
 
         # Parámetro configurable para este flujo
-        sku_a_vender = "120800280"
+        sku_a_vender = "120800710"
 
         try:
             # --- Flujo de Búsqueda ---
@@ -62,7 +67,7 @@ class Test_Venta_Completa:
         print("\n=== INICIO TEST: Configurar y Agregar Producto al Carrito ===")
 
         # Parámetro configurable para este flujo
-        cantidad_a_ingresar = 200
+        cantidad_a_ingresar = 100
 
         try:
             # Paso 1: Ingresar la cantidad deseada
@@ -71,7 +76,16 @@ class Test_Venta_Completa:
             # Paso 2: Hacer scroll para ver más opciones
             hacer_scroll_hacia_abajo(driver)
 
-            # Paso 3: Agregar el producto al carrito
+            # Paso 3: Validar informacion
+            unidades_bonificar = obtener_unidades_a_bonificar(driver)
+            print(f"Unidades a bonificar según la app: {unidades_bonificar}")
+            if unidades_bonificar != 4:
+                pytest.fail(
+                    f"La cantidad esperada para {cantidad_a_ingresar} es 4, "
+                    f"pero la app mostró {unidades_bonificar}"
+                )
+
+            # Paso 4: Agregar el producto al carrito
             agregar_producto_al_carrito(driver)
 
             print("\n✅ TEST COMPLETADO: Producto configurado exitosamente.")
@@ -83,3 +97,19 @@ class Test_Venta_Completa:
             if video_path:
                 print(f"📹 Video evidencia de la configuración guardado en: {video_path}")
 
+    @pytest.mark.xray("APPTEST-****")
+    def test_carrito(self, driver, video_recorder):
+        """
+            Este test ejecuta la tercera parte del flujo: carrito
+            NOTA: Este test depende de que el anterior haya finalizado correctamente.
+        """
+        print("\n=== INICIO TEST: Validaciones carrito ===")
+
+        try:
+            abrir_carrito(driver)
+        except Exception as e:
+            pytest.fail(f"TEST FALLÓ al estar dentro del carrito {e}")
+        finally:
+            video_path = video_recorder()
+            if video_path:
+                print(f"📹 Video evidencia de la configuración guardado en: {video_path}")
