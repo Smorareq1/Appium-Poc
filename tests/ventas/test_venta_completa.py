@@ -19,6 +19,8 @@ from tests.ventas.acciones.acciones_producto import (
 # Importamos las acciones del carrito
 from tests.ventas.acciones.acciones_carrito import (
     abrir_carrito,
+    hacer_swipe_en_resumen_compra,
+    hacer_clic_en_descuento_puntual
 )
 
 class Test_Venta_Completa:
@@ -107,6 +109,9 @@ class Test_Venta_Completa:
 
         try:
             abrir_carrito(driver)
+            hacer_swipe_en_resumen_compra(driver)
+            hacer_clic_en_descuento_puntual(driver)
+
         except Exception as e:
             pytest.fail(f"TEST FALLÓ al estar dentro del carrito {e}")
         finally:
