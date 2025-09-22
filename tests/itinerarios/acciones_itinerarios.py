@@ -95,29 +95,29 @@ def verificar_no_hay_clientes(driver):
     except NoSuchElementException:
         return False
 # Itinerario - Cliente
-def hacer_clic_pendientes(driver, wait):
+def hacer_click_pendientes(driver, wait):
     """
     Función auxiliar para hacer clic en el botón 'Pendientes'
     """
     try:
-        print("Buscando botón 'Pendientes'...")
+        print("🔍 Buscando botón 'Pendientes'...")
         xpath_pendientes = "//*[@content-desc='Pendientes']"
 
         boton_pendientes = wait.until(
             EC.element_to_be_clickable((AppiumBy.XPATH, xpath_pendientes))
         )
 
-        print("Botón 'Pendientes' encontrado, haciendo clic...")
+        print("✅ Botón 'Pendientes' encontrado, haciendo clic...")
         boton_pendientes.click()
         time.sleep(2)
 
-        print("¡Clic en 'Pendientes' realizado exitosamente!")
+        print("🎉 ¡Clic en 'Pendientes' realizado exitosamente!")
 
     except TimeoutException:
-        print("Error: No se encontró el botón 'Pendientes'")
+        print("❌ Error: No se encontró el botón 'Pendientes'")
         pytest.fail("No se pudo encontrar el botón 'Pendientes'")
     except Exception as e:
-        print(f"Error haciendo clic en 'Pendientes': {e}")
+        print(f"❌ Error haciendo clic en 'Pendientes': {e}")
         pytest.fail(f"Error al hacer clic en 'Pendientes': {e}")
 def buscar_primer_dia_con_clientes(driver):
     """
@@ -166,3 +166,139 @@ def buscar_primer_dia_con_clientes(driver):
     except Exception as e:
         print(f"❌ Error en búsqueda: {e}")
         return None
+
+# Completar cliente
+def hacer_click_primer_cliente(driver):
+    """
+    Hace clic en la primera card de cliente que aparece en la lista.
+    Localiza todas las cards de cliente y selecciona la primera del listado.
+    """
+    print("\n--- ACCIÓN: Hacer clic en el primer cliente (Método Corregido) ---")
+
+    try:
+        wait = WebDriverWait(driver, 15) # Aumentamos un poco el tiempo de espera por si acaso
+
+        # Estrategia:
+        # 1. Buscamos TODOS los elementos que cumplan el patrón de una "card de cliente".
+        # 2. Appium devuelve la lista en el orden en que aparecen en pantalla.
+        # 3. Simplemente seleccionamos el primer elemento de esa lista (índice 0).
+
+        print("🔍 Buscando todas las cards de cliente disponibles...")
+        xpath_cliente = "//android.view.View[@clickable='true' and contains(@content-desc, 'Clientes IS')]"
+
+        # Esperamos a que al menos UNA card de cliente esté presente y obtenemos la lista
+        lista_clientes = wait.until(
+            EC.presence_of_all_elements_located((AppiumBy.XPATH, xpath_cliente))
+        )
+
+        print(f"✅ Se encontraron {len(lista_clientes)} cards de cliente.")
+
+        # Verificamos que la lista no esté vacía
+        if not lista_clientes:
+            raise Exception("No se encontró ninguna card de cliente en la pantalla.")
+
+        # El primer cliente es el primer elemento de la lista
+        primer_cliente = lista_clientes[0]
+
+        # Obtenemos información para el log antes de hacer clic
+        desc = primer_cliente.get_attribute('content-desc') or '(sin descripción)'
+        print(f" Seleccionando la primera card:")
+        print(f" Descripción: {desc.replace(chr(10), ' | ')}") # Reemplaza saltos de línea para un log más limpio
+
+        # Hacemos clic
+        primer_cliente.click()
+        time.sleep(2)  # Pausa para la transición de pantalla
+
+        print("👍 Clic en el primer cliente realizado exitosamente.")
+
+    except TimeoutException:
+        pytest.fail("TEST FALLÓ: Timeout. No apareció ninguna card de cliente en el tiempo esperado.")
+    except Exception as e:
+        pytest.fail(f"TEST FALLÓ: Ocurrió un error inesperado al hacer clic en el primer cliente: {e}")
+def hacer_click_en_check_in(driver):
+    """
+    Busca y hace clic en la tarjeta de tarea pendiente que contiene 'Check-in'.
+    Esta función asume que ya se está en la pantalla de detalles de un cliente.
+    """
+    print("\n--- ACCIÓN: Hacer clic en la tarea 'Check-in' ---")
+    try:
+        wait = WebDriverWait(driver, 15)
+
+        # Este selector es robusto: busca un elemento clickeable (`android.view.View`)
+        check_in_xpath = "//android.view.View[contains(@content-desc, 'Check-in')]"
+
+        print(f"🔍 Buscando la tarea de Check-in con XPath: {check_in_xpath}")
+
+        check_in_card = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, check_in_xpath))
+        )
+
+        print("✅ Tarea 'Check-in' encontrada y es clickeable.")
+
+        check_in_card.click()
+        time.sleep(2)  # Pausa para esperar la animación/carga de la nueva pantalla
+
+        print("👍 Clic en 'Check-in' realizado exitosamente.")
+
+    except TimeoutException:
+        pytest.fail("TEST FALLÓ: Timeout. No se encontró la tarea 'Check-in' en el tiempo esperado.")
+    except Exception as e:
+        pytest.fail(f"TEST FALLÓ: Ocurrió un error inesperado al hacer clic en 'Check-in': {e}")
+def hacer_click_en_capturar_ubicacion(driver):
+    """
+    En la pantalla que aparece después del Check-in, busca y hace clic
+    en el botón 'Capturar ubicación'.
+    """
+    print("\n--- ACCIÓN: Hacer clic en 'Capturar ubicación' ---")
+    try:
+        wait = WebDriverWait(driver, 15)
+
+        # La estrategia más fiable para botones en Flutter es usar el 'content-desc',
+        # que Appium trata como el Accessibility ID.
+        capturar_ubicacion_id = "Capturar ubicación"
+
+        print(f"🔍 Buscando el botón por Accessibility ID: '{capturar_ubicacion_id}'")
+
+        boton_capturar = wait.until(
+            EC.element_to_be_clickable((AppiumBy.ACCESSIBILITY_ID, capturar_ubicacion_id))
+        )
+
+        print("✅ Botón 'Capturar ubicación' encontrado y es clickeable.")
+
+        boton_capturar.click()
+        # Pausa un poco más larga para dar tiempo a que el GPS o la cámara se inicien.
+        time.sleep(3)
+
+        print("👍 Clic en 'Capturar ubicación' realizado exitosamente.")
+
+    except TimeoutException:
+        pytest.fail("TEST FALLÓ: Timeout. No se encontró el botón 'Capturar ubicación' en el tiempo esperado.")
+    except Exception as e:
+        pytest.fail(f"TEST FALLÓ: Ocurrió un error inesperado al hacer clic en 'Capturar ubicación': {e}")
+def hacer_click_en_Ok(driver):
+    """
+    Hace clic en el botón 'Ok' que aparece en un diálogo emergente.
+    """
+    print("\n--- ACCIÓN: Hacer clic en 'Ok' ---")
+    try:
+        wait = WebDriverWait(driver, 10)
+
+        ok_xpath = "//*[@content-desc='Ok']"
+
+        print(f"🔍 Buscando el botón 'Ok' con XPath: {ok_xpath}")
+
+        boton_ok = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, ok_xpath))
+        )
+
+        print("✅ Botón 'Ok' encontrado y es clickeable.")
+
+        boton_ok.click()
+        time.sleep(2)  # Pausa para esperar la acción
+
+        print("👍 Clic en 'Ok' realizado exitosamente.")
+
+    except TimeoutException:
+        pytest.fail("TEST FALLÓ: Timeout. No se encontró el botón 'Ok' en el tiempo esperado.")
+    except Exception as e:
+        pytest.fail(f"TEST FALLÓ: Ocurrió un error inesperado al hacer clic en 'Ok': {e}")
