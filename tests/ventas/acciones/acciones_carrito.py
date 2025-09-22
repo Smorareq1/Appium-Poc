@@ -63,7 +63,6 @@ def hacer_swipe_en_resumen_compra(driver):
     except Exception as e:
         pytest.fail(f"Ocurrió un error al realizar el swipe en el resumen de compra: {e}")
 
-
 def hacer_clic_en_descuento_puntual(driver):
     """
     Busca y hace clic en el botón revelado después del swipe, usando
