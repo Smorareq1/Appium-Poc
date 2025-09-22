@@ -1,0 +1,5 @@
+pytest
+pytest-html
+python-dotenv
+requests
+Appium-Python-Client
