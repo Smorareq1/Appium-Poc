@@ -1,9 +1,14 @@
+import time
 import pytest
 from appium.webdriver.common.appiumby import AppiumBy
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 
+# Importamos las acciones del carrito
+from tests.itinerarios.acciones_itinerarios import (
+    spin_semana,
+)
 
 class test_itinerarios:
     @pytest.mark.xray("APPTEST-****")
@@ -11,10 +16,10 @@ class test_itinerarios:
         """Test para hacer click en el botón Itinerarios"""
         print("\n=== TEST: Click en botón Itinerarios ===")
         try:
-            itinerarios_button = None
             itinerarios_button = driver.find_element("xpath", "//*[@content-desc='Itinerarios']")
             itinerarios_button.click()
             assert itinerarios_button is not None, "No se pudo encontrar el botón 'Itinerarios'"
+
         except Exception as e:
             pytest.fail(f"TEST FALLÓ {e}")
         finally:
@@ -23,47 +28,56 @@ class test_itinerarios:
                 print(f"📹 Video evidencia de la configuración guardado en: {video_path}")
 
     @pytest.mark.xray("APPTEST-****")
-    def test_click_mes_anterior_button(self, driver, video_recorder):
+    def test_click_semana_anterior_y_verificar_alerta(self, driver, video_recorder):
         """
-        Test para hacer clic en el botón de flecha 'mes anterior' en el calendario.
+        Test para hacer clic en el botón 'semana anterior' y verificar que se
+        muestra el mensaje de advertencia 'No es posible visualizar semanas pasadas'.
         """
-        print("\n=== TEST: Click en botón 'Mes Anterior' del calendario ===")
+        print("\n=== TEST: Click semana anterior y verificar mensaje de advertencia ===")
         try:
-            # 🎯 Estrategia Corregida: Localizar el botón como un hermano directo del día Lunes.
-            #    El XPath busca el elemento 'Lunes' y luego selecciona el 'Button'
-            #    que le precede inmediatamente en el mismo nivel jerárquico.
             wait = WebDriverWait(driver, 10)
 
-            # El punto de referencia (día Lunes) no cambia
+            # Esperar a que el calendario sea visible
             lunes_ref_xpath = "//*[@content-desc='L\n22']"
-
-            # Se espera a que la referencia sea visible para asegurar que el calendario ha cargado
             wait.until(EC.presence_of_element_located((AppiumBy.XPATH, lunes_ref_xpath)))
-            print("✅ Calendario visible (referencia 'Lunes' encontrada).")
+            print("✅ Calendario visible")
 
-            # NUEVO XPATH: Busca el 'Button' que es hermano precedente de nuestra referencia.
+            # Encontrar y hacer clic en el botón "semana anterior"
             boton_anterior_xpath = f"{lunes_ref_xpath}/preceding-sibling::android.widget.Button"
-
-            print(f"Buscando el botón del mes anterior con XPath corregido: {boton_anterior_xpath}")
-
-            boton_mes_anterior = wait.until(
+            boton_semana_anterior = wait.until(
                 EC.element_to_be_clickable((AppiumBy.XPATH, boton_anterior_xpath))
             )
+            boton_semana_anterior.click()
+            print("✅ Clic en semana anterior realizado")
 
-            print("✅ Botón 'Mes Anterior' encontrado y es clickeable.")
+            # Verificar que aparece el mensaje de advertencia
+            mensaje_xpath = "//*[@content-desc='No es posible visualizar semanas pasadas']"
+            mensaje_advertencia = wait.until(
+                EC.presence_of_element_located((AppiumBy.XPATH, mensaje_xpath))
+            )
 
-            # Hacemos clic
-            boton_mes_anterior.click()
-
-            print("👍 Clic en 'Mes Anterior' realizado exitosamente.")
+            assert mensaje_advertencia is not None, "No se encontró el mensaje de advertencia"
+            print("✅ Mensaje de advertencia verificado correctamente")
 
         except TimeoutException:
-            pytest.fail(
-                "TEST FALLÓ: No se encontró el botón 'Mes Anterior' en el tiempo esperado. Verificar XPath y visibilidad.")
+            pytest.fail("Timeout: No se encontró el calendario, botón o mensaje de advertencia")
         except Exception as e:
-            pytest.fail(f"TEST FALLÓ: Ocurrió un error inesperado: {e}")
+            pytest.fail(f"TEST FALLÓ: {e}")
         finally:
-            # 📹 Guardar el video de evidencia
             video_path = video_recorder()
             if video_path:
                 print(f"📹 Video de evidencia guardado en: {video_path}")
+
+    @pytest.mark.xray("APPTEST-****")
+    def test_spin_semana(self, driver, video_recorder):
+        """Test para hacer spin en los días de la semana y verificar clientes"""
+        print("\n=== TEST: Spin en días de la semana ===")
+        try:
+            spin_semana(driver)
+
+        except Exception as e:
+            pytest.fail(f"TEST FALLÓ {e}")
+        finally:
+            video_path = video_recorder()
+            if video_path:
+                print(f"📹 Video evidencia de la configuración guardado en: {video_path}")
