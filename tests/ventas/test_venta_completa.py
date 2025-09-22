@@ -73,17 +73,17 @@ class Test_Venta_Completa:
             # Paso 1: Ingresar la cantidad deseada
             ingresar_cantidad_producto(driver, cantidad_a_ingresar)
 
-            # Paso 2: Hacer scroll para ver más opciones
-            hacer_scroll_hacia_abajo(driver)
-
-            # Paso 3: Validar informacion
+            # Paso 2: Validar informacion
             unidades_bonificar = obtener_unidades_a_bonificar(driver)
             print(f"Unidades a bonificar según la app: {unidades_bonificar}")
-            if unidades_bonificar != 4:
+            if unidades_bonificar != 10:
                 pytest.fail(
-                    f"La cantidad esperada para {cantidad_a_ingresar} es 4, "
+                    f"La cantidad esperada para {cantidad_a_ingresar} es 10, "
                     f"pero la app mostró {unidades_bonificar}"
                 )
+
+            # Paso 3: Hacer scroll para ver más opciones
+            hacer_scroll_hacia_abajo(driver)
 
             # Paso 4: Agregar el producto al carrito
             agregar_producto_al_carrito(driver)
