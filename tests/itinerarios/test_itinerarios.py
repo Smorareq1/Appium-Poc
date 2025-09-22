@@ -69,6 +69,20 @@ class test_itinerarios:
                 print(f"📹 Video de evidencia guardado en: {video_path}")
 
     @pytest.mark.xray("APPTEST-****")
+    def test_itinerario_cliente(self, driver, video_recorder):
+        """Test para hacer spin en los días de la semana y verificar clientes"""
+        print("\n=== TEST: Spin en días de la semana ===")
+        try:
+            spin_semana(driver)
+
+        except Exception as e:
+            pytest.fail(f"TEST FALLÓ {e}")
+        finally:
+            video_path = video_recorder()
+            if video_path:
+                print(f"📹 Video evidencia de la configuración guardado en: {video_path}")
+
+    @pytest.mark.xray("APPTEST-****")
     def test_spin_semana(self, driver, video_recorder):
         """Test para hacer spin en los días de la semana y verificar clientes"""
         print("\n=== TEST: Spin en días de la semana ===")
