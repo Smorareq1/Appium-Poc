@@ -1,24 +1,31 @@
 import pytest
 
 # Importamos las acciones del carrito
-from tests.ventas.acciones.acciones_carrito import (
-    abrir_carrito,
-    hacer_swipe_en_resumen_compra,
-    hacer_clic_en_descuento_puntual
+from tests.ventas.acciones.acciones_venta_putual import (
+    obtener_total_pedido,
+    ingresar_descuento_y_confirmar,
+    click_boton_marca,
+    click_monto_especifico_marca_producto,
+    click_boton_producto,
 )
 
 class test_puntuales:
     @pytest.mark.xray("APPTEST-****")
     def test_carrito(self, driver, video_recorder):
-        """
-            Este test ejecuta la tercera parte del flujo: carrito
-            NOTA: Este test depende de que el anterior haya finalizado correctamente.
-        """
-        print("\n=== INICIO TEST: Validaciones carrito ===")
-
         try:
-            hacer_swipe_en_resumen_compra(driver)
-            hacer_clic_en_descuento_puntual(driver)
+            # Descuento sobre producto
+            click_boton_producto(driver)
+            click_monto_especifico_marca_producto(driver)
+            monto = 2
+            total = obtener_total_pedido(driver)
+            print(f"Total del pedido obtenido: {total}")
+            ingresar_descuento_y_confirmar(driver, monto)
+            descuento = obtener_total_pedido(driver)
+            print(f"Total del pedido con descuento aplicado: {descuento}")
+            if descuento != (total - monto):
+                pytest.fail(
+                    f"La cantidad esperada para {descuento} no es correcta"
+                )
 
         except Exception as e:
             pytest.fail(f"TEST FALLÓ al estar dentro del carrito {e}")

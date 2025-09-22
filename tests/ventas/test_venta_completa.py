@@ -23,6 +23,15 @@ from tests.ventas.acciones.acciones_carrito import (
     hacer_clic_en_descuento_puntual
 )
 
+# Importamos las acciones del descuento puntual
+from tests.ventas.acciones.acciones_venta_putual import (
+    obtener_total_pedido,
+    ingresar_descuento_y_confirmar,
+    click_boton_marca,
+    click_monto_especifico_marca_producto,
+    click_boton_producto,
+)
+
 class Test_Venta_Completa:
 
     @pytest.mark.xray("APPTEST-****")
@@ -100,7 +109,7 @@ class Test_Venta_Completa:
                 print(f"📹 Video evidencia de la configuración guardado en: {video_path}")
 
     @pytest.mark.xray("APPTEST-****")
-    def test_carrito(self, driver, video_recorder):
+    def test_carrito_inicial(self, driver, video_recorder):
         """
             Este test ejecuta la tercera parte del flujo: carrito
             NOTA: Este test depende de que el anterior haya finalizado correctamente.
@@ -111,6 +120,87 @@ class Test_Venta_Completa:
             abrir_carrito(driver)
             hacer_swipe_en_resumen_compra(driver)
             hacer_clic_en_descuento_puntual(driver)
+
+        except Exception as e:
+            pytest.fail(f"TEST FALLÓ al estar dentro del carrito {e}")
+        finally:
+            video_path = video_recorder()
+            if video_path:
+                print(f"📹 Video evidencia de la configuración guardado en: {video_path}")
+
+    @pytest.mark.xray("APPTEST-****")
+    def test_descuento_puntual(self, driver, video_recorder):
+        """
+            Este test ejecuta la cuarta parte del flujo: descuento puntual
+            NOTA: Este test depende de que el anterior haya finalizado correctamente.
+        """
+        print("\n=== INICIO TEST: Validaciones descuento puntual ===")
+
+        try:
+            # Descuento sobre el total
+            monto = 5
+            total = obtener_total_pedido(driver)
+            print(f"Total del pedido obtenido: {total}")
+            ingresar_descuento_y_confirmar(driver, monto)
+            descuento = obtener_total_pedido(driver)
+            print(f"Total del pedido con descuento aplicado: {descuento}")
+
+            esperado = total * ((100 - monto) / 100)
+            esperado = round(esperado, 2)
+
+            if descuento != esperado:
+                pytest.fail(
+                    f"La cantidad esperada para {descuento} no coincide con {esperado}"
+                )
+
+            # Descuento sobre marca
+            click_boton_marca(driver)
+            click_monto_especifico_marca_producto(driver)
+
+            monto = 1
+            total = obtener_total_pedido(driver)
+            print(f"Total del pedido obtenido: {total}")
+            ingresar_descuento_y_confirmar(driver, monto)
+            descuento = obtener_total_pedido(driver)
+            print(f"Total del pedido con descuento aplicado: {descuento}")
+            if descuento != (total - monto):
+                pytest.fail(
+                    f"La cantidad esperada para {descuento} no es correcta"
+                )
+
+            #Descuento sobre producto
+            click_boton_producto(driver)
+            click_monto_especifico_marca_producto(driver)
+            monto = 2
+            total = obtener_total_pedido(driver)
+            print(f"Total del pedido obtenido: {total}")
+            ingresar_descuento_y_confirmar(driver, monto)
+            descuento = obtener_total_pedido(driver)
+            print(f"Total del pedido con descuento aplicado: {descuento}")
+            if descuento != (total - monto):
+                pytest.fail(
+                    f"La cantidad esperada para {descuento} no es correcta"
+                )
+            # Abrir el carrito
+            abrir_carrito(driver)
+
+        except Exception as e:
+            pytest.fail(f"TEST FALLÓ al estar dentro de bonificacion puntual {e}")
+        finally:
+            video_path = video_recorder()
+            if video_path:
+                print(f"📹 Video evidencia de la configuración guardado en: {video_path}")
+
+    @pytest.mark.xray("APPTEST-****")
+    def test_validar_carrito_final(self, driver, video_recorder):
+        """
+            Este test ejecuta la quinta parte del flujo: validar carrito final
+            NOTA: Este test depende de que el anterior haya finalizado correctamente.
+        """
+        print("\n=== INICIO TEST: Validaciones carrito final ===")
+
+        try:
+            pass
 
         except Exception as e:
             pytest.fail(f"TEST FALLÓ al estar dentro del carrito {e}")
