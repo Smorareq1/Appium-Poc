@@ -166,33 +166,43 @@ class test_Login:
             time.sleep(1)  # Reducido de 2 a 1
             print("Email escrito completamente. Ocultando teclado...")
 
-            # Ocultar el teclado
+            # Ocultar el teclado (intento principal)
             try:
                 driver.hide_keyboard()
                 print("Teclado ocultado con hide_keyboard()")
             except:
-                try:
-                    # Alternativa: usar botón atrás para cerrar teclado
-                    driver.back()
-                    print("Teclado ocultado con botón atrás")
-                except:
-                    print("⚠️ No se pudo ocultar el teclado, continuando...")
+                print("hide_keyboard() falló, usando fallback")
 
-            time.sleep(0.5)  # Reducido de 1 a 0.5
+            # Fuerzo cierres adicionales por si el teclado reaparece
+            ensure_keyboard_closed(driver)
 
-            # Buscar el botón "Continuar"
+            # Buscar el botón "Continuar" usando espera explícita para evitar interferencia del teclado
             print("Buscando botón 'Continuar'...")
 
             continuar_button = None
             try:
-                continuar_button = driver.find_element(AppiumBy.XPATH, "//*[@content-desc='Continuar']")
-                print("Encontrado por content-desc exacto")
-            except NoSuchElementException:
+                continuar_button = WebDriverWait(driver, 5).until(
+                    EC.element_to_be_clickable((AppiumBy.XPATH, "//*[@content-desc='Continuar']"))
+                )
+                print("Encontrado por content-desc exacto (wait clickable)")
+            except Exception:
                 try:
-                    continuar_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@content-desc,'Continuar')]")
-                    print("Encontrado por content-desc que contiene 'Continuar'")
-                except NoSuchElementException:
-                    pass
+                    continuar_button = WebDriverWait(driver, 5).until(
+                        EC.element_to_be_clickable((AppiumBy.XPATH, "//*[contains(@content-desc,'Continuar')]"))
+                    )
+                    print("Encontrado por content-desc contains (wait clickable)")
+                except Exception:
+                    # fallback a búsqueda directa como antes
+                    try:
+                        continuar_button = driver.find_element(AppiumBy.XPATH, "//*[@content-desc='Continuar']")
+                        print("Encontrado por content-desc exacto (fallback)")
+                    except NoSuchElementException:
+                        try:
+                            continuar_button = driver.find_element(AppiumBy.XPATH,
+                                                                  "//*[contains(@content-desc,'Continuar')]")
+                            print("Encontrado por content-desc contains (fallback)")
+                        except NoSuchElementException:
+                            pass
 
             assert continuar_button is not None, "No se pudo encontrar el botón 'Continuar'"
 
@@ -201,12 +211,16 @@ class test_Login:
             continuar_button.click()
             time.sleep(2)  # Reducido de 3 a 2
 
+            # Asegurarse de que el teclado no quede abierto para el siguiente test
+            ensure_keyboard_closed(driver)
+
             print("✅ TEST 4 COMPLETADO: Email escrito más rápido y botón continuar presionado")
 
         except Exception as e:
             pytest.fail(f"TEST 4 FALLÓ: {e}")
         finally:
             # El video se detiene automáticamente al finalizar el test
+            ensure_keyboard_closed(driver)
             video_path = video_recorder()
             if video_path:
                 print(f"📹 Video evidencia guardado: {video_path}")
@@ -290,7 +304,7 @@ class test_Login:
                     continue
 
             if not pantalla_cambio:
-                print("⚠️ No se pudo confirmar el cambio de pantalla, pero el click se ejecutó")
+                print("⚠ No se pudo confirmar el cambio de pantalla, pero el click se ejecutó")
 
             print("✅ TEST 5 COMPLETADO: Click en 'Usuario y contraseña' exitoso")
 
@@ -387,64 +401,34 @@ class test_Login:
                 driver.hide_keyboard()
                 print("Teclado ocultado con hide_keyboard()")
             except:
-                try:
-                    driver.back()
-                    print("Teclado ocultado con botón atrás")
-                except:
-                    print("⚠️ No se pudo ocultar el teclado, continuando...")
+                print("hide_keyboard() falló, usando fallback")
+
+            # Asegurar teclado cerrado antes de buscar el botón siguiente
+            ensure_keyboard_closed(driver)
 
             time.sleep(0.5)  # Reducido de 1 a 0.5
 
-            # Buscar el botón "Siguiente"
+            # Buscar el botón "Siguiente" con espera explícita
             print("Buscando botón 'Siguiente'...")
 
             siguiente_button = None
-
-            # Estrategia 2: Por content description
-            if not siguiente_button:
+            try:
+                siguiente_button = WebDriverWait(driver, 5).until(
+                    EC.element_to_be_clickable((AppiumBy.XPATH, "//*[@content-desc='Siguiente']"))
+                )
+                print("Encontrado por content-desc exacto (wait clickable)")
+            except Exception:
                 try:
-                    siguiente_button = driver.find_element(AppiumBy.XPATH, "//*[@content-desc='Siguiente']")
-                    print("Encontrado por content-desc exacto")
-                except NoSuchElementException:
-                    pass
-
-            # Estrategia 3: Por texto que contenga
-            if not siguiente_button:
-                try:
-                    siguiente_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@content-desc,'Siguiente')]")
-                    print("Encontrado por texto que contiene 'Siguiente'")
-                except NoSuchElementException:
-                    pass
-
-            # Estrategia 4: Buscar botones habilitados recientemente
-            if not siguiente_button:
-                try:
-                    # Buscar elementos clickeables que podrían ser el botón siguiente
-                    clickable_elements = driver.find_elements(AppiumBy.XPATH, "//*[@clickable='true']")
-                    for elem in clickable_elements:
-                        try:
-                            text = elem.get_attribute("text") or ""
-                            content_desc = elem.get_attribute("content-desc") or ""
-                            if ("siguiente" in text.lower() or "siguiente" in content_desc.lower() or
-                                    "continuar" in text.lower() or "continuar" in content_desc.lower() or
-                                    "login" in text.lower() or "entrar" in text.lower()):
-                                siguiente_button = elem
-                                print(f"Encontrado por contenido relacionado: '{text}' / '{content_desc}'")
-                                break
-                        except:
-                            continue
-                except:
-                    pass
-
-            # Estrategia 5: Como último recurso, usar el último botón clickeable
-            if not siguiente_button:
-                try:
-                    clickable_elements = driver.find_elements(AppiumBy.XPATH, "//*[@clickable='true']")
-                    if clickable_elements:
-                        siguiente_button = clickable_elements[-1]
-                        print("Encontrado como último elemento clickeable")
-                except:
-                    pass
+                    siguiente_button = WebDriverWait(driver, 5).until(
+                        EC.element_to_be_clickable((AppiumBy.XPATH, "//*[contains(@content-desc,'Siguiente')]"))
+                    )
+                    print("Encontrado por content-desc contains (wait clickable)")
+                except Exception:
+                    # fallback a búsqueda directa
+                    try:
+                        siguiente_button = driver.find_element(AppiumBy.XPATH, "//*[@content-desc='Siguiente']")
+                    except NoSuchElementException:
+                        siguiente_button = None
 
             assert siguiente_button is not None, "No se pudo encontrar el botón 'Siguiente'"
 
@@ -453,11 +437,16 @@ class test_Login:
             siguiente_button.click()
             time.sleep(2)  # Reducido de 3 a 2
 
+            # Asegurarse de que el teclado no quede abierto para el siguiente test
+            ensure_keyboard_closed(driver)
+
             print("✅ TEST 6 COMPLETADO: Usuario y contraseña escritos más rápido, botón siguiente presionado")
 
         except Exception as e:
             pytest.fail(f"TEST 6 FALLÓ: {e}")
         finally:
+            # Cerrar teclado antes de terminar test para no interferir siguiente test
+            ensure_keyboard_closed(driver)
             # El video se detiene automáticamente al finalizar el test
             video_path = video_recorder()
             if video_path:
@@ -540,7 +529,7 @@ class test_Login:
                     ffa_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@text,'FFA')]")
                     print("Encontrado 'FFA' por texto que contiene")
                 except NoSuchElementException:
-                    print("⚠️ No se pudo encontrar el botón 'FFA'")
+                    print("⚠ No se pudo encontrar el botón 'FFA'")
                     pass
 
             assert ffa_button is not None, "No se pudo encontrar el botón 'FFA'"
@@ -557,4 +546,5 @@ class test_Login:
             # El video se detiene automáticamente al finalizar el test
             video_path = video_recorder()
             if video_path:
-                print(f"📹 Video evidencia guardado: {video_path}")
+                print(f"📹 Video evidencia guardado: {video_path}")
+4

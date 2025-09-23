@@ -26,8 +26,8 @@ logger = logging.getLogger(__name__)
 class TestEnvironment:
     def __init__(self):
         self.apk_path = os.getenv('APK_PATH')
-        self.platform_version = os.getenv('PLATFORM_VERSION', "15")
-        self.device_name = os.getenv('DEVICE_NAME', "emulator-5554")
+        self.platform_version = os.getenv('PLATFORM_VERSION')
+        self.device_name = os.getenv('DEVICE_NAME')
         self.appium_server = os.getenv('APPIUM_SERVER')
         self.platform_name = "Android"
         self.automation_name = "UiAutomator2"
