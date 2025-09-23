@@ -53,6 +53,7 @@ def hacer_swipe_en_resumen_compra(driver):
         elemento_resumen = driver.find_element(AppiumBy.XPATH, xpath_selector)
         print("✅ Elemento de resumen encontrado.")
 
+
         # 2. Calcular coordenadas para el swipe relativo al elemento
         location = elemento_resumen.location
         size = elemento_resumen.size
