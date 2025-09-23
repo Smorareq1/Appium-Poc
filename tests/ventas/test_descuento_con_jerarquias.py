@@ -25,7 +25,7 @@ from tests.ventas.acciones.acciones_carrito import (
 )
 
 
-class TestDescuentoConJerarquias:
+class estDescuentoConJerarquias:
     @pytest.mark.xray("APPTEST-DESCUENTO-JERARQUIAS")
     def test_descuento_con_jerarquias(self, driver, video_recorder):
         """

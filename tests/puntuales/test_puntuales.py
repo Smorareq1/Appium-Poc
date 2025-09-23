@@ -1,21 +1,19 @@
 import pytest
 
 # Importamos las acciones del carrito
-from tests.itinerarios.acciones_itinerarios import (
-    spin_semana,
-    buscar_primer_dia_con_clientes,
-    hacer_click_pendientes,
-    hacer_click_primer_cliente,
-    hacer_click_en_check_in,
-    hacer_click_en_capturar_ubicacion,
-    hacer_click_en_Ok
+from tests.ventas.acciones.acciones_venta_directa import (
+    ejecutar_venta_directa_completa
 )
 
+from tests.itinerarios.acciones_itinerarios import (
+    realizar_check_out_si_pendiente
+)
 class test_puntuales:
     @pytest.mark.xray("APPTEST-****")
     def test_carrito(self, driver, video_recorder):
         try:
-            hacer_click_en_Ok(driver)
+            #ejecutar_venta_directa_completa(driver, "Cloro", 5)
+            realizar_check_out_si_pendiente(driver)
 
         except Exception as e:
             pytest.fail(f"TEST FALLÓ {e}")
