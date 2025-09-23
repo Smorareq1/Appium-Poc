@@ -28,7 +28,7 @@ class TestEnvironment:
         self.apk_path = os.getenv('APK_PATH')
         self.platform_version = os.getenv('PLATFORM_VERSION', "15")
         self.device_name = os.getenv('DEVICE_NAME', "emulator-5554")
-        self.appium_server = os.getenv('APPIUM_SERVER', "http://127.0.0.1:4723")
+        self.appium_server = os.getenv('APPIUM_SERVER')
         self.platform_name = "Android"
         self.automation_name = "UiAutomator2"
 
