@@ -2,6 +2,38 @@ import pytest
 import time
 from appium.webdriver.common.appiumby import AppiumBy
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+
+def ensure_keyboard_closed(driver):
+    """
+    Función auxiliar para asegurar que el teclado esté cerrado.
+    Intenta múltiples métodos para cerrar el teclado.
+    """
+    try:
+        # Método 1: hide_keyboard()
+        driver.hide_keyboard()
+        print("Teclado cerrado con hide_keyboard()")
+    except Exception:
+        try:
+            # Método 2: Presionar back si hay teclado
+            if driver.is_keyboard_shown():
+                driver.back()
+                print("Teclado cerrado con back()")
+        except Exception:
+            try:
+                # Método 3: Click en una zona vacía para quitar foco
+                size = driver.get_window_size()
+                x = int(size['width'] / 2)
+                y = int(size['height'] * 0.1)  # Top area
+                driver.tap([(x, y)], 100)
+                print("Teclado cerrado con tap en zona vacía")
+            except Exception:
+                print("No se pudo cerrar el teclado, continuando...")
+
+    # Espera breve para asegurar que el teclado se cierre
+    time.sleep(0.5)
 
 
 class test_Login:
@@ -199,7 +231,7 @@ class test_Login:
                     except NoSuchElementException:
                         try:
                             continuar_button = driver.find_element(AppiumBy.XPATH,
-                                                                  "//*[contains(@content-desc,'Continuar')]")
+                                                                   "//*[contains(@content-desc,'Continuar')]")
                             print("Encontrado por content-desc contains (fallback)")
                         except NoSuchElementException:
                             pass
@@ -460,25 +492,61 @@ class test_Login:
         print("\n=== TEST 7: Flujo productos (Ver productos → PDC → FFA) ===")
 
         try:
+            # Esperar un poco para que la pantalla se estabilice después del login
+            print("Esperando estabilización de pantalla...")
+            time.sleep(3)
+
             # Paso 1: Click en "Ver productos"
             print("Paso 1: Buscando botón 'Ver productos'...")
 
             ver_productos_button = None
             try:
-                ver_productos_button = driver.find_element(AppiumBy.XPATH, "//*[@content-desc='Ver productos']")
-                print("Encontrado 'Ver productos' por content-desc exacto")
-            except NoSuchElementException:
+                # Esperar que el elemento sea clickeable
+                ver_productos_button = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((AppiumBy.XPATH, "//*[@content-desc='Ver productos']"))
+                )
+                print("Encontrado 'Ver productos' por content-desc exacto (wait clickable)")
+            except Exception:
                 try:
-                    ver_productos_button = driver.find_element(AppiumBy.XPATH,
-                                                               "//*[contains(@content-desc,'Ver productos')]")
-                    print("Encontrado 'Ver productos' por content-desc que contiene")
-                except NoSuchElementException:
+                    ver_productos_button = WebDriverWait(driver, 10).until(
+                        EC.element_to_be_clickable((AppiumBy.XPATH, "//*[contains(@content-desc,'Ver productos')]"))
+                    )
+                    print("Encontrado 'Ver productos' por content-desc que contiene (wait clickable)")
+                except Exception:
                     try:
-                        ver_productos_button = driver.find_element(AppiumBy.XPATH,
-                                                                   "//*[contains(@content-desc,'productos')]")
-                        print("Encontrado por content-desc que contiene 'productos'")
+                        ver_productos_button = driver.find_element(AppiumBy.XPATH, "//*[@content-desc='Ver productos']")
+                        print("Encontrado 'Ver productos' por content-desc exacto")
                     except NoSuchElementException:
-                        pass
+                        try:
+                            ver_productos_button = driver.find_element(AppiumBy.XPATH,
+                                                                       "//*[contains(@content-desc,'Ver productos')]")
+                            print("Encontrado 'Ver productos' por content-desc que contiene")
+                        except NoSuchElementException:
+                            try:
+                                ver_productos_button = driver.find_element(AppiumBy.XPATH,
+                                                                           "//*[contains(@content-desc,'productos')]")
+                                print("Encontrado por content-desc que contiene 'productos'")
+                            except NoSuchElementException:
+                                # Debug: mostrar elementos disponibles
+                                print("🔍 DEBUG: Elementos clickeables disponibles:")
+                                clickable_elements = driver.find_elements(AppiumBy.XPATH, "//*[@clickable='true']")
+                                for i, elem in enumerate(clickable_elements[:10]):  # Solo mostrar los primeros 10
+                                    try:
+                                        text = elem.get_attribute("text") or "(sin texto)"
+                                        content_desc = elem.get_attribute("content-desc") or "(sin descripción)"
+                                        print(f"  {i}: Texto: '{text}' | Desc: '{content_desc}'")
+                                    except:
+                                        print(f"  {i}: Error obteniendo info del elemento")
+
+            if ver_productos_button is None:
+                # Intentar buscar por otros métodos alternativos
+                print("Intentando métodos alternativos para encontrar 'Ver productos'...")
+                try:
+                    # Buscar por texto
+                    ver_productos_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@text,'productos')]")
+                    print("Encontrado por texto que contiene 'productos'")
+                except NoSuchElementException:
+                    pass
 
             assert ver_productos_button is not None, "No se pudo encontrar el botón 'Ver productos'"
 
@@ -491,22 +559,28 @@ class test_Login:
 
             pdc_button = None
             try:
-                pdc_button = driver.find_element(AppiumBy.XPATH, "//*[@text='PDC']")
-                print("Encontrado 'PDC' por texto exacto")
-            except NoSuchElementException:
+                pdc_button = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((AppiumBy.XPATH, "//*[@text='PDC']"))
+                )
+                print("Encontrado 'PDC' por texto exacto (wait clickable)")
+            except Exception:
                 try:
-                    pdc_button = driver.find_element(AppiumBy.XPATH, "//*[@content-desc='PDC']")
-                    print("Encontrado 'PDC' por content-desc exacto")
+                    pdc_button = driver.find_element(AppiumBy.XPATH, "//*[@text='PDC']")
+                    print("Encontrado 'PDC' por texto exacto")
                 except NoSuchElementException:
                     try:
-                        pdc_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@text,'PDC')]")
-                        print("Encontrado 'PDC' por texto que contiene")
+                        pdc_button = driver.find_element(AppiumBy.XPATH, "//*[@content-desc='PDC']")
+                        print("Encontrado 'PDC' por content-desc exacto")
                     except NoSuchElementException:
                         try:
-                            pdc_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@content-desc,'PDC')]")
-                            print("Encontrado 'PDC' por content-desc que contiene")
+                            pdc_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@text,'PDC')]")
+                            print("Encontrado 'PDC' por texto que contiene")
                         except NoSuchElementException:
-                            pass
+                            try:
+                                pdc_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@content-desc,'PDC')]")
+                                print("Encontrado 'PDC' por content-desc que contiene")
+                            except NoSuchElementException:
+                                pass
 
             assert pdc_button is not None, "No se pudo encontrar el botón 'PDC'"
 
@@ -522,15 +596,21 @@ class test_Login:
             print("Paso 4: Buscando botón 'FFA'...")
             ffa_button = None
             try:
-                ffa_button = driver.find_element(AppiumBy.XPATH, "//*[@content-desc='FFA']")
-                print("Encontrado 'FFA' por content-desc exacto")
-            except NoSuchElementException:
+                ffa_button = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((AppiumBy.XPATH, "//*[@content-desc='FFA']"))
+                )
+                print("Encontrado 'FFA' por content-desc exacto (wait clickable)")
+            except Exception:
                 try:
-                    ffa_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@text,'FFA')]")
-                    print("Encontrado 'FFA' por texto que contiene")
+                    ffa_button = driver.find_element(AppiumBy.XPATH, "//*[@content-desc='FFA']")
+                    print("Encontrado 'FFA' por content-desc exacto")
                 except NoSuchElementException:
-                    print("⚠ No se pudo encontrar el botón 'FFA'")
-                    pass
+                    try:
+                        ffa_button = driver.find_element(AppiumBy.XPATH, "//*[contains(@text,'FFA')]")
+                        print("Encontrado 'FFA' por texto que contiene")
+                    except NoSuchElementException:
+                        print("⚠ No se pudo encontrar el botón 'FFA'")
+                        pass
 
             assert ffa_button is not None, "No se pudo encontrar el botón 'FFA'"
 
@@ -546,5 +626,4 @@ class test_Login:
             # El video se detiene automáticamente al finalizar el test
             video_path = video_recorder()
             if video_path:
-                print(f"📹 Video evidencia guardado: {video_path}")
-4
+                print(f"📹 Video evidencia guardado: {video_path}")

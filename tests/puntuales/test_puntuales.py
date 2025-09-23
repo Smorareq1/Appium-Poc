@@ -13,11 +13,15 @@ from tests.ventas.acciones.acciones_carrito import (
     abrir_carrito
 )
 
+from tests.ventas.acciones.acciones_busqueda import (
+ seleccionar_primera_tarjeta_producto
+)
+
 class test_puntuales:
     @pytest.mark.xray("APPTEST-****")
     def test_carrito(self, driver, video_recorder):
         try:
-            abrir_carrito(driver)
+            seleccionar_primera_tarjeta_producto()
 
         except Exception as e:
             pytest.fail(f"TEST FALLÓ {e}")
