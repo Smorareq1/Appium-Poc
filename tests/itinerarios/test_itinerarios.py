@@ -93,7 +93,7 @@ class test_itinerarios:
                     print("➡️ Se omite el flujo de Check-in ya que no estaba pendiente o ya se había completado.")
 
                 # Venta
-                venta
+
 
             else:
                 pytest.fail("No hay clientes disponibles en la semana")

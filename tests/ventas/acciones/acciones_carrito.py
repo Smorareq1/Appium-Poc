@@ -6,34 +6,39 @@ from selenium.webdriver.support import expected_conditions as EC
 import pytest
 
 
-def abrir_carrito(driver):
+
+def abrir_carrito(driver, timeout=10):
     """
-    Hace clic en el botón central de la barra de navegación inferior usando
-    coordenadas porcentuales para adaptarse a diferentes tamaños de pantalla.
+    Hace clic en el botón central de la barra de navegación (carrito)
+    localizándolo mediante XPath por su relación con los elementos adyacentes.
+    Este método es robusto y no depende de las coordenadas de la pantalla.
     """
-    print("\n--- ACCIÓN: Abrir el carrito ---")
+    print("\n--- ACCIÓN: Abrir el carrito (Método Mejorado con XPath) ---")
     try:
-        # Obtener el tamaño de la pantalla
-        size = driver.get_window_size()
-        width = size['width']
-        height = size['height']
+        # --- CORRECCIÓN ---
+        # Este XPath busca un elemento 'android.view.View' clickeable dentro de la barra
+        # de navegación que NO tiene una descripción de contenido ('content-desc').
+        # Basado en el XML, este es el único botón que cumple esa condición, haciéndolo un selector fiable.
+        # La primera parte (../) sube al contenedor padre desde 'Clientes' para buscar desde ahí.
+        cart_button_xpath = "//android.view.View[@content-desc='Clientes']/../android.view.View[@clickable='true' and not(@content-desc)]"
 
-        # Calcular las coordenadas basadas en porcentajes (50% H, 95% V)
-        x_coordinate = int(width * 0.50)
-        y_coordinate = int(height * 0.95)
+        print(f"Buscando el botón del carrito con el XPath corregido: {cart_button_xpath}")
 
-        print(f"Dimensiones de la pantalla: {width}x{height}.")
-        print(f"Haciendo tap en coordenadas calculadas: ({x_coordinate}, {y_coordinate})")
+        # Usamos WebDriverWait para esperar de forma inteligente a que el botón esté presente y sea clickeable.
+        wait = WebDriverWait(driver, timeout)
+        carrito_button = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, cart_button_xpath))
+        )
 
-        # Realizar el tap en las coordenadas calculadas
-        # El método tap espera una lista de tuplas de coordenadas
-        driver.tap([(x_coordinate, y_coordinate)])
+        print("✅ Botón del carrito encontrado y listo para ser presionado.")
+        carrito_button.click()
 
-        time.sleep(4)  # Pausa mayor para esperar la transición a la nueva pantalla
-        print("✅ Tap realizado exitosamente.")
+        time.sleep(3)  # Pausa para esperar la transición de la pantalla.
+        print("✅ Clic en el botón del carrito realizado exitosamente.")
 
     except Exception as e:
-        pytest.fail(f"Ocurrió un error al intentar hacer tap por coordenadas porcentuales: {e}")
+        pytest.fail(f"Ocurrió un error al intentar hacer clic en el botón del carrito con XPath: {e}")
+
 
 def hacer_swipe_en_resumen_compra(driver):
     """
