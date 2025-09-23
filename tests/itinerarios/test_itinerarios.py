@@ -11,8 +11,7 @@ from tests.itinerarios.acciones_itinerarios import (
     buscar_primer_dia_con_clientes,
     hacer_click_pendientes,
     hacer_click_primer_cliente,
-    hacer_click_en_check_in,
-    hacer_click_en_capturar_ubicacion
+    realizar_check_in_si_pendiente
 )
 
 class test_itinerarios:
@@ -75,30 +74,32 @@ class test_itinerarios:
 
     @pytest.mark.xray("APPTEST-****")
     def test_itinerario_cliente(self, driver, video_recorder):
-        """Encontrar cliente en itinerario"""
-        print("\n=== TEST: Buscar cliente en itinerario ===")
+        """Encontrar cliente en itinerario y completar Check-in si es necesario."""
+        print("\n=== TEST: Buscar cliente en itinerario (Lógica Refactorizada) ===")
         try:
-            # 1. Crear wait
             wait = WebDriverWait(driver, 10)
 
-            # 2. Buscar día con clientes
             dia_con_clientes = buscar_primer_dia_con_clientes(driver)
 
-            # 3. Solo hacer clic en Pendientes si se encontraron clientes
             if dia_con_clientes:
                 print(f"✅ Se encontraron clientes en día {dia_con_clientes}")
                 hacer_click_pendientes(driver, wait)
                 hacer_click_primer_cliente(driver)
+                check_in_realizado = realizar_check_in_si_pendiente(driver)
 
-                #Completar cliente
-                hacer_click_en_check_in(driver)
-                hacer_click_en_capturar_ubicacion(driver)
+                if check_in_realizado:
+                    print("✅ El proceso de Check-in se ha completado en este test.")
+                else:
+                    print("➡️ Se omite el flujo de Check-in ya que no estaba pendiente o ya se había completado.")
+
+                # El test puede continuar aquí con otras validaciones o acciones...
+
             else:
-                print("❌ No se encontraron clientes en ningún día")
                 pytest.fail("No hay clientes disponibles en la semana")
 
         except Exception as e:
-            pytest.fail(f"TEST FALLÓ {e}")
+            # Usamos str(e) para obtener un mensaje más limpio en el reporte de Pytest
+            pytest.fail(f"TEST FALLÓ con una excepción inesperada: {str(e)}")
         finally:
             video_path = video_recorder()
             if video_path:

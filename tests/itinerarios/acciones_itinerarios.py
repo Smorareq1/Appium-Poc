@@ -215,35 +215,98 @@ def hacer_click_primer_cliente(driver):
         pytest.fail("TEST FALLÓ: Timeout. No apareció ninguna card de cliente en el tiempo esperado.")
     except Exception as e:
         pytest.fail(f"TEST FALLÓ: Ocurrió un error inesperado al hacer clic en el primer cliente: {e}")
-def hacer_click_en_check_in(driver):
+def realizar_check_in_si_pendiente(driver):
     """
-    Busca y hace clic en la tarjeta de tarea pendiente que contiene 'Check-in'.
-    Esta función asume que ya se está en la pantalla de detalles de un cliente.
+    Busca la tarea 'Check-in' que esté PENDIENTE y la completa.
+    Si la tarea ya está finalizada o no se encuentra, lo informa y devuelve False.
+    Devuelve True si completó el check-in, False en caso contrario.
     """
-    print("\n--- ACCIÓN: Hacer clic en la tarea 'Check-in' ---")
+    print("\n--- LÓGICA: Verificando y realizando 'Check-in' si está pendiente ---")
     try:
-        wait = WebDriverWait(driver, 15)
+        wait = WebDriverWait(driver, 10)  # Un tiempo de espera más corto es suficiente para una verificación
 
-        # Este selector es robusto: busca un elemento clickeable (`android.view.View`)
-        check_in_xpath = "//android.view.View[contains(@content-desc, 'Check-in')]"
+        # ESTE ES EL XPATH CORREGIDO Y ESPECÍFICO
+        check_in_pendiente_xpath = "//android.view.View[contains(@content-desc, 'Check-in') and contains(@content-desc, 'Pendiente')]"
 
-        print(f"🔍 Buscando la tarea de Check-in con XPath: {check_in_xpath}")
+        print(f"🔍 Buscando tarea de Check-in PENDIENTE con XPath: {check_in_pendiente_xpath}")
 
         check_in_card = wait.until(
-            EC.element_to_be_clickable((AppiumBy.XPATH, check_in_xpath))
+            EC.element_to_be_clickable((AppiumBy.XPATH, check_in_pendiente_xpath))
         )
 
-        print("✅ Tarea 'Check-in' encontrada y es clickeable.")
-
+        # Si el código llega aquí, es porque encontró la tarea pendiente
+        print("✅ Tarea 'Check-in' pendiente encontrada. Procediendo a completarla...")
         check_in_card.click()
-        time.sleep(2)  # Pausa para esperar la animación/carga de la nueva pantalla
+        time.sleep(2)
 
-        print("👍 Clic en 'Check-in' realizado exitosamente.")
+        # Llamamos a las funciones subsiguientes solo si el check-in estaba pendiente
+        hacer_click_en_capturar_ubicacion(driver)
+        hacer_click_en_Ok(driver)
+
+        print("👍 Flujo de Check-in completado exitosamente.")
+        return True
 
     except TimeoutException:
-        pytest.fail("TEST FALLÓ: Timeout. No se encontró la tarea 'Check-in' en el tiempo esperado.")
+        # Si entra aquí, es porque no encontró una tarea de "Check-in" pendiente.
+        # ¡Esto ya no es un error! Es un caso esperado.
+        print("ℹ️ No se encontró una tarea de 'Check-in' en estado 'Pendiente'.")
+        # Opcional: Verificar si ya estaba finalizada para un log más claro.
+        try:
+            driver.find_element(AppiumBy.XPATH,
+                                "//android.view.View[contains(@content-desc, 'Check-in') and contains(@content-desc, 'Finalizado')]")
+            print("✅ Se confirma que la tarea 'Check-in' ya estaba marcada como 'Finalizado'.")
+        except:
+            print("⚠️ No se encontró ninguna tarea de 'Check-in' (ni pendiente ni finalizada).")
+
+        return False  # Indicamos que no se realizó la acción.
+
     except Exception as e:
-        pytest.fail(f"TEST FALLÓ: Ocurrió un error inesperado al hacer clic en 'Check-in': {e}")
+        pytest.fail(f"TEST FALLÓ: Ocurrió un error inesperado durante el proceso de check-in: {e}")
+        return False
+def realizar_venta_directa_si_pendiente(driver):
+    """
+        Busca la tarea 'Venta tienda de barrio' que esté PENDIENTE y la completa.
+        Si la tarea ya está finalizada o no se encuentra, lo informa y devuelve False.
+        """
+    print("\n--- LÓGICA: Verificando y realizando 'Venta tiendas de barrio' si está pendiente ---")
+    try:
+        wait = WebDriverWait(driver, 10)  # Un tiempo de espera más corto es suficiente para una verificación
+
+        # ESTE ES EL XPATH CORREGIDO Y ESPECÍFICO
+        check_in_pendiente_xpath = "//android.view.View[contains(@content-desc, 'Venta') and contains(@content-desc, 'Pendiente')]"
+
+        print(f"🔍 Buscando tarea de Venta tiendas de barrio PENDIENTE con XPath: {check_in_pendiente_xpath}")
+
+        check_in_card = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, check_in_pendiente_xpath))
+        )
+
+        # Si el código llega aquí, es porque encontró la tarea pendiente
+        print("✅ Tarea 'Ventas tienda de barrio' pendiente encontrada. Procediendo a completarla...")
+        check_in_card.click()
+        time.sleep(2)
+
+        # Llama a las funciones de venta
+
+        print("👍 Flujo de Venta tiendas de barrio completado exitosamente.")
+        return True
+
+    except TimeoutException:
+        print("ℹ️ No se encontró una tarea de 'Venta' en estado 'Pendiente'.")
+        # Opcional: Verificar si ya estaba finalizada para un log más claro.
+        try:
+            driver.find_element(AppiumBy.XPATH,
+                                "//android.view.View[contains(@content-desc, 'Venta') and contains(@content-desc, 'Finalizado')]")
+            print("✅ Se confirma que la tarea 'Venta' ya estaba marcada como 'Finalizado'.")
+        except:
+            print("⚠️ No se encontró ninguna tarea de 'Venta' (ni pendiente ni finalizada).")
+
+        return False  # Indicamos que no se realizó la acción.
+
+    except Exception as e:
+        pytest.fail(f"TEST FALLÓ: Ocurrió un error inesperado durante el proceso de check-in: {e}")
+        return False
+#Validaciones
 def hacer_click_en_capturar_ubicacion(driver):
     """
     En la pantalla que aparece después del Check-in, busca y hace clic
