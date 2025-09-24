@@ -4,7 +4,7 @@ from appium.webdriver.common.appiumby import AppiumBy
 from selenium.common.exceptions import NoSuchElementException
 
 class test_catalogo:
-    @pytest.mark.xray("APPTEST-9999") #KEY
+    @pytest.mark.xray("ATC-CATALOGO-BOTON")
     def test_click_catalogo_button(self, driver, video_recorder):
         """Test para hacer click en el botón Catálogo"""
         print("\n=== TEST: Click en botón Catálogo ===")
@@ -47,7 +47,7 @@ class test_catalogo:
             if video_path:
                 print(f"📹 Video evidencia guardado: {video_path}")
 
-    @pytest.mark.xray("APPTEST-9999")
+    @pytest.mark.xray("ATC-CATALOGO-COMBOBOX_CLIENTE")
     def test_click_combobox_selecciona_cliente(self, driver, video_recorder):
         """Test para hacer click en el combobox 'Selecciona un cliente'"""
         print("\n=== TEST: Click en combobox 'Selecciona un cliente' ===")
@@ -84,7 +84,7 @@ class test_catalogo:
                 print(f"📹 Video evidencia guardado: {video_path}")
 
     # Seleccionar al primer cliente encontrado
-    @pytest.mark.xray("APPTEST-9999")
+    @pytest.mark.xray("ATC-CATALOGO-PRIMER_CLIENTE")
     def test_seleccionar_primer_cliente(self, driver, video_recorder):
         """Test para seleccionar el primer cliente disponible"""
         print("\n=== TEST: Seleccionar primer cliente disponible ===")
@@ -162,7 +162,7 @@ class test_catalogo:
             if video_path:
                 print(f"📹 Video evidencia guardado: {video_path}")
 
-    @pytest.mark.xray("APPTEST-9999")
+    @pytest.mark.xray("ATC-CATALOGO-SELECCIONAR_BOTON")
     def test_clicl_seleccionar_button(self, driver, video_recorder):
         """Test para hacer click en el botón 'Seleccionar'"""
         print("\n=== TEST: Click en botón 'Seleccionar' ===")
