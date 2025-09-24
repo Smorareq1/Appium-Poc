@@ -6,7 +6,7 @@ from tests.ventas.acciones.acciones_venta_directa import (
 )
 
 from tests.itinerarios.acciones_itinerarios import (
-    realizar_check_out_si_pendiente
+    hacer_click_en_atras
 )
 
 from tests.ventas.acciones.acciones_carrito import (
@@ -21,7 +21,7 @@ class test_puntuales:
     @pytest.mark.xray("APPTEST-****")
     def test_carrito(self, driver, video_recorder):
         try:
-            seleccionar_primera_tarjeta_producto()
+            hacer_click_en_atras(driver)
 
         except Exception as e:
             pytest.fail(f"TEST FALLÓ {e}")

@@ -420,3 +420,32 @@ def hacer_click_en_Ok(driver):
         pytest.fail("TEST FALLÓ: Timeout. No se encontró el botón 'Ok' en el tiempo esperado.")
     except Exception as e:
         pytest.fail(f"TEST FALLÓ: Ocurrió un error inesperado al hacer clic en 'Ok': {e}")
+
+# Atras
+def hacer_click_en_atras(driver):
+    """
+    Hace clic en el botón 'Atrás' que aparece en la pantalla.
+    """
+    print("\n--- ACCIÓN: Hacer clic en 'Atrás' ---")
+    try:
+        wait = WebDriverWait(driver, 10)
+
+        atras_xpath = "//*[@content-desc='Atrás']"
+
+        print(f"🔍 Buscando el botón 'Atrás' con XPath: {atras_xpath}")
+
+        boton_atras = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, atras_xpath))
+        )
+
+        print("✅ Botón 'Atrás' encontrado y es clickeable.")
+
+        boton_atras.click()
+        time.sleep(2)  # Pausa para esperar la transición de pantalla
+
+        print("👍 Clic en 'Atrás' realizado exitosamente.")
+
+    except TimeoutException:
+        pytest.fail("TEST FALLÓ: Timeout. No se encontró el botón 'Atrás' en el tiempo esperado.")
+    except Exception as e:
+        pytest.fail(f"TEST FALLÓ: Ocurrió un error inesperado al hacer clic en 'Atrás': {e}")
