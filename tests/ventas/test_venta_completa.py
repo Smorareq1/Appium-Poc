@@ -208,7 +208,7 @@ class Test_Venta_Completa:
             seleccionar_primera_direccion_entrega(driver)
             escribir_comentario_pedido(driver)
             abrir_carrito(driver)
-            abrir_carrito(driver)
+            aceptar_pedido(driver)
             click_ok(driver)
 
 
