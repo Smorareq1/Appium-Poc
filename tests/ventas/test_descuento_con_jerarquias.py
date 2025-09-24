@@ -7,6 +7,7 @@ from selenium.common.exceptions import NoSuchElementException
 from tests.ventas.acciones.acciones_busqueda import (
     realizar_click_en_buscar,
     escribir_y_buscar_sku,
+    seleccionar_resultado_por_sku,
     seleccionar_primera_tarjeta_producto
 )
 
@@ -25,7 +26,7 @@ from tests.ventas.acciones.acciones_carrito import (
 )
 
 
-class estDescuentoConJerarquias:
+class TestDescuentoConJerarquias:
     @pytest.mark.xray("APPTEST-DESCUENTO-JERARQUIAS")
     def test_descuento_con_jerarquias(self, driver, video_recorder):
         """
@@ -50,12 +51,12 @@ class estDescuentoConJerarquias:
         7. Confirmar pedido
         """
         print("\n🧪 === TEST: DESCUENTO CON JERARQUÍAS ===")
-        print("📦 Producto: Mb Clinity Espuma 75")
+        print("📦 Producto: Mb Clinity Espuma 75 Mango")
         print("🔢 Cantidad: 22 unidades")
         print("🎯 Objetivo: Validar descuentos automáticos por jerarquía de usuario")
         print("=" * 60)
 
-        producto_buscar = "Mb Clinity Espuma 75"
+        producto_buscar = "120801640"
         cantidad_producto = 22
 
         try:
@@ -68,11 +69,14 @@ class estDescuentoConJerarquias:
             escribir_y_buscar_sku(driver, producto_buscar)
             print(f"✅ Producto '{producto_buscar}' buscado.")
 
-            # 3) SELECCIONAR PRIMERA OPCIÓN
+            # Paso 3: Seleccionar el resultado que aparece
+            seleccionar_resultado_por_sku(driver, producto_buscar)
+
+            # 4) SELECCIONAR PRIMERA OPCIÓN
             seleccionar_primera_tarjeta_producto(driver)
             print("✅ Primera opción seleccionada - pantalla de detalle abierta.")
 
-            # 4) INGRESAR CANTIDAD
+            # 5) INGRESAR CANTIDAD
             print(f"📝 Ingresando cantidad: {cantidad_producto} unidades...")
             ingresar_cantidad_producto(driver, cantidad_producto)
             print("✅ Cantidad ingresada.")

@@ -128,3 +128,77 @@ def agregar_producto_al_carrito(driver):
     except Exception as e:
         pytest.fail(f"Ocurrió un error al intentar hacer tap por coordenadas porcentuales: {e}")
 
+
+def incrementar_productos_con_botones(driver, clics_base, incremento_clics):
+    """
+    Busca todos los botones de incremento ('+') en la pantalla y hace clic en ellos
+    de forma incremental.
+
+    Esta función está diseñada para interfaces donde cada producto tiene un botón '+'
+    en lugar de un campo de texto para ingresar la cantidad.
+
+    :param driver: La instancia del driver de Appium.
+    :param clics_base: El número de veces que se hará clic en el botón del PRIMER producto.
+    :param incremento_clics: El número de clics adicionales para cada producto subsecuente.
+                             Ej: Si es 2, el segundo producto recibirá clics_base + 2 clics,
+                             el tercero clics_base + 4, y así sucesivamente.
+    """
+    print(f"\n--- ACCIÓN: Incrementar productos con botones (Base: {clics_base}, Incremento: +{incremento_clics}) ---")
+
+    try:
+        # La clave es localizar todos los botones '+' que son los que añaden cantidad.
+        # Usamos XPath porque nos permite ser muy específicos con el content-desc.
+        xpath_selector = "//android.widget.Button[@content-desc='+']"
+        print(f"🔍 Buscando todos los botones de incremento con XPath: \"{xpath_selector}\"")
+
+        # Buscar todos los botones de incremento
+        botones_incremento = driver.find_elements(AppiumBy.XPATH, xpath_selector)
+
+        cantidad_botones = len(botones_incremento)
+        print(f"✅ Se encontraron {cantidad_botones} botones de incremento ('+').")
+
+        if cantidad_botones == 0:
+            print("⚠️ No se encontraron botones de incremento ('+'). No se realizará ninguna acción.")
+            return
+
+        # Iterar sobre cada botón de incremento encontrado
+        for i, boton in enumerate(botones_incremento):
+            # Calcular cuántos clics corresponden a este botón
+            clics_para_este_boton = clics_base + (i * incremento_clics)
+
+            print(f"\n📝 Procesando Botón {i + 1}/{cantidad_botones} - Se harán {clics_para_este_boton} clics.")
+
+            if clics_para_este_boton <= 0:
+                print(f"   ⏭️  Saltando botón {i + 1} porque el número de clics es cero o negativo.")
+                continue
+
+            try:
+                # Hacer clic en el botón la cantidad de veces calculada
+                for j in range(clics_para_este_boton):
+                    print(f"   🖱️  Haciendo clic {j + 1}/{clics_para_este_boton}...")
+                    boton.click()
+                    time.sleep(0.2)  # Pequeña pausa para asegurar que la UI procese el clic
+
+                print(f"   ✅ Botón {i + 1} procesado exitosamente con {clics_para_este_boton} clics.")
+
+            except Exception as e:
+                print(f"   ⚠️ Error al hacer clic en el botón {i + 1}: {e}")
+                # Continuamos con el siguiente botón aunque este falle
+                continue
+
+        time.sleep(1)
+        print("\n" + "=" * 50)
+        print(f"🎉 ✅ PROCESO COMPLETADO: Se procesaron {cantidad_botones} productos.")
+        print(f"📊 Patrón de clics aplicado: Base {clics_base}, Incremento por producto {incremento_clics}")
+        print("=" * 50)
+
+    except NoSuchElementException:
+        print("❌ No se encontraron botones de incremento ('+') en la pantalla.")
+        pytest.fail("Fallo crítico: No se encontraron botones de producto para interactuar.")
+
+    except Exception as e:
+        print(f"💥 Error general al interactuar con los botones de incremento: {e}")
+        pytest.fail(f"Ocurrió un error inesperado durante la interacción con los botones: {e}")
+
+
+
