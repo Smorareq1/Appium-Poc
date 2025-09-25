@@ -1,14 +1,17 @@
 import time
 import pytest
+from appium.webdriver.common.appiumby import AppiumBy
 
 from tests.clientes.acciones_clientes import (
     realizar_long_press_en_tarjeta_cliente,
     pulsar_boton_central_nav,
+    escribir_nit,
+    escribir_dpi_representante
 )
 
 
 class test_clientes:
-    @pytest.mark.xray("ATC-CLIENTES-BOTON")
+    @pytest.mark.xray("ATC-32")
     def test_clientes_button(self, driver, video_recorder):
         """Test para hacer click en el botón Clientes del menú de navegación"""
         print("\n=== TEST: Click en botón Clientes del menú inferior (método robusto) ===")
@@ -28,7 +31,7 @@ class test_clientes:
             if video_path:
                 print(f"📹 Video evidencia de la configuración guardado en: {video_path}")
 
-    @pytest.mark.xray("ATC-CLIENTES-LONGPRESS-CARD")
+    @pytest.mark.xray("ATC-33")
     def test_long_press_cliente_card(self, driver, video_recorder):
         """
         Test que valida la acción de mantener presionado una tarjeta de cliente,
@@ -73,6 +76,44 @@ class test_clientes:
 
             pytest.fail(f"TEST FALLÓ: {e}")
 
+        finally:
+            video_path = video_recorder()
+            if video_path:
+                print(f"📹 Video evidencia guardado en: {video_path}")
+
+    @pytest.mark.xray("ATC-34")
+    def test_llenar_campos(self, driver, video_recorder):
+        """
+        Test que llena los campos el formulario de nuevos clientes GENERAL
+        y verifica que los valores se hayan ingresado correctamente.
+        """
+        print("\n=== TEST: Llenar formulario GENERAL ===")
+        try:
+            # Valores a ingresar
+            nit_a_escribir = "123456789"
+            dpi_a_escribir = "1234567890101"
+
+            # Paso 1: Llamar a la función para escribir el NIT
+            escribir_nit(driver, nit_a_escribir)
+
+            # Paso 2: Llamar a la función para escribir el DPI
+            escribir_dpi_representante(driver, dpi_a_escribir)
+
+            # --- VERIFICACIÓN (ASSERT) ---
+            print("\nVerificando que los datos se escribieron correctamente...")
+
+            nit_field = driver.find_element(AppiumBy.XPATH, "//*[@hint='*NIT']")
+            assert nit_field.text == nit_a_escribir
+            print(f"✅ Verificación NIT exitosa: el campo contiene '{nit_field.text}'")
+
+            dpi_field = driver.find_element(AppiumBy.XPATH, "//*[@hint='DPI del representante']")
+            assert dpi_field.text == dpi_a_escribir
+            print(f"✅ Verificación DPI exitosa: el campo contiene '{dpi_field.text}'")
+
+            print("\n✅ TEST PASADO: Los campos se llenaron y verificaron exitosamente.")
+
+        except Exception as e:
+            pytest.fail(f"TEST FALLÓ: {e}")
         finally:
             video_path = video_recorder()
             if video_path:

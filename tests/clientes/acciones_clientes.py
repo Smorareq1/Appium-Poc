@@ -1,11 +1,11 @@
 # acciones_cliente.py
 
-from selenium.common.exceptions import NoSuchElementException, TimeoutException
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from appium.webdriver.common.appiumby import AppiumBy
 import time
 
+from appium.webdriver.common.appiumby import AppiumBy
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 def realizar_long_press_en_tarjeta_cliente(driver):
     """
@@ -82,3 +82,127 @@ def pulsar_boton_central_nav(driver):
         print(f"❌ Error buscando botón central: {e}")
         raise
 
+def escribir_nit(driver, nit, timeout=10):
+    """
+    Busca el campo de texto con el hint '*NIT', hace click para activarlo,
+    lo limpia, escribe el valor proporcionado y presiona Enter.
+
+    Args:
+        driver: La instancia del driver de Appium.
+        nit (str): El número de NIT a escribir.
+        timeout (int): Tiempo máximo de espera.
+    """
+    print(f"--- ACCIÓN: Escribir NIT: '{nit}' ---")
+    try:
+        nit_xpath = "//*[@hint='*NIT']"
+        print(f"Buscando campo NIT con XPath: {nit_xpath}")
+        wait = WebDriverWait(driver, timeout)
+
+        # Esperar que el campo esté presente y sea clickeable
+        nit_field = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, nit_xpath))
+        )
+
+        print("Campo NIT encontrado. Haciendo click para activarlo...")
+        nit_field.click()  # CLICK PARA DAR FOCO
+
+        time.sleep(0.5)  # Pequeña pausa para que se active el campo
+
+        print("Limpiando campo y escribiendo NIT...")
+        nit_field.clear()
+        nit_field.send_keys(nit)
+
+        print("Presionando Enter...")
+        driver.press_keycode(66)  # Enter
+
+        print(f"✅ NIT '{nit}' escrito correctamente")
+
+    except TimeoutException:
+        print(f"❌ ERROR: No se encontró el campo NIT en {timeout} segundos")
+        raise
+    except Exception as e:
+        print(f"❌ ERROR escribiendo NIT: {e}")
+        raise
+
+def escribir_dpi_representante(driver, dpi, timeout=10):
+    """
+    Busca el campo de texto con el hint 'DPI del representante',
+    hace click para activarlo, lo limpia, escribe el valor y presiona Enter.
+
+    Args:
+        driver: La instancia del driver de Appium.
+        dpi (str): El número de DPI a escribir.
+        timeout (int): Tiempo máximo de espera.
+    """
+    print(f"--- ACCIÓN: Escribir DPI del representante: '{dpi}' ---")
+    try:
+        dpi_xpath = "//*[@hint='*DPI del representante']"
+        print(f"Buscando campo DPI con XPath: {dpi_xpath}")
+        wait = WebDriverWait(driver, timeout)
+
+        # Esperar que el campo esté presente y sea clickeable
+        dpi_field = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, dpi_xpath))
+        )
+
+        print("Campo DPI encontrado. Haciendo click para activarlo...")
+        dpi_field.click()  # CLICK PARA DAR FOCO
+
+        time.sleep(0.5)  # Pequeña pausa para que se active el campo
+
+        print("Limpiando campo y escribiendo DPI...")
+        dpi_field.clear()
+        dpi_field.send_keys(dpi)
+
+        print("Presionando Enter...")
+        driver.press_keycode(66)  # Enter
+
+        print(f"✅ DPI '{dpi}' escrito correctamente")
+
+    except TimeoutException:
+        print(f"❌ ERROR: No se encontró el campo DPI en {timeout} segundos")
+        raise
+    except Exception as e:
+        print(f"❌ ERROR escribiendo DPI: {e}")
+        raise
+
+def escribir_en_campo_generico(driver, hint_text, valor, timeout=10):
+    """
+    Función genérica para escribir en cualquier campo de texto por su hint.
+
+    Args:
+        driver: La instancia del driver de Appium.
+        hint_text (str): El texto del hint del campo a buscar.
+        valor (str): El valor a escribir.
+        timeout (int): Tiempo máximo de espera.
+    """
+    print(f"--- ACCIÓN: Escribir '{valor}' en campo con hint '{hint_text}' ---")
+    try:
+        campo_xpath = f"//*[@hint='{hint_text}']"
+        wait = WebDriverWait(driver, timeout)
+
+        # Esperar que el campo esté presente y sea clickeable
+        campo = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, campo_xpath))
+        )
+
+        print(f"Campo encontrado. Haciendo click para activarlo...")
+        campo.click()  # CLICK PARA DAR FOCO
+
+        time.sleep(0.5)  # Pausa para activación
+
+        print("Limpiando y escribiendo...")
+        campo.clear()
+        campo.send_keys(valor)
+
+        print("Presionando Enter...")
+        driver.press_keycode(66)
+
+        print(f"✅ Valor '{valor}' escrito en campo '{hint_text}'")
+
+    except TimeoutException:
+        print(f"❌ ERROR: No se encontró campo con hint '{hint_text}' en {timeout} segundos")
+        raise
+    except Exception as e:
+        print(f"❌ ERROR escribiendo en campo: {e}")
+        raise
