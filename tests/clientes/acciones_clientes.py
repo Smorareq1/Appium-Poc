@@ -3,9 +3,39 @@
 import time
 
 from appium.webdriver.common.appiumby import AppiumBy
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+
+
+def ensure_keyboard_closed(driver):
+    """
+    Función auxiliar para asegurar que el teclado esté cerrado.
+    Intenta múltiples métodos para cerrar el teclado.
+    """
+    try:
+        # Método 1: hide_keyboard()
+        driver.hide_keyboard()
+        print("Teclado cerrado con hide_keyboard()")
+    except Exception:
+        try:
+            # Método 2: Presionar back si hay teclado
+            if driver.is_keyboard_shown():
+                driver.back()
+                print("Teclado cerrado con back()")
+        except Exception:
+            try:
+                # Método 3: Click en una zona vacía para quitar foco
+                size = driver.get_window_size()
+                x = int(size['width'] / 2)
+                y = int(size['height'] * 0.1)  # Top area
+                driver.tap([(x, y)], 100)
+                print("Teclado cerrado con tap en zona vacía")
+            except Exception:
+                print("No se pudo cerrar el teclado, continuando...")
+
+    # Espera breve para asegurar que el teclado se cierre
+    time.sleep(0.5)
 
 def realizar_long_press_en_tarjeta_cliente(driver):
     """
@@ -283,5 +313,155 @@ def escribir_version_dpi(driver, version_dpi, timeout=10):
         print(f"❌ ERROR escribiendo Versión DPI: {e}")
         raise
 
+def seleccionar_vencimiento_dpi(driver, dia, year_actual , timeout=10):
+    """
+    Selecciona una fecha en el campo "*Vencimiento DPI".
+    Versión optimizada que usa solo los selectores que funcionaron.
 
+    Args:
+        driver: La instancia del driver de Appium.
+        dia (str): El día a seleccionar (ej: "13", "01", "30")
+        year_actual (str): Año actual mostrado en el date picker (por defecto "2025")
+        timeout (int): Tiempo máximo de espera.
+    """
+    year_siguiente = str(int(year_actual) + 1)
+    print(f"📅 Seleccionando fecha en Vencimiento DPI - Año: {year_siguiente}, Día: '{dia}'")
 
+    try:
+        # Paso 1: Hacer click en el campo Vencimiento DPI
+        print("🎯 Haciendo click en campo Vencimiento DPI...")
+        vencimiento_xpath = "//*[@hint='*Vencimiento DPI']"
+        wait = WebDriverWait(driver, timeout)
+
+        vencimiento_field = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, vencimiento_xpath))
+        )
+
+        vencimiento_field.click()
+        print("✅ Date picker abierto")
+        time.sleep(2)
+
+        # Paso 2: Hacer click en año actual
+        print(f"🎯 Seleccionando año {year_actual}...")
+        year_current = driver.find_element("xpath", f"//*[contains(@text, '{year_actual}')]")
+        year_current.click()
+        print(f"✅ Año {year_actual} clickeado")
+        time.sleep(1)
+
+        # Paso 3: Seleccionar año siguiente
+        print(f"🎯 Seleccionando año {year_siguiente}...")
+        year_next = driver.find_element("xpath", f"//*[@content-desc='{year_siguiente}']")
+        year_next.click()
+        print(f"✅ Año {year_siguiente} seleccionado")
+        time.sleep(1)
+
+        # Paso 4: Seleccionar el día
+        print(f"🎯 Seleccionando día '{dia}'...")
+        day_element = driver.find_element("xpath", f"//*[@content-desc='{dia}']")
+        day_element.click()
+        print(f"✅ Día '{dia}' seleccionado")
+        time.sleep(1)
+
+        # Paso 5: Confirmar con botón "aceptar"
+        print("🎯 Confirmando selección...")
+        aceptar_button = driver.find_element("xpath", "//*[@content-desc='Aceptar']")
+        aceptar_button.click()
+        print("✅ Fecha confirmada")
+
+        time.sleep(1)
+        print(f"✅ Vencimiento DPI completado - Año: {year_siguiente}, Día: {dia}")
+
+    except TimeoutException:
+        print(f"❌ ERROR: No se encontró el campo Vencimiento DPI en {timeout} segundos")
+        raise
+    except Exception as e:
+        print(f"❌ ERROR seleccionando fecha: {e}")
+        raise
+
+def escribir_nota(driver, comentario, timeout=10):
+    """
+    Busca el campo con hint 'Nota', hace click para activarlo,
+    y escribe el comentario proporcionado.
+
+    Args:
+        driver: La instancia del driver de Appium.
+        comentario (str): El texto/comentario a escribir en el campo Nota.
+        timeout (int): Tiempo máximo de espera.
+    """
+    print(f"📝 Escribiendo nota: '{comentario}'")
+    try:
+        nota_xpath = "//*[@hint='Nota']"
+        print("🎯 Buscando campo Nota...")
+        wait = WebDriverWait(driver, timeout)
+
+        # Esperar que el campo esté presente y sea clickeable
+        nota_field = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, nota_xpath))
+        )
+
+        print("Campo Nota encontrado. Haciendo click para activarlo...")
+        nota_field.click()  # CLICK PARA DAR FOCO
+
+        time.sleep(0.5)  # Pequeña pausa para que se active el campo
+
+        print("Limpiando campo y escribiendo nota...")
+        nota_field.clear()
+        nota_field.send_keys(comentario)
+
+        print("Ocultando teclado...")
+        ensure_keyboard_closed(driver)
+
+        print(f"✅ Nota '{comentario}' escrita correctamente")
+
+    except TimeoutException:
+        print(f"❌ ERROR: No se encontró el campo Nota en {timeout} segundos")
+        raise
+    except Exception as e:
+        print(f"❌ ERROR escribiendo nota: {e}")
+        raise
+
+def hacer_click_continuar(driver, timeout=10):
+    """
+    Busca y hace click en el botón con content-desc 'Continuar'.
+
+    Args:
+        driver: La instancia del driver de Appium.
+        timeout (int): Tiempo máximo de espera.
+    """
+    print("🎯 Buscando botón Continuar...")
+    try:
+        continuar_xpath = "//*[@content-desc='Continuar']"
+        wait = WebDriverWait(driver, timeout)
+
+        continuar_button = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, continuar_xpath))
+        )
+
+        print("Botón Continuar encontrado. Haciendo click...")
+        continuar_button.click()
+
+        time.sleep(2)  # Pausa para que procese la acción
+        print("✅ Botón Continuar presionado correctamente")
+
+    except TimeoutException:
+        print(f"❌ ERROR: No se encontró el botón Continuar en {timeout} segundos")
+        raise
+    except Exception as e:
+        print(f"❌ ERROR haciendo click en Continuar: {e}")
+        raise
+
+def hacer_scroll_hacia_arriba(driver, cantidad_scroll=3):
+    try:
+        screen_size = driver.get_window_size()
+        screen_width = screen_size['width']
+        screen_height = screen_size['height']
+
+        start_y = int(screen_height * 0.2)
+        end_y = int(screen_height * 0.8)
+        center_x = int(screen_width * 0.5)
+
+        for i in range(cantidad_scroll):
+            driver.swipe(center_x, start_y, center_x, end_y, duration=800)
+            time.sleep(0.3)
+    except:
+        pass
