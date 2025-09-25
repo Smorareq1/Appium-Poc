@@ -166,7 +166,7 @@ def escribir_dpi_representante(driver, dpi, timeout=10):
     """
     print(f"--- ACCIÓN: Escribir DPI del representante: '{dpi}' ---")
     try:
-        dpi_xpath = "//*[@hint='*DPI del representante']"
+        dpi_xpath = "//*[contains(@hint, 'DPI del representante')]"
         print(f"Buscando campo DPI con XPath: {dpi_xpath}")
         wait = WebDriverWait(driver, timeout)
 
@@ -465,3 +465,399 @@ def hacer_scroll_hacia_arriba(driver, cantidad_scroll=3):
             time.sleep(0.3)
     except:
         pass
+
+# Sucursales
+def seleccionar_tipo_de_ruta(driver, timeout=10):
+    """
+    Hace click en el botón "Tipo de ruta" y selecciona "Venta".
+
+    Args:
+        driver: La instancia del driver de Appium.
+        timeout (int): Tiempo máximo de espera.
+    """
+    print("🎯 Seleccionando Tipo de ruta...")
+
+    try:
+        # Paso 1: Hacer click en el botón Tipo de ruta
+        print("Paso 1: Haciendo click en Tipo de ruta...")
+        tipo_ruta_xpath = "//*[contains(@content-desc, 'Tipo de ruta')]"
+        wait = WebDriverWait(driver, timeout)
+
+        tipo_ruta_button = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, tipo_ruta_xpath))
+        )
+
+        tipo_ruta_button.click()
+        print("✅ Botón Tipo de ruta clickeado")
+        time.sleep(2)  # Esperar que aparezcan las opciones
+
+        # Paso 2: Seleccionar "Venta"
+        print("Paso 2: Seleccionando opción 'Venta'...")
+        venta_xpath = "//*[@content-desc='Venta']"
+
+        venta_option = driver.find_element("xpath", venta_xpath)
+        venta_option.click()
+        print("✅ Opción 'Venta' seleccionada")
+
+        time.sleep(1)
+        print("✅ Tipo de ruta configurado correctamente")
+
+    except TimeoutException:
+        print(f"❌ ERROR: No se encontró el botón Tipo de ruta en {timeout} segundos")
+        raise
+    except Exception as e:
+        print(f"❌ ERROR seleccionando tipo de ruta: {e}")
+        raise
+
+def seleccionar_direccion(driver, opcion_texto, timeout=10):
+    """
+    Hace click en el botón "Dirección" y selecciona una opción cuyo texto contenga
+    la cadena indicada en opcion_texto.
+
+    Args:
+        driver: La instancia del driver de Appium.
+        opcion_texto (str): Texto parcial de la opción a seleccionar.
+        timeout (int): Tiempo máximo de espera.
+    """
+    print("🎯 Seleccionando Dirección...")
+
+    try:
+        # Paso 1: Hacer click en el botón Dirección
+        print("Paso 1: Haciendo click en Dirección...")
+        direccion_xpath = "//*[contains(@content-desc, 'Dirección')]"
+        wait = WebDriverWait(driver, timeout)
+
+        direccion_button = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, direccion_xpath))
+        )
+        direccion_button.click()
+        print("✅ Botón Dirección clickeado")
+        time.sleep(2)  # Esperar que aparezcan las opciones
+
+        # Paso 2: Seleccionar opción según el texto proporcionado
+        print(f"Paso 2: Seleccionando opción que contenga '{opcion_texto}'...")
+        opcion_xpath = f"//*[contains(@content-desc, '{opcion_texto}')]"
+
+        seleccionar_direccion_option = driver.find_element(AppiumBy.XPATH, opcion_xpath)
+        seleccionar_direccion_option.click()
+        print(f"✅ Opción con texto '{opcion_texto}' seleccionada")
+
+        time.sleep(1)
+        print("✅ Dirección configurada correctamente")
+
+    except TimeoutException:
+        print(f"❌ ERROR: No se encontró el botón Dirección en {timeout} segundos")
+        raise
+    except Exception as e:
+        print(f"❌ ERROR seleccionando dirección: {e}")
+        raise
+
+def llenar_formulario_direccion(driver, campo1="", campo2="", campo3="", campo4="", campo5="", timeout=10):
+    """
+    Llena el formulario "Añadir dirección" con los datos proporcionados
+    y presiona el botón Validar al finalizar.
+
+    Args:
+        driver: La instancia del driver de Appium.
+        campo1 (str): Valor para el primer campo (puede ser dirección principal)
+        campo2 (str): Valor para el segundo campo (puede ser ciudad)
+        campo3 (str): Valor para el tercer campo (puede ser código postal)
+        campo4 (str): Valor para el cuarto campo (puede ser referencia)
+        campo5 (str): Valor para el quinto campo (puede ser notas adicionales)
+        timeout (int): Tiempo máximo de espera.
+    """
+    print("📝 Llenando formulario 'Añadir dirección'...")
+
+    # Lista de valores para los campos
+    valores_campos = [campo1, campo2, campo3, campo4, campo5]
+    nombres_campos = ["Campo 1", "Campo 2", "Campo 3", "Campo 4", "Campo 5"]
+
+    try:
+        wait = WebDriverWait(driver, timeout)
+
+        # Buscar todos los EditText del formulario
+        print("🔍 Buscando campos del formulario...")
+        campos_edittext = driver.find_elements("class name", "android.widget.EditText")
+
+        if len(campos_edittext) != 5:
+            print(f"⚠️ Esperaba 5 campos, encontré {len(campos_edittext)}")
+
+        # Llenar cada campo con su valor correspondiente
+        for i, (campo, valor, nombre) in enumerate(zip(campos_edittext, valores_campos, nombres_campos)):
+            if valor:  # Solo llenar si el valor no está vacío
+                try:
+                    print(f"📝 Llenando {nombre}: '{valor}'")
+
+                    # Hacer click para activar el campo
+                    campo.click()
+                    time.sleep(0.3)
+
+                    # Limpiar y escribir
+                    campo.clear()
+                    campo.send_keys(valor)
+
+                    print(f"✅ {nombre} completado")
+
+                except Exception as e:
+                    print(f"⚠️ Error llenando {nombre}: {e}")
+            else:
+                print(f"⏭️ {nombre}: vacío, saltando...")
+
+        # Pequeña pausa antes de validar
+        time.sleep(1)
+        # Presionar ok de android
+        driver.press_keycode(66)
+        # Presionar el botón Validar
+        print("🎯 Presionando botón 'Validar'...")
+        validar_button = driver.find_element("xpath", "//*[@content-desc='Validar']")
+        validar_button.click()
+
+        time.sleep(2)  # Esperar que procese la validación
+        print("✅ Formulario enviado correctamente")
+
+    except TimeoutException:
+        print(f"❌ ERROR: No se pudo completar el formulario en {timeout} segundos")
+        raise
+    except Exception as e:
+        print(f"❌ ERROR llenando formulario de dirección: {e}")
+        raise
+
+def seleccionar_contacto(driver, opcion_texto, timeout=10):
+    """
+    Hace click en el botón "Contacto" y selecciona una opción cuyo texto contenga
+    la cadena indicada en opcion_texto.
+
+    Args:
+        driver: La instancia del driver de Appium.
+        opcion_texto (str): Texto parcial de la opción a seleccionar.
+        timeout (int): Tiempo máximo de espera.
+    """
+    print("🎯 Seleccionando Contacto...")
+
+    try:
+        # Paso 1: Hacer click en el botón Contacto
+        print("Paso 1: Haciendo click en Contacto...")
+        contacto_xpath = "//*[contains(@content-desc, 'Contacto')]"
+        wait = WebDriverWait(driver, timeout)
+
+        contacto_button = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, contacto_xpath))
+        )
+        contacto_button.click()
+        print("✅ Botón Contacto clickeado")
+        time.sleep(2)  # Esperar que aparezcan las opciones
+
+        # Paso 2: Seleccionar opción según el texto proporcionado
+        print(f"Paso 2: Seleccionando opción que contenga '{opcion_texto}'...")
+        opcion_xpath = f"//*[contains(@content-desc, '{opcion_texto}')]"
+
+        seleccionar_contacto_option = driver.find_element(AppiumBy.XPATH, opcion_xpath)
+        seleccionar_contacto_option.click()
+        print(f"✅ Opción con texto '{opcion_texto}' seleccionada")
+
+        time.sleep(1)
+        print("✅ Contacto configurado correctamente")
+
+    except TimeoutException:
+        print(f"❌ ERROR: No se encontró el botón Contacto en {timeout} segundos")
+        raise
+    except Exception as e:
+        print(f"❌ ERROR seleccionando contacto: {e}")
+        raise
+
+def llenar_formulario_contacto(driver, nombres="", apellidos="", puesto="", correo1="", telefono1="", timeout=10):
+    """
+    Llena el formulario "Añadir contacto" con los datos proporcionados
+    y presiona el botón Validar al finalizar.
+
+    Args:
+        driver: La instancia del driver de Appium.
+        nombres (str): Nombre(s) del contacto.
+        apellidos (str): Apellidos del contacto.
+        puesto (str): Puesto o cargo del contacto.
+        correo1 (str): Correo electrónico principal.
+        telefono1 (str): Teléfono principal.
+        timeout (int): Tiempo máximo de espera.
+    """
+    print("📝 Llenando formulario 'Añadir contacto'...")
+
+    # Lista de valores para los campos
+    valores_campos = [nombres, apellidos, puesto, correo1, telefono1]
+    nombres_campos = ["Nombres", "Apellidos", "Puesto", "Correo 1", "Teléfono 1"]
+
+    try:
+        wait = WebDriverWait(driver, timeout)
+
+        # Buscar todos los EditText del formulario
+        print("🔍 Buscando campos del formulario...")
+        campos_edittext = driver.find_elements("class name", "android.widget.EditText")
+
+        if len(campos_edittext) != 5:
+            print(f"⚠️ Esperaba 5 campos, encontré {len(campos_edittext)}")
+
+        # Llenar cada campo con su valor correspondiente
+        for i, (campo, valor, nombre) in enumerate(zip(campos_edittext, valores_campos, nombres_campos)):
+            if valor:  # Solo llenar si el valor no está vacío
+                try:
+                    print(f"📝 Llenando {nombre}: '{valor}'")
+
+                    # Hacer click para activar el campo
+                    campo.click()
+                    time.sleep(0.3)
+
+                    # Limpiar y escribir
+                    campo.clear()
+                    campo.send_keys(valor)
+
+                    print(f"✅ {nombre} completado")
+
+                except Exception as e:
+                    print(f"⚠️ Error llenando {nombre}: {e}")
+            else:
+                print(f"⏭️ {nombre}: vacío, saltando...")
+
+        # Pequeña pausa antes de validar
+        time.sleep(1)
+        # Presionar OK del teclado (Enter en Android)
+        driver.press_keycode(66)
+        # Presionar el botón Validar
+        print("🎯 Presionando botón 'Validar'...")
+        validar_button = driver.find_element("xpath", "//*[@content-desc='Validar']")
+        validar_button.click()
+
+        time.sleep(2)  # Esperar que procese la validación
+        print("✅ Formulario de contacto enviado correctamente")
+
+    except TimeoutException:
+        print(f"❌ ERROR: No se pudo completar el formulario de contacto en {timeout} segundos")
+        raise
+    except Exception as e:
+        print(f"❌ ERROR llenando formulario de contacto: {e}")
+        raise
+
+# Geolozalicaion
+def click_asignar_geolocalizacion(driver, timeout=10):
+    """
+    Hace click en el botón con content-desc que contiene 'Asignar geolocalización'.
+
+    Args:
+        driver: La instancia del driver de Appium.
+        timeout (int): Tiempo máximo de espera.
+    """
+    print("📍 Buscando botón 'Asignar geolocalización'...")
+
+    try:
+        wait = WebDriverWait(driver, timeout)
+        boton_xpath = "//*[contains(@content-desc, 'Asignar geolocalización')]"
+
+        boton = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, boton_xpath))
+        )
+        boton.click()
+
+
+        print("✅ Botón 'Asignar geolocalización' clickeado")
+
+    except TimeoutException:
+        print(f"❌ ERROR: No se encontró el botón 'Asignar geolocalización' en {timeout} segundos")
+        raise
+    except Exception as e:
+        print(f"❌ ERROR al dar click en 'Asignar geolocalización': {e}")
+        raise
+def click_capturar(driver, timeout=10):
+    print("📍 Buscando botón 'Capturar'...")
+
+    try:
+        wait = WebDriverWait(driver, timeout)
+        boton_xpath = "//*[contains(@content-desc, 'Capturar') and @clickable='true']"
+
+        boton = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, boton_xpath))
+        )
+        boton.click()
+
+        print("✅ Botón 'Capturar' clickeado")
+
+    except TimeoutException:
+        print(f"❌ ERROR: No se encontró el botón 'Capturar' en {timeout} segundos")
+        raise
+    except Exception as e:
+        print(f"❌ ERROR al dar click en 'Capturar': {e}")
+        raise
+
+# Borrar otras sucursales y confirmar
+def eliminar_gestiones_extras_iterativo(driver, max_intentos=5):
+    """
+    Elimina gestiones extras de forma iterativa:
+    1. Busca gestiones que NO sean "Gestión 1"
+    2. Elimina la primera que encuentre
+    3. Vuelve a buscar (DOM actualizado)
+    4. Repite hasta que solo quede "Gestión 1"
+
+    Args:
+        driver: La instancia del driver de Appium.
+        timeout (int): Tiempo máximo de espera por elemento.
+        max_intentos (int): Máximo número de gestiones a eliminar (previene bucle infinito).
+    """
+    print("🗑️ Eliminando gestiones extras iterativamente...")
+
+    intentos = 0
+
+    while intentos < max_intentos:
+        try:
+            print(f"\n🔄 Intento {intentos + 1}: Buscando gestiones extras...")
+
+            # Buscar gestiones que NO sean "Gestión 1"
+            gestiones_extra_xpath = "//*[contains(@content-desc, 'Gestión') and not(contains(@content-desc, 'Gestión 1'))]"
+            gestiones_extras = driver.find_elements("xpath", gestiones_extra_xpath)
+
+            if not gestiones_extras:
+                print("✅ No se encontraron más gestiones extras. Solo queda Gestión 1")
+                break
+
+            print(f"📋 Encontradas {len(gestiones_extras)} gestiones extras")
+
+            # Tomar la PRIMERA gestión extra encontrada
+            primera_gestion = gestiones_extras[0]
+            gestion_desc = primera_gestion.get_attribute('content-desc')
+            print(f"🎯 Eliminando: {gestion_desc}")
+
+            # Buscar el segundo ImageView dentro de esta gestión
+            imageviews = primera_gestion.find_elements("xpath", ".//android.widget.ImageView")
+
+            if len(imageviews) < 2:
+                print(f"⚠️ {gestion_desc}: No tiene suficientes ImageViews, saltando...")
+                intentos += 1
+                continue
+
+            # Hacer click en el segundo ImageView (índice 1)
+            segundo_imageview = imageviews[1]
+            print("🖱️ Click en segundo ImageView...")
+            segundo_imageview.click()
+
+            # Esperar 1 segundo como especificaste
+            time.sleep(1)
+
+            # Buscar y hacer click en botón "confirmar"
+            print("🔍 Buscando botón 'confirmar'...")
+            confirmar_button = driver.find_element("xpath", "//*[@content-desc='Confirmar']")
+            confirmar_button.click()
+            print(f"✅ {gestion_desc} eliminada")
+
+            # Pausa para que el DOM se actualice
+            time.sleep(2)
+
+            intentos += 1
+
+        except NoSuchElementException as e:
+            print(f"⚠️ Elemento no encontrado en intento {intentos + 1}: {e}")
+            break
+        except Exception as e:
+            print(f"❌ Error en intento {intentos + 1}: {e}")
+            intentos += 1
+            continue
+
+    if intentos >= max_intentos:
+        print(f"⚠️ Se alcanzó el máximo de intentos ({max_intentos}). Puede que queden gestiones extras")
+    else:
+        print("✅ Proceso completado: Solo queda Gestión 1")

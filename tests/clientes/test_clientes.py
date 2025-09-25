@@ -12,7 +12,18 @@ from tests.clientes.acciones_clientes import (
     seleccionar_vencimiento_dpi,
     escribir_nota,
     hacer_click_continuar,
-    hacer_scroll_hacia_arriba
+    hacer_scroll_hacia_arriba,
+
+    #Sucursales
+    seleccionar_tipo_de_ruta,
+    seleccionar_direccion,
+    llenar_formulario_direccion,
+    seleccionar_contacto,
+    llenar_formulario_contacto,
+
+    #Geolocalizacion
+    click_asignar_geolocalizacion,
+click_capturar
 )
 
 
@@ -225,7 +236,37 @@ class test_clientes:
     @pytest.mark.xray("ATC-35")
     def test_llenar_campos_sucursales_1(self, driver, video_recorder):
         try:
-            pass
+            seleccionar_tipo_de_ruta(driver)
+            #Direccion
+            seleccionar_direccion(driver, "Selecciona una direcc")
+            llenar_formulario_direccion(
+                driver=driver,
+                campo1="5ta Avenida 12-34",
+                campo2="Zona 1",
+                campo3="Casa 123",
+                campo4="Frente al parque central",
+                campo5="Zona 1"
+            )
+            seleccionar_direccion(driver, "5ta Avenida 12-34")
+
+            #Contacto
+            seleccionar_contacto(driver, "Selecciona un contacto")
+            nombres = "Juan"
+            apellidos = "Pérez"
+            llenar_formulario_contacto(
+                driver,
+                nombres,
+                apellidos,
+                puesto="Gerente",
+                correo1="juan.perez@ejemplo.com",
+                telefono1="45126523"
+            )
+            result = nombres + ' ' + apellidos
+            seleccionar_contacto(driver, result)
+            #Geolocalizacion
+            click_asignar_geolocalizacion(driver)
+            click_capturar(driver)
+
 
         except Exception as e:
             pytest.fail(f"TEST FALLÓ {e}")
@@ -235,7 +276,7 @@ class test_clientes:
                 print(f"📹 Video guardado: {video_path}")
 
     @pytest.mark.xray("ATC-36")
-    def test_llenar_campos_perfilacion(self, driver, video_recorder):
+    def est_llenar_campos_perfilacion(self, driver, video_recorder):
         try:
             pass
 
@@ -247,7 +288,7 @@ class test_clientes:
                 print(f"📹 Video guardado: {video_path}")
 
     @pytest.mark.xray("ATC-37")
-    def test_verificar_creacion_cliente(self, driver, video_recorder):
+    def est_verificar_creacion_cliente(self, driver, video_recorder):
         try:
             pass
 
