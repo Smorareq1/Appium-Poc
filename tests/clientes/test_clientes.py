@@ -82,7 +82,7 @@ class test_clientes:
                 print(f"📹 Video evidencia guardado en: {video_path}")
 
     @pytest.mark.xray("ATC-34")
-    def test_llenar_campos(self, driver, video_recorder):
+    def test_llenar_campos_general(self, driver, video_recorder):
         """
         Test que llena los campos el formulario de nuevos clientes GENERAL
         y verifica que los valores se hayan ingresado correctamente.

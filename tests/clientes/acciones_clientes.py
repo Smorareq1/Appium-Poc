@@ -206,3 +206,82 @@ def escribir_en_campo_generico(driver, hint_text, valor, timeout=10):
     except Exception as e:
         print(f"❌ ERROR escribiendo en campo: {e}")
         raise
+
+def hacer_scroll_hacia_abajo(driver, cantidad_scroll=3):
+    """
+    Realiza scroll hacia abajo en la pantalla.
+
+    Args:
+        driver: La instancia del driver de Appium.
+        cantidad_scroll (int): Número de scrolls a realizar.
+    """
+    print(f"📜 Haciendo scroll hacia abajo ({cantidad_scroll} veces)...")
+
+    try:
+        # Obtener dimensiones de la pantalla
+        screen_size = driver.get_window_size()
+        screen_width = screen_size['width']
+        screen_height = screen_size['height']
+
+        # Calcular coordenadas para el scroll (desde el 80% hasta el 20% de la altura)
+        start_y = int(screen_height * 0.8)
+        end_y = int(screen_height * 0.2)
+        center_x = int(screen_width * 0.5)
+
+        for i in range(cantidad_scroll):
+            print(f"Scroll {i + 1}/{cantidad_scroll}")
+
+            # Realizar swipe hacia arriba (scroll hacia abajo)
+            driver.swipe(center_x, start_y, center_x, end_y, duration=800)
+            time.sleep(0.5)  # Pausa entre scrolls
+
+        print("✅ Scroll hacia abajo completado")
+
+    except Exception as e:
+        print(f"❌ Error haciendo scroll: {e}")
+        raise
+
+def escribir_version_dpi(driver, version_dpi, timeout=10):
+    """
+    Busca el campo de texto con el hint '*Versión DPI', hace click para activarlo,
+    lo limpia, escribe el valor proporcionado y presiona Enter.
+
+    Args:
+        driver: La instancia del driver de Appium.
+        version_dpi (str): El valor de versión DPI a escribir.
+        timeout (int): Tiempo máximo de espera.
+    """
+    print(f"--- ACCIÓN: Escribir Versión DPI: '{version_dpi}' ---")
+    try:
+        version_dpi_xpath = "//*[@hint='*Versión DPI']"
+        print(f"Buscando campo Versión DPI con XPath: {version_dpi_xpath}")
+        wait = WebDriverWait(driver, timeout)
+
+        # Esperar que el campo esté presente y sea clickeable
+        version_dpi_field = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, version_dpi_xpath))
+        )
+
+        print("Campo Versión DPI encontrado. Haciendo click para activarlo...")
+        version_dpi_field.click()  # CLICK PARA DAR FOCO
+
+        time.sleep(0.5)  # Pequeña pausa para que se active el campo
+
+        print("Limpiando campo y escribiendo Versión DPI...")
+        version_dpi_field.clear()
+        version_dpi_field.send_keys(version_dpi)
+
+        print("Presionando Enter...")
+        driver.press_keycode(66)  # Enter
+
+        print(f"✅ Versión DPI '{version_dpi}' escrito correctamente")
+
+    except TimeoutException:
+        print(f"❌ ERROR: No se encontró el campo Versión DPI en {timeout} segundos")
+        raise
+    except Exception as e:
+        print(f"❌ ERROR escribiendo Versión DPI: {e}")
+        raise
+
+
+
