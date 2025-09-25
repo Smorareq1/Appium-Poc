@@ -221,3 +221,39 @@ class test_clientes:
             video_path = video_recorder()
             if video_path:
                 print(f"📹 Video guardado: {video_path}")
+
+    @pytest.mark.xray("ATC-35")
+    def test_llenar_campos_sucursales_1(self, driver, video_recorder):
+        try:
+            pass
+
+        except Exception as e:
+            pytest.fail(f"TEST FALLÓ {e}")
+        finally:
+            video_path = video_recorder()
+            if video_path:
+                print(f"📹 Video guardado: {video_path}")
+
+    @pytest.mark.xray("ATC-36")
+    def test_llenar_campos_perfilacion(self, driver, video_recorder):
+        try:
+            pass
+
+        except Exception as e:
+            pytest.fail(f"TEST FALLÓ {e}")
+        finally:
+            video_path = video_recorder()
+            if video_path:
+                print(f"📹 Video guardado: {video_path}")
+
+    @pytest.mark.xray("ATC-37")
+    def test_verificar_creacion_cliente(self, driver, video_recorder):
+        try:
+            pass
+
+        except Exception as e:
+            pytest.fail(f"TEST FALLÓ {e}")
+        finally:
+            video_path = video_recorder()
+            if video_path:
+                print(f"📹 Video guardado: {video_path}")
