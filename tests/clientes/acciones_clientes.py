@@ -955,3 +955,110 @@ def seleccionar_condicion(driver, opcion_texto, timeout=10):
     except Exception as e:
         print(f"❌ ERROR seleccionando condición: {e}")
         raise
+
+#Final
+def buscar_cliente(driver, texto_busqueda, timeout=10):
+    """
+    Busca un cliente específico escribiendo en el campo de búsqueda
+    y verifica que aparezca una tarjeta de cliente con ese texto.
+
+    Args:
+        driver: La instancia del driver de Appium.
+        texto_busqueda (str): Texto a buscar (nombre, código, etc.)
+        timeout (int): Tiempo máximo de espera.
+    """
+    print(f"🔍 Buscando cliente: '{texto_busqueda}'")
+
+    try:
+        # Paso 1: Encontrar y hacer click en el campo de búsqueda
+        print("Paso 1: Localizando campo de búsqueda...")
+        search_xpath = "//*[@hint='Buscar']"
+        wait = WebDriverWait(driver, timeout)
+
+        search_field = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, search_xpath))
+        )
+
+        # Hacer click para activar el campo
+        search_field.click()
+        print("✅ Campo de búsqueda activado")
+        time.sleep(0.5)
+
+        # Paso 2: Limpiar y escribir el texto de búsqueda
+        print(f"Paso 2: Escribiendo '{texto_busqueda}'...")
+        search_field.clear()
+        search_field.send_keys(texto_busqueda)
+
+        # Presionar Enter para ejecutar búsqueda
+        driver.press_keycode(66)  # Enter
+        print("✅ Búsqueda ejecutada")
+
+        # Paso 3: Esperar y verificar que aparezca un resultado
+        print("Paso 3: Verificando resultados...")
+        time.sleep(2)  # Esperar que aparezcan los resultados
+
+        # Buscar tarjetas de cliente que contengan el texto buscado
+        resultado_xpath = f"//*[contains(@content-desc, '{texto_busqueda}')]"
+
+        try:
+            resultado = driver.find_element("xpath", resultado_xpath)
+            resultado_desc = resultado.get_attribute('content-desc')
+            print(f"✅ Cliente encontrado: {resultado_desc}")
+            return resultado
+
+        except NoSuchElementException:
+            print(f"⚠️ No se encontraron resultados para '{texto_busqueda}'")
+            return None
+
+    except TimeoutException:
+        print(f"❌ ERROR: No se encontró el campo de búsqueda en {timeout} segundos")
+        raise
+    except Exception as e:
+        print(f"❌ ERROR durante la búsqueda: {e}")
+        raise
+
+
+def buscar_y_seleccionar_cliente(driver, texto_busqueda, timeout=10):
+    """
+    Busca un cliente y hace click en la primera tarjeta encontrada.
+
+    Args:
+        driver: La instancia del driver de Appium.
+        texto_busqueda (str): Texto a buscar.
+        timeout (int): Tiempo máximo de espera.
+    """
+    print(f"🎯 Buscando y seleccionando cliente: '{texto_busqueda}'")
+
+    try:
+        # Realizar la búsqueda
+        resultado = buscar_cliente(driver, texto_busqueda, timeout)
+
+        if resultado:
+            # Hacer click en la tarjeta encontrada
+            print("🖱️ Haciendo click en el cliente encontrado...")
+            resultado.click()
+            time.sleep(1)
+            print("✅ Cliente seleccionado")
+            return resultado
+        else:
+            raise Exception(f"No se encontraron clientes con '{texto_busqueda}'")
+
+    except Exception as e:
+        print(f"❌ ERROR seleccionando cliente: {e}")
+        raise
+
+
+def buscar_cliente_por_codigo(driver, codigo, timeout=10):
+    """
+    Función específica para buscar por código de cliente (ej: CM20250926).
+    """
+    print(f"🔍 Buscando cliente por código: '{codigo}'")
+    return buscar_cliente(driver, codigo, timeout)
+
+
+def buscar_cliente_por_nombre(driver, nombre, timeout=10):
+    """
+    Función específica para buscar por nombre de cliente.
+    """
+    print(f"🔍 Buscando cliente por nombre: '{nombre}'")
+    return buscar_cliente(driver, nombre, timeout)

@@ -31,7 +31,10 @@ from tests.clientes.acciones_clientes import (
     click_continuar,
 
     # Perfilacion
-    seleccionar_condicion
+    seleccionar_condicion,
+
+    #Busqueda
+    buscar_cliente_por_nombre
 )
 
 
@@ -290,7 +293,7 @@ class test_clientes:
                 print(f"📹 Video guardado: {video_path}")
 
     @pytest.mark.xray("ATC-36")
-    def est_llenar_campos_perfilacion(self, driver, video_recorder):
+    def test_llenar_campos_perfilacion(self, driver, video_recorder):
         print("\n=== TEST: Llenar Perfilacion ===")
         try:
             seleccionar_condicion(driver, "Contado contra entrega")
@@ -304,10 +307,10 @@ class test_clientes:
                 print(f"📹 Video guardado: {video_path}")
 
     @pytest.mark.xray("ATC-37")
-    def est_verificar_creacion_cliente(self, driver, video_recorder):
+    def test_verificar_creacion_cliente(self, driver, video_recorder):
         print("\n=== TEST: Buscar y confirmar nuevo cliente ===")
         try:
-            pass
+            buscar_cliente_por_nombre(driver, "TEST 3")
 
         except Exception as e:
             pytest.fail(f"TEST FALLÓ {e}")

@@ -12,8 +12,9 @@ from tests.clientes.acciones_clientes import (
     click_capturar,
     eliminar_gestiones_extras_iterativo,
     hacer_click_boton_sucursal_especifico,
-click_continuar,
-seleccionar_condicion
+    click_continuar,
+    seleccionar_condicion,
+    buscar_cliente_por_nombre
 )
 
 
@@ -21,7 +22,7 @@ class test_puntuales:
     @pytest.mark.xray("APPTEST-****")
     def test_puntual(self, driver, video_recorder):
         try:
-            seleccionar_condicion(driver, "Contado contra entrega")
+            buscar_cliente_por_nombre(driver, "TEST 3")
 
         except Exception as e:
             pytest.fail(f"TEST FALLÓ {e}")
