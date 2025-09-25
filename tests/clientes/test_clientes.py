@@ -23,7 +23,15 @@ from tests.clientes.acciones_clientes import (
 
     #Geolocalizacion
     click_asignar_geolocalizacion,
-click_capturar
+    click_capturar,
+
+    #Continuar
+    eliminar_gestiones_extras_iterativo,
+    hacer_click_boton_sucursal_especifico,
+    click_continuar,
+
+    # Perfilacion
+    seleccionar_condicion
 )
 
 
@@ -235,6 +243,7 @@ class test_clientes:
 
     @pytest.mark.xray("ATC-35")
     def test_llenar_campos_sucursales_1(self, driver, video_recorder):
+        print("\n=== TEST: Llenar formulario Sucursales y Gestiones ===")
         try:
             seleccionar_tipo_de_ruta(driver)
             #Direccion
@@ -250,7 +259,7 @@ class test_clientes:
             seleccionar_direccion(driver, "5ta Avenida 12-34")
 
             #Contacto
-            seleccionar_contacto(driver, "Selecciona un contacto")
+            seleccionar_contacto(driver, "un contacto")
             nombres = "Juan"
             apellidos = "Pérez"
             llenar_formulario_contacto(
@@ -267,6 +276,11 @@ class test_clientes:
             click_asignar_geolocalizacion(driver)
             click_capturar(driver)
 
+            #Continuar
+            eliminar_gestiones_extras_iterativo(driver, 3)
+            hacer_click_boton_sucursal_especifico(driver)
+            click_continuar(driver)
+
 
         except Exception as e:
             pytest.fail(f"TEST FALLÓ {e}")
@@ -277,8 +291,10 @@ class test_clientes:
 
     @pytest.mark.xray("ATC-36")
     def est_llenar_campos_perfilacion(self, driver, video_recorder):
+        print("\n=== TEST: Llenar Perfilacion ===")
         try:
-            pass
+            seleccionar_condicion(driver, "Contado contra entrega")
+            click_continuar(driver)
 
         except Exception as e:
             pytest.fail(f"TEST FALLÓ {e}")
@@ -289,6 +305,7 @@ class test_clientes:
 
     @pytest.mark.xray("ATC-37")
     def est_verificar_creacion_cliente(self, driver, video_recorder):
+        print("\n=== TEST: Buscar y confirmar nuevo cliente ===")
         try:
             pass
 

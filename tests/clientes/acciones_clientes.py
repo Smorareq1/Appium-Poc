@@ -786,7 +786,7 @@ def click_capturar(driver, timeout=10):
         raise
 
 # Borrar otras sucursales y confirmar
-def eliminar_gestiones_extras_iterativo(driver, max_intentos=5):
+def eliminar_gestiones_extras_iterativo(driver, max_intentos):
     """
     Elimina gestiones extras de forma iterativa:
     1. Busca gestiones que NO sean "Gestión 1"
@@ -861,3 +861,97 @@ def eliminar_gestiones_extras_iterativo(driver, max_intentos=5):
         print(f"⚠️ Se alcanzó el máximo de intentos ({max_intentos}). Puede que queden gestiones extras")
     else:
         print("✅ Proceso completado: Solo queda Gestión 1")
+
+# Continuar
+def hacer_click_boton_sucursal_especifico(driver, timeout=10):
+    """
+    Versión más específica que busca exactamente el botón por su posición
+    relativa al ImageView en Sucursal 1.
+    """
+    print("🏢 Haciendo click en botón específico de Sucursal 1...")
+
+    try:
+        # XPath que busca el botón que está justo después del ImageView en Sucursal 1
+        boton_xpath = "//*[@content-desc='Sucursal 1']//android.widget.ImageView/following-sibling::android.widget.Button[1]"
+
+        wait = WebDriverWait(driver, timeout)
+        boton_sucursal = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, boton_xpath))
+        )
+
+        print("🎯 Haciendo click en botón específico...")
+        boton_sucursal.click()
+
+        time.sleep(1)
+        print("✅ Click completado")
+
+    except TimeoutException:
+        print(f"❌ ERROR: No se encontró el botón específico en {timeout} segundos")
+        raise
+    except Exception as e:
+        print(f"❌ ERROR: {e}")
+        raise
+def click_continuar(driver, timeout=10):
+    print("📍 Buscando botón 'Continuar'...")
+
+    try:
+        wait = WebDriverWait(driver, timeout)
+        boton_xpath = "//*[contains(@content-desc, 'Continuar') and @clickable='true']"
+
+        boton = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, boton_xpath))
+        )
+        boton.click()
+
+        print("✅ Botón 'Continuar' clickeado")
+
+    except TimeoutException:
+        print(f"❌ ERROR: No se encontró el botón 'Continuar' en {timeout} segundos")
+        raise
+    except Exception as e:
+        print(f"❌ ERROR al dar click en 'Continuar': {e}")
+        raise
+
+# Perfilacion
+def seleccionar_condicion(driver, opcion_texto, timeout=10):
+    """
+    Hace click en el botón "Condición" y selecciona una opción cuyo texto contenga
+    la cadena indicada en opcion_texto.
+
+    Args:
+        driver: La instancia del driver de Appium.
+        opcion_texto (str): Texto parcial de la opción a seleccionar.
+        timeout (int): Tiempo máximo de espera.
+    """
+    print("🎯 Seleccionando Condición...")
+
+    try:
+        # Paso 1: Hacer click en el botón Condición
+        print("Paso 1: Haciendo click en Condición...")
+        condicion_xpath = "//*[contains(@content-desc, 'Condición')]"
+        wait = WebDriverWait(driver, timeout)
+
+        condicion_button = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, condicion_xpath))
+        )
+        condicion_button.click()
+        print("✅ Botón Condición clickeado")
+        time.sleep(2)  # Esperar que aparezcan las opciones
+
+        # Paso 2: Seleccionar opción según el texto proporcionado
+        print(f"Paso 2: Seleccionando opción que contenga '{opcion_texto}'...")
+        opcion_xpath = f"//*[contains(@content-desc, '{opcion_texto}')]"
+
+        seleccionar_condicion_option = driver.find_element(AppiumBy.XPATH, opcion_xpath)
+        seleccionar_condicion_option.click()
+        print(f"✅ Opción con texto '{opcion_texto}' seleccionada")
+
+        time.sleep(1)
+        print("✅ Condición configurada correctamente")
+
+    except TimeoutException:
+        print(f"❌ ERROR: No se encontró el botón Condición en {timeout} segundos")
+        raise
+    except Exception as e:
+        print(f"❌ ERROR seleccionando condición: {e}")
+        raise
