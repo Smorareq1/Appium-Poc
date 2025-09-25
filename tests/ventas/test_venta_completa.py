@@ -38,7 +38,7 @@ from tests.ventas.acciones.acciones_venta_putual import (
 
 class Test_Venta_Completa:
 
-    @pytest.mark.xray("APPTEST-****")
+    @pytest.mark.xray("ATC-23")
     def test_flujo_busqueda_y_seleccion(self, driver, video_recorder):
         """
         Este test ejecuta la primera parte del flujo: buscar un producto por SKU
@@ -72,7 +72,7 @@ class Test_Venta_Completa:
             if video_path:
                 print(f"📹 Video evidencia de la búsqueda guardado en: {video_path}")
 
-    @pytest.mark.xray("APPTEST-****")
+    @pytest.mark.xray("ATC-24")
     def test_configurar_y_agregar_producto(self, driver, video_recorder):
         """
         Este test ejecuta la segunda parte del flujo: configurar la cantidad
@@ -112,7 +112,7 @@ class Test_Venta_Completa:
             if video_path:
                 print(f"📹 Video evidencia de la configuración guardado en: {video_path}")
 
-    @pytest.mark.xray("APPTEST-****")
+    @pytest.mark.xray("ATC-25")
     def test_carrito_inicial(self, driver, video_recorder):
         """
             Este test ejecuta la tercera parte del flujo: carrito
@@ -132,7 +132,7 @@ class Test_Venta_Completa:
             if video_path:
                 print(f"📹 Video evidencia de la configuración guardado en: {video_path}")
 
-    @pytest.mark.xray("APPTEST-****")
+    @pytest.mark.xray("ATC-26")
     def test_descuento_puntual(self, driver, video_recorder):
         """
             Este test ejecuta la cuarta parte del flujo: descuento puntual
@@ -195,7 +195,7 @@ class Test_Venta_Completa:
             if video_path:
                 print(f"📹 Video evidencia de la configuración guardado en: {video_path}")
 
-    @pytest.mark.xray("APPTEST-****")
+    @pytest.mark.xray("ATC-27")
     def test_validar_carrito_final(self, driver, video_recorder):
         """
             Este test ejecuta la quinta parte del flujo: validar carrito final

@@ -27,7 +27,7 @@ from tests.ventas.acciones.acciones_carrito import (
 
 
 class TestVentaDeCombos:
-    @pytest.mark.xray("APPTEST-COMBO-01")
+    @pytest.mark.xray("ATC-28")
     def test_vender_combo_desde_catalogo(self, driver, video_recorder):
         """
         🎯 TEST DE VENTA DE COMBOS

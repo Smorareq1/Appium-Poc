@@ -59,7 +59,7 @@ class test_clientes:
             if video_path:
                 print(f"📹 Video evidencia de la configuración guardado en: {video_path}")
 
-    @pytest.mark.xray("ATC-33")
+    @pytest.mark.xray("ATC-34")
     def test_long_press_cliente_card(self, driver, video_recorder):
         """
         Test que valida la acción de mantener presionado una tarjeta de cliente,
@@ -109,7 +109,7 @@ class test_clientes:
             if video_path:
                 print(f"📹 Video evidencia guardado en: {video_path}")
 
-    @pytest.mark.xray("ATC-34")
+    @pytest.mark.xray("ATC-35")
     def test_llenar_campos_general(self, driver, video_recorder):
         """
         Test que llena los campos el formulario de nuevos clientes GENERAL
@@ -244,7 +244,7 @@ class test_clientes:
             if video_path:
                 print(f"📹 Video guardado: {video_path}")
 
-    @pytest.mark.xray("ATC-35")
+    @pytest.mark.xray("ATC-36")
     def test_llenar_campos_sucursales_1(self, driver, video_recorder):
         print("\n=== TEST: Llenar formulario Sucursales y Gestiones ===")
         try:
@@ -292,7 +292,7 @@ class test_clientes:
             if video_path:
                 print(f"📹 Video guardado: {video_path}")
 
-    @pytest.mark.xray("ATC-36")
+    @pytest.mark.xray("ATC-37")
     def test_llenar_campos_perfilacion(self, driver, video_recorder):
         print("\n=== TEST: Llenar Perfilacion ===")
         try:
@@ -306,7 +306,7 @@ class test_clientes:
             if video_path:
                 print(f"📹 Video guardado: {video_path}")
 
-    @pytest.mark.xray("ATC-37")
+    @pytest.mark.xray("ATC-38")
     def test_verificar_creacion_cliente(self, driver, video_recorder):
         print("\n=== TEST: Buscar y confirmar nuevo cliente ===")
         try:

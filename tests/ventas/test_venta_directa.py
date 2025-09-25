@@ -10,7 +10,7 @@ from tests.ventas.acciones.acciones_carrito import abrir_carrito, aceptar_pedido
 
 
 class TestVentaDirecta:
-    @pytest.mark.xray("APPTEST-CLORO-5U")
+    @pytest.mark.xray("ATC-29")
     def test_flujo_cloro_5_checkout(self, driver, video_recorder):
         """
         Flujo SIMPLE de venta directa - como test_venta_completa pero más básico

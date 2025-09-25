@@ -18,7 +18,7 @@ from tests.itinerarios.acciones_itinerarios import (
 )
 
 class test_itinerarios:
-    @pytest.mark.xray("ATC-ITINERARIO-BOTON")
+    @pytest.mark.xray("ATC-18")
     def test_itinerarios_button(self, driver, video_recorder):
         """Test para hacer click en el botón Itinerarios"""
         print("\n=== TEST: Click en botón Itinerarios ===")
@@ -34,7 +34,7 @@ class test_itinerarios:
             if video_path:
                 print(f"📹 Video evidencia de la configuración guardado en: {video_path}")
 
-    @pytest.mark.xray("ATC-ITINERARIO-SEMANA_ANTERIOR")
+    @pytest.mark.xray("ATC-19")
     def test_click_semana_anterior_y_verificar_alerta(self, driver, video_recorder):
         """
         Test para hacer clic en el botón 'semana anterior' y verificar que se
@@ -75,7 +75,7 @@ class test_itinerarios:
             if video_path:
                 print(f"📹 Video de evidencia guardado en: {video_path}")
 
-    @pytest.mark.xray("ATC-ITINERARIO-CLIENTE")
+    @pytest.mark.xray("ATC-20")
     def test_itinerario_cliente(self, driver, video_recorder):
         """Encontrar cliente en itinerario y completar Check-in, Venta y Check-out si es necesario."""
         print("\n=== TEST: Buscar cliente en itinerario (Lógica Refactorizada) ===")
@@ -137,7 +137,7 @@ class test_itinerarios:
             if video_path:
                 print(f"📹 Video evidencia de la configuración guardado en: {video_path}")
 
-    @pytest.mark.xray("ATC-ITINERARIO-SPIN_SEMANA")
+    @pytest.mark.xray("ATC-40")
     def test_spin_semana(self, driver, video_recorder):
         """Test para hacer spin en los días de la semana y verificar clientes"""
         print("\n=== TEST: Spin en días de la semana ===")
@@ -151,7 +151,7 @@ class test_itinerarios:
             if video_path:
                 print(f"📹 Video evidencia de la configuración guardado en: {video_path}")
 
-    @pytest.mark.xray("ATC-ITINERARIO-SEMANA_SIGUENTE_6_VECES")
+    @pytest.mark.xray("ATC-41")
     def test_click_semana_siguiente_6_veces_y_verificar_alerta(self, driver, video_recorder):
         """
         Test para hacer clic en el botón 'semana siguiente' 6 veces y verificar que se

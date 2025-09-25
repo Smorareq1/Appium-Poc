@@ -144,6 +144,7 @@ def escribir_nit(driver, nit, timeout=10):
 
         print("Presionando Enter...")
         driver.press_keycode(66)  # Enter
+        time.sleep(3)
 
         print(f"✅ NIT '{nit}' escrito correctamente")
 

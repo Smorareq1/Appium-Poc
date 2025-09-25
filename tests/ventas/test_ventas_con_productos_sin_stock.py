@@ -21,7 +21,7 @@ from tests.ventas.acciones.acciones_producto import (
 
 
 class TestVentasConProductosSinStock:
-    @pytest.mark.xray("APPTEST-SIN-STOCK")
+    @pytest.mark.xray("ATC-30")
     def test_producto_sin_stock(self, driver, video_recorder):
         """
         Flujo de prueba para productos sin stock:
