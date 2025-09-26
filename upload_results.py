@@ -5,6 +5,7 @@ import mimetypes
 import requests
 import argparse
 import glob
+import re
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -90,6 +91,29 @@ class XrayUploader:
 
         return sorted(modules)
 
+    def find_videos_by_test_key(self, module_name):
+        """
+        Devuelve un dict { 'ATC-123': '/ruta/al/video.mp4', ... } para el módulo.
+        Toma el .mp4 más reciente cuando hay varios por la misma key.
+        """
+        mapping = {}
+        module_videos_dir = os.path.join(self.BASE_VIDEOS_DIR, module_name)
+        if not os.path.exists(module_videos_dir):
+            return mapping
+
+        candidates = glob.glob(os.path.join(module_videos_dir, "*.mp4"))
+        for path in candidates:
+            fname = os.path.basename(path)
+            m = self.TEST_KEY_RE.search(fname.upper())
+            if not m:
+                continue
+            key = m.group(1)  # p.ej. ATC-123
+            # Mantener el más nuevo si hay duplicados
+            if key not in mapping or os.path.getmtime(path) > os.path.getmtime(mapping[key]):
+                mapping[key] = path
+
+        return mapping
+
     # =========================
     #   SUBIR RESULTADOS JUNIT
     # =========================
@@ -168,6 +192,7 @@ class XrayUploader:
     #   GRAPHQL XRAY (EVIDENCIAS)
     # =========================
     XRAY_GRAPHQL_URL = "https://xray.cloud.getxray.app/api/v2/graphql"
+    TEST_KEY_RE = re.compile(r'([A-Z][A-Z0-9]+-\d+)')
 
     def _gql(self, query, variables=None):
         headers = {
@@ -190,11 +215,9 @@ class XrayUploader:
             raise RuntimeError(f"GraphQL errors: {data['errors']}")
         return data.get("data", {})
 
-    def _get_testrun_ids_by_exec_key(self, test_exec_key, limit=100):
+    def _get_runs_with_keys_by_exec_key(self, test_exec_key, limit=100):
         """
-        Devuelve los IDs de Test Run del Test Execution indicado por su KEY (ej. ATC-48).
-        Paso 1: key -> issueId con getTestExecutions
-        Paso 2: issueId -> Test Runs con getTestRuns
+        Devuelve lista de tuplas (run_id, test_key) del Test Execution (por KEY).
         """
         print(f"   🔍 Obteniendo Test Runs de {test_exec_key}...")
 
@@ -207,17 +230,24 @@ class XrayUploader:
             getTestRuns(testExecIssueIds:$execIds, limit:$limit){
               results{
                 id
-                # Si quieres mapear por Test:
-                # test { jira(fields:["key","summary"]) }
+                test { jira(fields:["key","summary"]) }
               }
             }
           }
         """
         data = self._gql(query, {"execIds": [issue_id], "limit": min(limit, 100)})
         results = ((data or {}).get("getTestRuns") or {}).get("results") or []
-        run_ids = [r["id"] for r in results if r.get("id")]
-        print(f"   ✅ Encontrados {len(run_ids)} Test Run(s)")
-        return run_ids
+
+        runs = []
+        for r in results:
+            rid = r.get("id")
+            test = r.get("test") or {}
+            jira = test.get("jira") or {}
+            tkey = jira.get("key")
+            if rid and tkey:
+                runs.append((rid, tkey))
+        print(f"   ✅ Encontrados {len(runs)} Test Run(s)")
+        return runs
 
     def _add_video_to_testrun(self, testrun_id, video_path, description=None):
         import base64, mimetypes, os
@@ -344,51 +374,80 @@ class XrayUploader:
             }
 
             # Adjuntar evidencia (video) a cada Test Run del Execution
+            # Adjuntar evidencia (video) a cada Test Run del Execution
             if success and test_exec_key:
-                print(f"\n   🎬 Buscando video para adjuntar...")
-                video = self.find_video_for_module(module_name)
+                print(f"\n   🎬 Buscando videos para adjuntar (modo por Test Key)...")
 
-                if video:
+                # 4.1: intentar mapping por Test Key (ATC-123.mp4, etc.)
+                videos_by_key = self.find_videos_by_test_key(module_name)
+
+                if videos_by_key:
+                    print(f"   🔗 Mapeos detectados: {len(videos_by_key)} archivo(s) por Test Key")
                     try:
-                        run_ids = self._get_testrun_ids_by_exec_key(test_exec_key, limit=200)
-
-                        if not run_ids:
+                        runs = self._get_runs_with_keys_by_exec_key(test_exec_key, limit=100)
+                        if not runs:
                             print("   ⚠️ No se hallaron Test Runs en el Test Execution.")
                             result_entry['video_note'] = 'No Test Runs found'
                         else:
-                            video_size_mb = os.path.getsize(video) / (1024 * 1024)
-                            print(f"   🎞️ Adjuntando video '{os.path.basename(video)}' ({video_size_mb:.2f} MB)")
-                            print(f"   📊 A {len(run_ids)} Test Run(s) de {test_exec_key}...")
-
                             ok = 0
-                            errors = []
-                            for rid in run_ids:
+                            missing = 0
+                            for rid, tkey in runs:
+                                video_path = videos_by_key.get(tkey)
+                                if not video_path:
+                                    # No hay video específico para este test
+                                    missing += 1
+                                    continue
                                 try:
-                                    self._add_video_to_testrun(rid, video, f"Video {module_name}")
+                                    print(f"      📎 {tkey} -> {os.path.basename(video_path)}")
+                                    self._add_video_to_testrun(rid, video_path, f"Video {module_name}")
                                     ok += 1
                                 except Exception as e:
-                                    print(f"   ⚠️ Falló run {rid}: {e}")
-                                    errors.append(str(e))
+                                    print(f"      ⚠️ Falló run {rid} ({tkey}): {e}")
 
-                            print(f"   ✅ Video adjuntado a {ok}/{len(run_ids)} Test Run(s).")
-                            if errors:
-                                print(f"   ℹ️ Errores en {len(errors)} run(s), ver arriba.")
-
-                            print(f"   ✅ Video adjuntado correctamente a {len(run_ids)} Test Run(s).")
-                            result_entry['video_attached'] = True
-                            result_entry['test_runs_count'] = len(run_ids)
+                            if ok > 0:
+                                print(f"   ✅ Video(s) adjuntado(s) a {ok}/{len(runs)} Test Run(s).")
+                                result_entry['video_attached'] = True
+                                result_entry['test_runs_count'] = ok
+                            if missing > 0:
+                                print(f"   ℹ️ {missing} Test Run(s) sin video mapeado por key.")
 
                     except Exception as e:
                         print(f"   ❌ Error adjuntando evidencia: {e}")
                         import traceback
                         traceback.print_exc()
                         result_entry['video_note'] = f'Error: {str(e)}'
+
                 else:
-                    print(f"   ℹ️ No se encontró video para el módulo '{module_name}'")
-                    result_entry['video_note'] = 'No video found'
-            elif success and not test_exec_key:
-                print(f"   ⚠️ No se pudo obtener TestExecutionKey, no se adjuntará video")
-                result_entry['video_note'] = 'No TestExecKey obtained'
+                    # 4.2: si NO hay nombres por Test Key, caemos al comportamiento anterior (1 video para todos)
+                    print(
+                        f"   ℹ️ No se encontraron videos con nombre de Test Key en {self.BASE_VIDEOS_DIR}/{module_name}")
+                    # Fallback: un solo video (último del módulo)
+                    video = self.find_video_for_module(module_name)
+                    if video:
+                        try:
+                            # Reutilizar el fetch de runs (sin keys también sirve)
+                            runs = self._get_runs_with_keys_by_exec_key(test_exec_key, limit=100)
+                            if not runs:
+                                print("   ⚠️ No se hallaron Test Runs en el Test Execution.")
+                                result_entry['video_note'] = 'No Test Runs found'
+                            else:
+                                ok = 0
+                                for rid, _ in runs:
+                                    try:
+                                        self._add_video_to_testrun(rid, video, f"Video {module_name}")
+                                        ok += 1
+                                    except Exception as e:
+                                        print(f"      ⚠️ Falló run {rid}: {e}")
+                                if ok > 0:
+                                    print(f"   ✅ Video adjuntado a {ok}/{len(runs)} Test Run(s) (fallback).")
+                                    result_entry['video_attached'] = True
+                                    result_entry['test_runs_count'] = ok
+                        except Exception as e:
+                            print(f"   ❌ Error en fallback de evidencia: {e}")
+                            result_entry['video_note'] = f'Fallback error: {str(e)}'
+                    else:
+                        print(f"   ℹ️ Tampoco hay video genérico para el módulo '{module_name}'")
+                        result_entry['video_note'] = 'No video found'
 
             results_summary.append(result_entry)
 
