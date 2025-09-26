@@ -23,6 +23,11 @@ class XrayUploader:
         self.BASE_REPORTS_DIR = "pytest_reports"
         self.BASE_VIDEOS_DIR = "pytest_videos"
 
+        # Nuevas variables para Jira REST
+        self.JIRA_EMAIL = os.getenv("JIRA_EMAIL")
+        self.JIRA_API_TOKEN = os.getenv("JIRA_API_TOKEN")
+        self.JIRA_DOMAIN = os.getenv("JIRA_DOMAIN")
+
         self.token = None
 
         # Módulos excluidos por defecto
@@ -249,37 +254,56 @@ class XrayUploader:
         print(f"   ✅ Encontrados {len(runs)} Test Run(s)")
         return runs
 
-    def _add_video_to_testrun(self, testrun_id, video_path, description=None):
-        import base64, mimetypes, os
-
-        mime, _ = mimetypes.guess_type(video_path)
-        if not mime:
-            mime = "video/mp4"
-
-        with open(video_path, "rb") as f:
-            b64 = base64.b64encode(f.read()).decode("ascii")
-
-        # ✅ Campos correctos en el selection set
-        mutation = """
-          mutation ($id: String!, $evidence: [AttachmentDataInput!]!) {
-            addEvidenceToTestRun(id: $id, evidence: $evidence) {
-              addedEvidence
-              warnings
-            }
-          }
+    def _add_video_to_testrun_rest(self, testrun_id, video_path, test_key=None):
         """
+        Adjunta video usando REST API de Jira con API Token
+        """
+        if not test_key:
+            test_key = self._get_issue_key_from_testrun(testrun_id)
+            if not test_key:
+                print(f"      ❌ No se pudo obtener Issue Key del Test Run")
+                return None
 
-        # ✅ AttachmentDataInput solo permite filename, mimeType, data (o attachmentId)
-        variables = {
-            "id": testrun_id,
-            "evidence": [{
-                "filename": os.path.basename(video_path),
-                "mimeType": mime,
-                "data": b64
-            }]
+        # Autenticación básica con email + API token
+        jira_email = os.getenv("JIRA_EMAIL")
+        jira_token = os.getenv("JIRA_API_TOKEN")
+
+        if not jira_email or not jira_token:
+            print(f"      ❌ JIRA_EMAIL o JIRA_API_TOKEN no configurados en .env")
+            return None
+
+        url = f"https://{self.JIRA_DOMAIN}.atlassian.net/rest/api/3/issue/{test_key}/attachments"
+
+        # Autenticación básica (Base64)
+        import base64
+        auth_str = f"{jira_email}:{jira_token}"
+        auth_bytes = auth_str.encode('ascii')
+        auth_b64 = base64.b64encode(auth_bytes).decode('ascii')
+
+        headers = {
+            "Authorization": f"Basic {auth_b64}",
+            "X-Atlassian-Token": "no-check"
         }
 
-        return self._gql(mutation, variables)
+        size_mb = os.path.getsize(video_path) / (1024 * 1024)
+        print(f"      ⬆️ Subiendo video ({size_mb:.1f}MB) via REST API...")
+
+        try:
+            with open(video_path, 'rb') as f:
+                files = {'file': (os.path.basename(video_path), f, 'video/mp4')}
+                response = requests.post(url, headers=headers, files=files, timeout=300)
+
+            if response.status_code in [200, 201]:
+                print(f"      ✅ Video adjuntado exitosamente")
+                return True
+            else:
+                print(f"      ❌ Error REST API: {response.status_code}")
+                print(f"      {response.text[:200]}")
+                return False
+
+        except Exception as e:
+            print(f"      ❌ Error: {e}")
+            return False
 
     def _get_issue_id_from_key(self, issue_key: str) -> str | None:
         # Usa JQL para traer el TE por key y quedarte con su issueId (numérico).
@@ -299,6 +323,22 @@ class XrayUploader:
         if results:
             return results[0].get("issueId")
         return None
+
+    def _get_issue_key_from_testrun(self, testrun_id):
+        """Obtener el Issue Key asociado a un Test Run"""
+        query = """
+          query($id: String!) {
+            getTestRun(id: $id) {
+              test {
+                jira(fields: ["key"])
+              }
+            }
+          }
+        """
+        data = self._gql(query, {"id": testrun_id})
+        test = (data.get("getTestRun") or {}).get("test") or {}
+        jira = test.get("jira") or {}
+        return jira.get("key")
 
     # =========================
     #   VIDEOS POR MÓDULO
@@ -399,7 +439,7 @@ class XrayUploader:
                                     continue
                                 try:
                                     print(f"      📎 {tkey} -> {os.path.basename(video_path)}")
-                                    self._add_video_to_testrun(rid, video_path, f"Video {module_name}")
+                                    self._add_video_to_testrun_rest(rid, video_path, tkey)
                                     ok += 1
                                 except Exception as e:
                                     print(f"      ⚠️ Falló run {rid} ({tkey}): {e}")
