@@ -455,31 +455,97 @@ class TestFeaturesAutenticacion:
     @pytest.mark.xray("APPTEST-71")
     def test_dashboard_de_metas(self, driver, video_recorder):
         """
-        Plantilla: abrir dashboard, validar KPIs/cards y totales por vendedor.
+        Flujo: Navega y hace clic en la opción 'Mis Métricas' desde el menú principal.
+        Éxito: El botón es encontrado y se hace clic en él sin errores.
         """
-        print("\n=== FEATURE: Dashboard de metas ===")
+        print("\n=== FEATURE: Dashboard de metas (Mis Métricas) ===")
         try:
-            # TODO: Ajustar navegación real hacia el Dashboard
-            dash = find_first(driver, [
-                "//*[@content-desc='Dashboard']",
-                "//*[contains(@content-desc,'metas')]",
-                "//*[contains(@text,'Dashboard')]",
+            # MENU
+            print("Paso 1: Buscando botón 'menu'...")
+            menu_button = find_first(driver, [
+                "//*[@content-desc='Menú']",
+                "//*[contains(@content-desc,'Menú')]"
             ])
-            if not dash:
-                pytest.fail("No se encontró entrada al Dashboard de metas")
-            dash.click();
+            assert menu_button, "No se pudo encontrar el botón 'Menú'"
+            print("✅ Botón 'Menú' encontrado")
+            menu_button.click()
+            time.sleep(1.5)
+
+            # Mis metricas
+            print("Buscando el botón 'Mis Métricas'...")
+            mis_metricas_button = find_first(driver, [
+                "//*[@content-desc='Mis Métricas']",
+                "//*[contains(@content-desc,'Métricas')]"
+            ])
+            assert mis_metricas_button, "No se pudo encontrar el botón 'Mis Métricas' en la pantalla."
+            rect = mis_metricas_button.rect
+            x = int(rect['x'] + rect['width'] * 0.25)
+            y = int(rect['y'] + rect['height'] / 2)
+            driver.tap([(x, y)])
+            time.sleep(3)
+
+            # Mi progreso
+            progreso_button = find_first(driver, [
+                "//*[@content-desc='Mi progreso']",
+                "//*[contains(@content-desc,'progreso')]"
+            ])
+            assert progreso_button, "No se pudo encontrar el botón 'Mi Progreso'"
+            print("✅ Botón 'Mi progreso' encontrado")
+            progreso_button.click()
+            time.sleep(1.5)
+
+            # Validar que aparezcan los elementos esperados
+            print("Validando elementos en la pantalla 'Mis Métricas'...")
+            efectividad_diaria = find_first(driver, [
+                "//*[@content-desc='Efectividad de venta diaria']",
+                "//*[contains(@content-desc,'Efectividad de venta diaria')]"
+            ])
+            assert efectividad_diaria, "No se encontró 'Efectividad de venta diaria'"
+            print("✅ 'Efectividad de venta diaria' encontrado")
+
+            necesidad_mensual = find_first(driver, [
+                "//*[@content-desc='Necesidad venta mensual']",
+                "//*[contains(@content-desc,'Necesidad venta mensual')]"
+            ])
+            assert necesidad_mensual, "No se encontró 'Necesidad venta mensual'"
+            print("✅ 'Necesidad venta mensual' encontrado")
+
+            efectividad_mensual = find_first(driver, [
+                "//*[@content-desc='Efectividad de venta mensual']",
+                "//*[contains(@content-desc,'Efectividad de venta mensual')]"
+            ])
+            assert efectividad_mensual, "No se encontró 'Efectividad de venta mensual'"
+            print("✅ 'Efectividad de venta mensual' encontrado")
+
+            print("✅ Todos los elementos validados correctamente")
+
+            # Regresar en el teléfono
+            print("Regresando a la pantalla anterior...")
+            driver.back()
+            time.sleep(2)
+
+            driver.back()
             time.sleep(1)
 
-            # TODO: Aserciones de métricas clave (targets, alcanzado, %)
-            pytest.fail("Agregar validaciones de métricas del dashboard (pendiente)")
-        except pytest.skip.Exception:
-            raise
+            # FFA
+            FFA_button = find_first(driver, [
+                "//*[@content-desc='FFA']",
+                "//*[contains(@content-desc,'FFA')]"
+            ])
+
+            assert FFA_button, "No se pudo encontrar el botón 'FFA'"
+            print("✅ Botón 'FFA' encontrado")
+            FFA_button.click()
+            time.sleep(1.5)
+            print("✅ TEST COMPLETADO: Validación exitosa y regreso completado.")
+
         except Exception as e:
-            pytest.fail(f"Dashboard de metas FALLO: {e}")
+            pytest.fail(f"El test de Dashboard de metas FALLÓ: {e}")
         finally:
-            vp = video_recorder()
-            if vp:
-                print(f"📹 Video: {vp}")
+            # Guardar el video de la ejecución de la prueba
+            video_path = video_recorder()
+            if video_path:
+                print(f"📹 Video de evidencia guardado en: {video_path}")
 
     @pytest.mark.xray("APPTEST-68")
     def test_cerrar_sesion(self, driver, video_recorder):
@@ -496,7 +562,7 @@ class TestFeaturesAutenticacion:
             assert menu_button, "No se pudo encontrar el botón 'Menú'"
             print("✅ Botón 'Menú' encontrado")
             menu_button.click()
-            time.sleep(1.5)  # Reducido de 2 a 1.5
+            time.sleep(1.5)
 
             # Paso 2: Hacer scroll hacia abajo
             print("Paso 2: Haciendo scroll hacia abajo...")

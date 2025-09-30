@@ -51,47 +51,84 @@ class test_puntuales:
     @pytest.mark.xray("APPTEST-****")
     def test_puntual(self, driver, video_recorder):
         try:
-            # 1) Código recibido (reemplaza por tu inyección/mock)
-            otp_code = "476338"
-
-            # 2) Localizar las 6 casillas (EditText de 1 carácter)
-            otp_inputs = driver.find_elements(AppiumBy.XPATH, "//android.widget.EditText")
-            if not otp_inputs or len(otp_inputs) < 4:
-                pytest.skip("Pantalla de OTP no presente (no se hallaron casillas)")
-
-            # Asegurar no escribir más dígitos de los disponibles
-            for i, ch in enumerate(otp_code[:len(otp_inputs)]):
-                el = otp_inputs[i]
-                el.click()
-                time.sleep(0.1)
-                try:
-                    el.clear()
-                except Exception:
-                    pass
-                el.send_keys(ch)
-                time.sleep(0.1)
-
-            ensure_keyboard_closed(driver)
-
-            # 3) Botón 'Validar'
-            validar_btn = find_first(driver, [
-                "//*[@content-desc='Validar']",
-                "//*[contains(@content-desc,'Validar') or contains(@text,'Validar')]"
+            # MENU
+            print("Paso 1: Buscando botón 'menu'...")
+            menu_button = find_first(driver, [
+                "//*[@content-desc='Menú']",
+                "//*[contains(@content-desc,'Menú')]"
             ])
-            assert validar_btn, "No se encontró botón 'Validar'"
-            validar_btn.click()
+            assert menu_button, "No se pudo encontrar el botón 'Menú'"
+            print("✅ Botón 'Menú' encontrado")
+            menu_button.click()
+            time.sleep(1.5)
+
+            #Mis metricas
+            print("Buscando el botón 'Mis Métricas'...")
+            mis_metricas_button = find_first(driver, [
+                "//*[@content-desc='Mis Métricas']",
+                "//*[contains(@content-desc,'Métricas')]"
+            ])
+            assert mis_metricas_button, "No se pudo encontrar el botón 'Mis Métricas' en la pantalla."
+            rect = mis_metricas_button.rect
+            x = int(rect['x'] + rect['width'] * 0.25)
+            y = int(rect['y'] + rect['height'] / 2)
+            driver.tap([(x, y)])
+            time.sleep(3)
+
+            #Mi progreso
+            progreso_button = find_first(driver, [
+                "//*[@content-desc='Mi progreso']",
+                "//*[contains(@content-desc,'progreso')]"
+            ])
+            assert progreso_button, "No se pudo encontrar el botón 'Mi Progreso'"
+            print("✅ Botón 'Mi progreso' encontrado")
+            progreso_button.click()
+            time.sleep(1.5)
+
+            # Validar que aparezcan los elementos esperados
+            print("Validando elementos en la pantalla 'Mis Métricas'...")
+            efectividad_diaria = find_first(driver, [
+                "//*[@content-desc='Efectividad de venta diaria']",
+                "//*[contains(@content-desc,'Efectividad de venta diaria')]"
+            ])
+            assert efectividad_diaria, "No se encontró 'Efectividad de venta diaria'"
+            print("✅ 'Efectividad de venta diaria' encontrado")
+
+            necesidad_mensual = find_first(driver, [
+                "//*[@content-desc='Necesidad venta mensual']",
+                "//*[contains(@content-desc,'Necesidad venta mensual')]"
+            ])
+            assert necesidad_mensual, "No se encontró 'Necesidad venta mensual'"
+            print("✅ 'Necesidad venta mensual' encontrado")
+
+            efectividad_mensual = find_first(driver, [
+                "//*[@content-desc='Efectividad de venta mensual']",
+                "//*[contains(@content-desc,'Efectividad de venta mensual')]"
+            ])
+            assert efectividad_mensual, "No se encontró 'Efectividad de venta mensual'"
+            print("✅ 'Efectividad de venta mensual' encontrado")
+
+            print("✅ Todos los elementos validados correctamente")
+
+            # Regresar en el teléfono
+            print("Regresando a la pantalla anterior...")
+            driver.back()
             time.sleep(2)
 
-            # 4) Si aparece mensaje de error -> FAIL
-            pin_invalido = find_first(driver, [
-                "//*[contains(@text,'Pin inválido') or contains(@content-desc,'Pin inválido')]",
-                "//*[contains(@text,'PIN inválido') or contains(@content-desc,'PIN inválido')]",
-                "//*[contains(@text,'pin inválido') or contains(@content-desc,'pin inválido')]",
-                "//*[contains(@text,'Pin invalido') or contains(@content-desc,'Pin invalido')]"  # sin tilde
-            ])
-            assert pin_invalido is None, "Se mostró 'Pin inválido' al validar el OTP"
+            driver.back()
+            time.sleep(1)
 
-            print("✅ OTP validado correctamente")
+            # FFA
+            FFA_button = find_first(driver, [
+                "//*[@content-desc='FFA']",
+                "//*[contains(@content-desc,'FFA')]"
+            ])
+
+            assert FFA_button, "No se pudo encontrar el botón 'FFA'"
+            print("✅ Botón 'FFA' encontrado")
+            FFA_button.click()
+            time.sleep(1.5)
+            print("✅ TEST COMPLETADO: Validación exitosa y regreso completado.")
 
         except Exception as e:
             pytest.fail(f"TEST FALLÓ {e}")
