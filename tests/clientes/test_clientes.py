@@ -57,7 +57,7 @@ class test_clientes:
         finally:
             video_path = video_recorder()
             if video_path:
-                print(f"📹 Video evidencia de la configuración guardado en: {video_path}")
+                print(f" Video evidencia de la configuración guardado en: {video_path}")
 
     @pytest.mark.xray("ATC-34")
     def test_long_press_cliente_card(self, driver, video_recorder):
@@ -67,18 +67,18 @@ class test_clientes:
         """
         print("\n=== TEST: Validar long press en tarjeta de cliente 'CLIENTES IS' ===")
         try:
-            # Paso 1: Realizar la pulsación larga en la tarjeta
-            print("🎯 Paso 1: Ejecutando long press en tarjeta...")
+
+            print(" Paso 1: Ejecutando long press en tarjeta...")
             try:
                 realizar_long_press_en_tarjeta_cliente(driver)
                 print("✅ Paso 1 completado: Long press realizado exitosamente.")
             except Exception as long_press_error:
-                print(f"⚠️  Error en método principal, {long_press_error}")
-            print("⏳ Pausa para estabilizar la UI...")
+                print(f"  Error en método principal, {long_press_error}")
+            print(" Pausa para estabilizar la UI...")
             time.sleep(2)
 
-            # Paso 2: Pulsar el botón central
-            print("🎯 Paso 2: Pulsando botón central de navegación...")
+
+            print(" Paso 2: Pulsando botón central de navegación...")
             pulsar_boton_central_nav(driver)
             print("✅ Paso 2 completado: Botón central de navegación pulsado.")
 
@@ -89,7 +89,7 @@ class test_clientes:
             print(f"❌ ERROR durante el test: {e}")
 
             # Información adicional para debugging
-            print("🔧 Información de debugging:")
+            print(" Información de debugging:")
             try:
                 current_activity = driver.current_activity
                 print(f"   - Actividad actual: {current_activity}")
@@ -107,7 +107,7 @@ class test_clientes:
         finally:
             video_path = video_recorder()
             if video_path:
-                print(f"📹 Video evidencia guardado en: {video_path}")
+                print(f" Video evidencia guardado en: {video_path}")
 
     @pytest.mark.xray("ATC-35")
     def test_llenar_campos_general(self, driver, video_recorder):
@@ -117,47 +117,36 @@ class test_clientes:
         """
         print("\n=== TEST: Llenar formulario GENERAL ===")
         try:
-            # Valores a escribir
             nit_a_escribir = "123456789"
             dpi_a_escribir = "1234567890101"
             version_dpi_a_escribir = "001"
 
-            # Paso 1: Escribir NIT
             escribir_nit(driver, nit_a_escribir)
 
-            # Paso 2: Escribir DPI del representante
             escribir_dpi_representante(driver, dpi_a_escribir)
 
-            # Paso 3: Hacer scroll hacia abajo para ver el campo Versión DPI
             hacer_scroll_hacia_abajo(driver, cantidad_scroll=2)
 
-            # Paso 4: Escribir Versión DPI
             escribir_version_dpi(driver, version_dpi_a_escribir)
 
-            # Paso 5: Fecha de DPI
             dia = "13"
             anio = "2025"
             seleccionar_vencimiento_dpi(driver, dia, anio)
 
-            # Paso 6: Nota
             nota = "Prueba automatizada"
             escribir_nota(driver, nota)
 
-            # VERIFICACIÓN
             print("\nVerificando que los datos se escribieron correctamente...")
 
-            # Hacer scroll hacia arriba primero
             hacer_scroll_hacia_arriba(driver, 3)
 
-            # Verificar NIT por su texto
             nit_encontrado = False
             try:
                 nit_field = driver.find_element(AppiumBy.XPATH, f"//android.widget.EditText[@text='{nit_a_escribir}']")
                 print(f"✅ Verificación NIT exitosa: el campo contiene '{nit_field.text}'")
                 nit_encontrado = True
             except:
-                print("⚠️ Campo NIT no visible, haciendo scroll hacia abajo...")
-                # Scroll hacia abajo hasta 3 veces buscando NIT
+                print(" Campo NIT no visible, haciendo scroll hacia abajo...")
                 for scroll_attempt in range(3):
                     driver.swipe(driver.get_window_size()['width'] // 2,
                                  int(driver.get_window_size()['height'] * 0.8),
@@ -174,17 +163,16 @@ class test_clientes:
                     except:
                         continue
                 if not nit_encontrado:
-                    print("⚠️ No se pudo verificar el campo NIT después de scroll")
+                    print(" No se pudo verificar el campo NIT después de scroll")
 
-            # Verificar DPI por su texto
             dpi_encontrado = False
             try:
                 dpi_field = driver.find_element(AppiumBy.XPATH, f"//android.widget.EditText[@text='{dpi_a_escribir}']")
                 print(f"✅ Verificación DPI exitosa: el campo contiene '{dpi_field.text}'")
                 dpi_encontrado = True
             except:
-                print("⚠️ Campo DPI no visible, haciendo scroll hacia abajo...")
-                # Scroll hacia abajo hasta 3 veces buscando DPI
+                print(" Campo DPI no visible, haciendo scroll hacia abajo...")
+
                 for scroll_attempt in range(3):
                     driver.swipe(driver.get_window_size()['width'] // 2,
                                  int(driver.get_window_size()['height'] * 0.8),
@@ -201,9 +189,8 @@ class test_clientes:
                     except:
                         continue
                 if not dpi_encontrado:
-                    print("⚠️ No se pudo verificar el campo DPI después de scroll")
+                    print(" No se pudo verificar el campo DPI después de scroll")
 
-            # Verificar Versión DPI por su texto
             version_dpi_encontrado = False
             try:
                 version_dpi_field = driver.find_element(AppiumBy.XPATH,
@@ -211,8 +198,8 @@ class test_clientes:
                 print(f"✅ Verificación Versión DPI exitosa: el campo contiene '{version_dpi_field.text}'")
                 version_dpi_encontrado = True
             except:
-                print("⚠️ Campo Versión DPI no visible, haciendo scroll hacia abajo...")
-                # Scroll hacia abajo hasta 3 veces buscando Versión DPI
+                print("Campo Versión DPI no visible, haciendo scroll hacia abajo...")
+
                 for scroll_attempt in range(3):
                     driver.swipe(driver.get_window_size()['width'] // 2,
                                  int(driver.get_window_size()['height'] * 0.8),
@@ -229,9 +216,9 @@ class test_clientes:
                     except:
                         continue
                 if not version_dpi_encontrado:
-                    print("⚠️ No se pudo verificar el campo Versión DPI después de scroll")
+                    print(" No se pudo verificar el campo Versión DPI después de scroll")
 
-            # Paso 7 - Continuar
+
             hacer_scroll_hacia_abajo(driver, cantidad_scroll=2)
             hacer_click_continuar(driver)
 
@@ -242,7 +229,7 @@ class test_clientes:
         finally:
             video_path = video_recorder()
             if video_path:
-                print(f"📹 Video guardado: {video_path}")
+                print(f" Video guardado: {video_path}")
 
     @pytest.mark.xray("ATC-36")
     def test_llenar_campos_sucursales_1(self, driver, video_recorder):
@@ -290,7 +277,7 @@ class test_clientes:
         finally:
             video_path = video_recorder()
             if video_path:
-                print(f"📹 Video guardado: {video_path}")
+                print(f" Video guardado: {video_path}")
 
     @pytest.mark.xray("ATC-37")
     def test_llenar_campos_perfilacion(self, driver, video_recorder):
@@ -304,7 +291,7 @@ class test_clientes:
         finally:
             video_path = video_recorder()
             if video_path:
-                print(f"📹 Video guardado: {video_path}")
+                print(f" Video guardado: {video_path}")
 
     @pytest.mark.xray("ATC-38")
     def test_verificar_creacion_cliente(self, driver, video_recorder):
@@ -317,4 +304,4 @@ class test_clientes:
         finally:
             video_path = video_recorder()
             if video_path:
-                print(f"📹 Video guardado: {video_path}")
+                print(f" Video guardado: {video_path}")
