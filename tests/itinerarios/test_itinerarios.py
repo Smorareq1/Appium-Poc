@@ -67,7 +67,17 @@ class test_itinerarios:
             if video_path:
                 print(f"Video de evidencia guardado en: {video_path}")
 
-
+    @pytest.mark.xray("ATC-")
+    def test_mapa(self,driver,video_recorder):
+        print("\n=== TEST: Spin en días de la semana ===")
+        try:
+            pytest.skip("No se ha implementado la funcionalidad")
+        except Exception as e:
+            pytest.fail(f"TEST FALLÓ {e}")
+        finally:
+            video_path = video_recorder()
+            if video_path:
+                print(f"Video evidencia de la configuración guardado en: {video_path}")
 
     @pytest.mark.xray("ATC-20")
     def test_actividades_programadas(self, driver, video_recorder):
