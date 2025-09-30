@@ -33,6 +33,7 @@ class test_itinerarios:
                 print(f"Video evidencia de la configuración guardado en: {video_path}")
 
     @pytest.mark.xray("ATC-19")
+    #Agregado
     def test_click_semana_anterior_y_verificar_alerta(self, driver, video_recorder):
         print("\n=== TEST: Click semana anterior y verificar mensaje de advertencia ===")
         try:
@@ -66,8 +67,10 @@ class test_itinerarios:
             if video_path:
                 print(f"Video de evidencia guardado en: {video_path}")
 
+
+
     @pytest.mark.xray("ATC-20")
-    def test_itinerario_cliente(self, driver, video_recorder):
+    def test_actividades_programadas(self, driver, video_recorder):
         print("\n=== TEST: Buscar cliente en itinerario (Lógica Refactorizada) ===")
         try:
             wait = WebDriverWait(driver, 10)
@@ -122,8 +125,8 @@ class test_itinerarios:
             if video_path:
                 print(f"Video evidencia de la configuración guardado en: {video_path}")
 
-    @pytest.mark.xray("ATC-40")
-    def test_spin_semana(self, driver, video_recorder):
+    @pytest.mark.xray("ATC-")
+    def test_filtrar_por_fecha(self, driver, video_recorder):
         print("\n=== TEST: Spin en días de la semana ===")
         try:
             spin_semana(driver)
@@ -135,7 +138,120 @@ class test_itinerarios:
             if video_path:
                 print(f"Video evidencia de la configuración guardado en: {video_path}")
 
+    @pytest.mark.xray("ATC-")
+    def test_filtrar_por_estado(self, driver, video_recorder):
+        try:
+            pytest.skip("No se ha implementado la funcionalidad")
+        except Exception as e:
+            pytest.fail(f"TEST FALLÓ {e}")
+        finally:
+            video_path = video_recorder()
+            if video_path:
+                print(f"Video evidencia de la configuración guardado en: {video_path}")
+
+    @pytest.mark.xray("ATC-")
+    def test_crear_actividad(self, driver, video_recorder):
+        print("\n=== TEST: Crear actividad desde itinerario ===")
+        try:
+            pytest.fail("No se ha implementado la funcionalidad")
+        except Exception as e:
+            pytest.fail(f"TEST FALLÓ {e}")
+        finally:
+            video_path = video_recorder()
+            if video_path:
+                print(f"Video evidencia de la configuración guardado en: {video_path}")
+
+    @pytest.mark.xray("ATC-")
+    def test_no_se_puede_realizar(self,driver,video_recorder):
+        try:
+            pytest.skip("No se ha implementado la funcionalidad")
+        except Exception as e:
+            pytest.fail(f"TEST FALLÓ {e}")
+        finally:
+            video_path = video_recorder()
+            if video_path:
+                print(f"Video evidencia de la configuración guardado en: {video_path}")
+
+    @pytest.mark.xray("ATC-")
+    def test_reactivar_actividades(self,driver,video_recorder):
+        try:
+            pytest.skip("No se ha implementado la funcionalidad")
+        except Exception as e:
+            pytest.fail(f"TEST FALLÓ {e}")
+        finally:
+            video_path = video_recorder()
+            if video_path:
+                print(f"Video evidencia de la configuración guardado en: {video_path}")
+
+    @pytest.mark.xray("ATC-")
+    def test_check_in(self,driver,video_recorder):
+        try:
+            pytest.skip("No se ha implementado la funcionalidad")
+        except Exception as e:
+            pytest.fail(f"TEST FALLÓ {e}")
+        finally:
+            video_path = video_recorder()
+            if video_path:
+                print(f"Video evidencia de la configuración guardado en: {video_path}")
+
+    @pytest.mark.xray("ATC-")
+    def test_log_actividad(self,driver, video_recorder):
+        try:
+            pytest.skip("No se ha implementado la funcionalidad")
+        except Exception as e:
+            pytest.fail(f"TEST FALLÓ {e}")
+        finally:
+            video_path = video_recorder()
+            if video_path:
+                print(f"Video evidencia de la configuración guardado en: {video_path}")
+
+    @pytest.mark.xray("ATC-")
+    def test_venta(self,driver,video_recorder):
+        try:
+            pytest.skip("No se ha implementado la funcionalidad")
+        except Exception as e:
+            pytest.fail(f"TEST FALLÓ {e}")
+        finally:
+            video_path = video_recorder()
+            if video_path:
+                print(f"Video evidencia de la configuración guardado en: {video_path}")
+
+    @pytest.mark.xray("ATC-")
+    #Agregado
+    def test_check_out(self,driver,video_recorder):
+        try:
+            pytest.skip("No se ha implementado la funcionalidad")
+        except Exception as e:
+            pytest.fail(f"TEST FALLÓ {e}")
+        finally:
+            video_path = video_recorder()
+            if video_path:
+                print(f"Video evidencia de la configuración guardado en: {video_path}")
+
+    @pytest.mark.xray("ATC-")
+    def test_verificar_estados(self,driver,video_recorder):
+        try:
+            pytest.skip("No se ha implementado la funcionalidad")
+        except Exception as e:
+            pytest.fail(f"TEST FALLÓ {e}")
+        finally:
+            video_path = video_recorder()
+            if video_path:
+                print(f"Video evidencia de la configuración guardado en: {video_path}")
+
+    @pytest.mark.xray("ATC-")
+    def test_comision(self,driver,video_recorder):
+        try:
+            pytest.skip("No se ha implementado la funcionalidad")
+        except Exception as e:
+            pytest.fail(f"TEST FALLÓ {e}")
+        finally:
+            video_path = video_recorder()
+            if video_path:
+                print(f"Video evidencia de la configuración guardado en: {video_path}")
+
     @pytest.mark.xray("ATC-41")
+    #Agregado
     def test_click_semana_siguiente_6_veces_y_verificar_alerta(self, driver, video_recorder):
         print("\n=== TEST: Click semana siguiente 6 veces y verificar mensaje de advertencia ===")
         try:
