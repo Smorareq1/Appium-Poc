@@ -350,7 +350,7 @@ class TestFeaturesAutenticacion:
                 usuario.clear()
             except:
                 pass
-            usuario.send_keys("Alejandro.Morales")
+            usuario.send_keys("Nelson.Zarat")
 
             contrasena = find_first(driver, [
                 "//*[@hint='Contraseña']",
@@ -364,7 +364,7 @@ class TestFeaturesAutenticacion:
                 contrasena.clear()
             except:
                 pass
-            contrasena.send_keys("Admin123")
+            contrasena.send_keys("Admin1234")
 
             ensure_keyboard_closed(driver)
 
