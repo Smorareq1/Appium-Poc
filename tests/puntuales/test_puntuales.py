@@ -4,28 +4,25 @@ from appium.webdriver.common.appiumby import AppiumBy
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from datetime import datetime
+
 
 from tests.clientes.acciones_clientes import(
     pulsar_boton_central_nav
 )
 
 from tests.itinerarios.acciones_itinerarios import(
-    registrar_motivo
+    registrar_motivo,
+    validar_y_contar_actividades_pendientes,
+    reactivar_todas_actividades_canceladas
 )
 
 
 class test_puntuales:
-    @pytest.mark.xray("APPTEST-****")
+    @pytest.mark.xray("APPTEST-PUNTUALES")
     def test_puntual(self, driver, video_recorder):
         try:
-            pulsar_boton_central_nav(driver)
-            wait = WebDriverWait(driver, 10)
-            motivo = "Enfermedad"
-            fecha = "10"
-            comentario = "No puedo asistir por motivos médicos"
-
-            # Llamada a la función que armamos
-            registrar_motivo(driver, wait, motivo, fecha, comentario)
+            reactivar_todas_actividades_canceladas(driver)
         except Exception as e:
             pytest.fail(f"TEST FALLÓ {e}")
         finally:

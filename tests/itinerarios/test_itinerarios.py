@@ -2,6 +2,7 @@ import time
 import pytest
 from appium.webdriver.common.appiumby import AppiumBy
 from selenium.webdriver.support.ui import WebDriverWait
+from datetime import datetime
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 
@@ -15,7 +16,11 @@ from tests.itinerarios.acciones_itinerarios import (
     realizar_check_in_si_pendiente,
     realizar_venta_directa_si_pendiente,
     realizar_check_out_si_pendiente,
-    hacer_click_en_atras
+    hacer_click_en_atras,
+    registrar_motivo,
+    validar_y_contar_actividades_pendientes,
+    reactivar_todas_actividades_canceladas
+
 )
 
 from tests.clientes.acciones_clientes import(
@@ -182,7 +187,7 @@ class test_itinerarios:
                 print(f"Video evidencia de la configuración guardado en: {video_path}")
 
     @pytest.mark.xray("ATC-")
-    def test_no_se_puede_realizar(self,driver,video_recorder):
+    def test_no_se_puede_realizar_general(self,driver,video_recorder):
         try:
             pytest.skip("No se ha implementado la funcionalidad")
         except Exception as e:
@@ -193,9 +198,44 @@ class test_itinerarios:
                 print(f"Video evidencia de la configuración guardado en: {video_path}")
 
     @pytest.mark.xray("ATC-")
+    def test_no_se_puede_realizar_especifico(self,driver,video_recorder):
+        try:
+            # Validar estado inicial y contar actividades pendientes
+            resultado_inicial = validar_y_contar_actividades_pendientes(driver)
+            cantidad_inicial_pendientes = resultado_inicial['pendientes']
+            cantidad_inicial_canceladas = resultado_inicial['canceladas']
+            assert cantidad_inicial_pendientes > 0, "No hay actividades pendientes para cancelar"
+
+            # Cancelar actividades
+            pulsar_boton_central_nav(driver)
+            wait = WebDriverWait(driver, 10)
+            motivo = "Enfermedad"
+            fecha = str(datetime.now().day)
+            comentario = "No puedo asistir por motivos médicos"
+            registrar_motivo(driver, wait, motivo, fecha, comentario)
+
+            # Validar estado final
+            resultado_final = validar_y_contar_actividades_pendientes(driver)
+            cantidad_final_pendientes = resultado_final['pendientes']
+            cantidad_final_canceladas = resultado_final['canceladas']
+            cantidad_esperada_canceladas = cantidad_inicial_pendientes + cantidad_inicial_canceladas
+
+            assert cantidad_final_pendientes == 0, \
+                f"Aún quedan {cantidad_final_pendientes} actividades pendientes. Se esperaba 0"
+
+            assert cantidad_final_canceladas == cantidad_esperada_canceladas, \
+                f"Canceladas no coincide. Esperado: {cantidad_esperada_canceladas}, Actual: {cantidad_final_canceladas}"
+        except Exception as e:
+            pytest.fail(f"TEST FALLÓ {e}")
+        finally:
+            video_path = video_recorder()
+            if video_path:
+                print(f"Video evidencia de la configuración guardado en: {video_path}")
+
+    @pytest.mark.xray("ATC-")
     def test_reactivar_actividades(self,driver,video_recorder):
         try:
-            pytest.skip("No se ha implementado la funcionalidad")
+            reactivar_todas_actividades_canceladas(driver)
         except Exception as e:
             pytest.fail(f"TEST FALLÓ {e}")
         finally:

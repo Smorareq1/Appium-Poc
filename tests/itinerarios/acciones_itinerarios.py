@@ -4,11 +4,12 @@ from appium.webdriver.common.appiumby import AppiumBy
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from datetime import datetime
 
+from tests.login.test_login import find_first
 from tests.ventas.acciones.acciones_venta_directa import (
     ejecutar_venta_directa_completa
 )
-
 
 def spin_semana(driver):
     print("\n--- ACCIÓN: Spin semana (L hasta D) ---")
@@ -69,7 +70,6 @@ def spin_semana(driver):
         print(f"\n❌ Error general en spin_semana: {e}")
         pytest.fail(f"Error en spin_semana: {e}")
 
-
 def scroll_hacia_abajo(driver):
     screen_size = driver.get_window_size()
     start_x = screen_size['width'] // 2
@@ -78,7 +78,6 @@ def scroll_hacia_abajo(driver):
 
     driver.swipe(start_x, start_y, start_x, end_y, duration=800)
 
-
 def verificar_no_hay_clientes(driver):
     try:
         xpath_no_clientes = "//*[@content-desc='No hay clientes para mostrar']"
@@ -86,7 +85,6 @@ def verificar_no_hay_clientes(driver):
         return True
     except NoSuchElementException:
         return False
-
 
 def hacer_click_pendientes(driver, wait):
     try:
@@ -191,8 +189,19 @@ def registrar_motivo(driver, wait, motivo_texto, fecha_inicio, comentario):
     campo_comentario = wait.until(
         EC.presence_of_element_located((AppiumBy.XPATH, "//*[@hint='Comentario']"))
     )
+    campo_comentario.click()
     campo_comentario.send_keys(comentario)
     time.sleep(1)
+
+    #Click en confirmar
+    print("Paso 1: Buscando botón 'Confirmar'...")
+    confirmar_button = find_first(driver, [
+        "//*[@content-desc='Confirmar']",
+        "//*[contains(@content-desc,'Confirmar')]"
+    ])
+    assert confirmar_button, "No se pudo encontrar el botón 'Confirmar'"
+    confirmar_button.click()
+    time.sleep(1.5)
 
     print("✅ Registro de motivo completado")
 
@@ -239,7 +248,6 @@ def buscar_primer_dia_con_clientes(driver):
         print(f"❌ Error en búsqueda: {e}")
         return None
 
-
 def hacer_click_primer_cliente(driver):
     print("\n--- ACCIÓN: Hacer clic en el primer cliente ---")
 
@@ -273,7 +281,6 @@ def hacer_click_primer_cliente(driver):
         pytest.fail("TEST FALLÓ: Timeout. No apareció ninguna card de cliente en el tiempo esperado.")
     except Exception as e:
         pytest.fail(f"TEST FALLÓ: Ocurrió un error inesperado al hacer clic en el primer cliente: {e}")
-
 
 def realizar_check_in_si_pendiente(driver):
     print("\n--- LÓGICA: Verificando y realizando 'Check-in' si está pendiente ---")
@@ -313,7 +320,6 @@ def realizar_check_in_si_pendiente(driver):
         pytest.fail(f"TEST FALLÓ: Ocurrió un error inesperado durante el proceso de check-in: {e}")
         return False
 
-
 def realizar_venta_directa_si_pendiente(driver):
     print("\n--- LÓGICA: Verificando y realizando 'Venta tiendas de barrio' si está pendiente ---")
     try:
@@ -350,7 +356,6 @@ def realizar_venta_directa_si_pendiente(driver):
     except Exception as e:
         pytest.fail(f"TEST FALLÓ: Ocurrió un error inesperado durante el proceso de check-in: {e}")
         return False
-
 
 def realizar_check_out_si_pendiente(driver):
     print("\n--- LÓGICA: Verificando y realizando 'Check-out' si está pendiente ---")
@@ -390,7 +395,6 @@ def realizar_check_out_si_pendiente(driver):
         pytest.fail(f"TEST FALLÓ: Ocurrió un error inesperado durante el proceso de check-out: {e}")
         return False
 
-
 def hacer_click_en_capturar_ubicacion(driver):
     print("\n--- ACCIÓN: Hacer clic en 'Capturar ubicación' ---")
     try:
@@ -415,7 +419,6 @@ def hacer_click_en_capturar_ubicacion(driver):
         pytest.fail("TEST FALLÓ: Timeout. No se encontró el botón 'Capturar ubicación' en el tiempo esperado.")
     except Exception as e:
         pytest.fail(f"TEST FALLÓ: Ocurrió un error inesperado al hacer clic en 'Capturar ubicación': {e}")
-
 
 def hacer_click_en_Ok(driver):
     print("\n--- ACCIÓN: Hacer clic en 'Ok' ---")
@@ -442,7 +445,6 @@ def hacer_click_en_Ok(driver):
     except Exception as e:
         pytest.fail(f"TEST FALLÓ: Ocurrió un error inesperado al hacer clic en 'Ok': {e}")
 
-
 def hacer_click_en_atras(driver):
     print("\n--- ACCIÓN: Hacer clic en 'Atrás' ---")
     try:
@@ -467,3 +469,244 @@ def hacer_click_en_atras(driver):
         pytest.fail("TEST FALLÓ: Timeout. No se encontró el botón 'Atrás' en el tiempo esperado.")
     except Exception as e:
         pytest.fail(f"TEST FALLÓ: Ocurrió un error inesperado al hacer clic en 'Atrás': {e}")
+
+#Validar estados
+def validar_y_contar_actividades_pendientes(driver):
+    """
+    Valida que todas las actividades en la pantalla tengan estado 'Pendiente', 'Finalizado' o 'Cancelado'
+    y cuenta cuántas están en cada estado.
+
+    Returns:
+        dict: Diccionario con información de las actividades
+              {
+                  'total_actividades': int,
+                  'pendientes': int,
+                  'finalizadas': int,
+                  'canceladas': int,
+                  'actividades_pendientes': list,
+                  'actividades_finalizadas': list,
+                  'actividades_canceladas': list
+              }
+    """
+    print("\n--- LÓGICA: Validando estados de actividades y contando pendientes ---")
+
+    wait = WebDriverWait(driver, 10)
+
+    # XPath para encontrar todas las actividades con estado
+    actividades_xpath = "//android.view.View[contains(@content-desc, 'Pendiente') or contains(@content-desc, 'Finalizado') or contains(@content-desc, 'Cancelado')]"
+
+    # Buscar todas las actividades
+    actividades = driver.find_elements(AppiumBy.XPATH, actividades_xpath)
+
+    total_actividades = len(actividades)
+    print(f"Total de actividades encontradas: {total_actividades}")
+
+    actividades_pendientes = []
+    actividades_finalizadas = []
+    actividades_canceladas = []
+
+    # Analizar cada actividad
+    for i, actividad in enumerate(actividades, 1):
+        content_desc = actividad.get_attribute('content-desc')
+        print(f"\nActividad {i}: {content_desc}")
+
+        if 'Pendiente' in content_desc:
+            nombre_actividad = content_desc.replace('Pendiente', '').strip()
+            actividades_pendientes.append(nombre_actividad)
+            print(f"  ✅ Estado: PENDIENTE")
+        elif 'Finalizado' in content_desc:
+            nombre_actividad = content_desc.replace('Finalizado', '').strip()
+            actividades_finalizadas.append(nombre_actividad)
+            print(f"  ✅ Estado: FINALIZADO")
+        elif 'Cancelado' in content_desc:
+            nombre_actividad = content_desc.replace('Cancelado', '').strip()
+            actividades_canceladas.append(nombre_actividad)
+            print(f"  ✅ Estado: CANCELADO")
+        else:
+            print(f"  ⚠️ ADVERTENCIA: Estado no reconocido para esta actividad")
+
+    # Resumen
+    contador_pendientes = len(actividades_pendientes)
+    contador_finalizadas = len(actividades_finalizadas)
+    contador_canceladas = len(actividades_canceladas)
+
+    print(f"\n{'=' * 60}")
+    print(f"RESUMEN DE VALIDACIÓN:")
+    print(f"{'=' * 60}")
+    print(f"Total de actividades: {total_actividades}")
+    print(f"Actividades PENDIENTES: {contador_pendientes}")
+    print(f"Actividades FINALIZADAS: {contador_finalizadas}")
+    print(f"Actividades CANCELADAS: {contador_canceladas}")
+
+    if actividades_pendientes:
+        print(f"\nLista de actividades pendientes:")
+        for act in actividades_pendientes:
+            print(f"  - {act}")
+
+    if actividades_finalizadas:
+        print(f"\nLista de actividades finalizadas:")
+        for act in actividades_finalizadas:
+            print(f"  - {act}")
+
+    if actividades_canceladas:
+        print(f"\nLista de actividades canceladas:")
+        for act in actividades_canceladas:
+            print(f"  - {act}")
+
+    print(f"{'=' * 60}\n")
+
+    # Validar que todas las actividades tengan un estado válido
+    if total_actividades == (contador_pendientes + contador_finalizadas + contador_canceladas):
+        print("✅ VALIDACIÓN EXITOSA: Todas las actividades tienen estado válido (Pendiente, Finalizado o Cancelado)")
+    else:
+        print("⚠️ ADVERTENCIA: Algunas actividades no tienen estado válido")
+
+    resultado = {
+        'total_actividades': total_actividades,
+        'pendientes': contador_pendientes,
+        'finalizadas': contador_finalizadas,
+        'canceladas': contador_canceladas,
+        'actividades_pendientes': actividades_pendientes,
+        'actividades_finalizadas': actividades_finalizadas,
+        'actividades_canceladas': actividades_canceladas
+    }
+
+    return resultado
+def test_validar_estados_actividades(driver, esperado_pendientes=None, esperado_finalizadas=None,esperado_canceladas=None):
+    """
+    Test flexible que valida las cantidades esperadas de actividades por estado.
+    Si un parámetro es None, no se valida ese estado.
+
+    Args:
+        driver: WebDriver de Appium
+        esperado_pendientes: int opcional - Cantidad esperada de actividades Pendientes
+        esperado_finalizadas: int opcional - Cantidad esperada de actividades Finalizadas
+        esperado_canceladas: int opcional - Cantidad esperada de actividades Canceladas
+    """
+    print(f"\n{'=' * 60}")
+    print(f"TEST: Validar estados de actividades")
+    if esperado_pendientes is not None:
+        print(f"Pendientes esperadas: {esperado_pendientes}")
+    if esperado_finalizadas is not None:
+        print(f"Finalizadas esperadas: {esperado_finalizadas}")
+    if esperado_canceladas is not None:
+        print(f"Canceladas esperadas: {esperado_canceladas}")
+    print(f"{'=' * 60}")
+
+    try:
+        resultado = validar_y_contar_actividades_pendientes(driver)
+
+        print(f"\n📊 Comparación de resultados:")
+
+        # Validar pendientes si se especificó
+        if esperado_pendientes is not None:
+            print(f"   PENDIENTES - Esperado: {esperado_pendientes}, Actual: {resultado['pendientes']}")
+            assert resultado['pendientes'] == esperado_pendientes, \
+                f"Pendientes no coincide. Esperado: {esperado_pendientes}, Actual: {resultado['pendientes']}"
+
+        # Validar finalizadas si se especificó
+        if esperado_finalizadas is not None:
+            print(f"   FINALIZADAS - Esperado: {esperado_finalizadas}, Actual: {resultado['finalizadas']}")
+            assert resultado['finalizadas'] == esperado_finalizadas, \
+                f"Finalizadas no coincide. Esperado: {esperado_finalizadas}, Actual: {resultado['finalizadas']}"
+
+        # Validar canceladas si se especificó
+        if esperado_canceladas is not None:
+            print(f"   CANCELADAS - Esperado: {esperado_canceladas}, Actual: {resultado['canceladas']}")
+            assert resultado['canceladas'] == esperado_canceladas, \
+                f"Canceladas no coincide. Esperado: {esperado_canceladas}, Actual: {resultado['canceladas']}"
+
+        print(f"\n✅ TEST EXITOSO: Todas las validaciones pasaron correctamente")
+        return True
+
+    except AssertionError as e:
+        print(f"\n❌ TEST FALLIDO: {e}")
+        pytest.fail(str(e))
+        return False
+
+    except Exception as e:
+        print(f"\n❌ ERROR INESPERADO: {e}")
+        pytest.fail(f"TEST FALLÓ: Ocurrió un error inesperado: {e}")
+        return False
+
+    finally:
+        print(f"\n{'=' * 60}")
+        print(f"Fin del test de validación")
+        print(f"{'=' * 60}\n")
+
+#Reactivar actividades
+def reactivar_actividad_cancelada(driver, wait):
+    """
+    Reactiva una actividad cancelada haciendo click en ella y luego en el botón Reactivar.
+
+    Args:
+        driver: WebDriver de Appium
+        wait: WebDriverWait instance
+    """
+    # XPath para encontrar una actividad cancelada
+    actividad_cancelada_xpath = "//android.view.View[contains(@content-desc, 'Cancelado')]"
+
+    # Click en la actividad cancelada
+    actividad = wait.until(
+        EC.element_to_be_clickable((AppiumBy.XPATH, actividad_cancelada_xpath))
+    )
+    nombre_actividad = actividad.get_attribute('content-desc')
+    print(f"  → Haciendo click en: {nombre_actividad}")
+    actividad.click()
+    time.sleep(1)
+
+    # Click en el botón Reactivar
+    boton_reactivar_xpath = "//android.widget.Button[contains(@content-desc, 'Reactivar') or contains(@text, 'Reactivar')]"
+    boton_reactivar = wait.until(
+        EC.element_to_be_clickable((AppiumBy.XPATH, boton_reactivar_xpath))
+    )
+    print(f"  → Haciendo click en botón 'Reactivar'")
+    boton_reactivar.click()
+    time.sleep(1)
+def reactivar_todas_actividades_canceladas(driver):
+    """
+    Reactiva todas las actividades en estado Cancelado y valida que cambien a Pendiente.
+
+    Args:
+        driver: WebDriver de Appium
+
+    Returns:
+        bool: True si todas las actividades fueron reactivadas correctamente
+    """
+    wait = WebDriverWait(driver, 10)
+
+    # Validar estado inicial
+    resultado_inicial = validar_y_contar_actividades_pendientes(driver)
+    cantidad_inicial_canceladas = resultado_inicial['canceladas']
+    cantidad_inicial_pendientes = resultado_inicial['pendientes']
+
+    print(f"Estado inicial - Canceladas: {cantidad_inicial_canceladas}, Pendientes: {cantidad_inicial_pendientes}")
+
+    if cantidad_inicial_canceladas == 0:
+        print("No hay actividades canceladas para reactivar")
+        return True
+
+    # Reactivar cada actividad cancelada
+    for i in range(cantidad_inicial_canceladas):
+        print(f"\nReactivando actividad {i + 1} de {cantidad_inicial_canceladas}:")
+        reactivar_actividad_cancelada(driver, wait)
+
+    # Validar estado final
+    resultado_final = validar_y_contar_actividades_pendientes(driver)
+    cantidad_final_canceladas = resultado_final['canceladas']
+    cantidad_final_pendientes = resultado_final['pendientes']
+    cantidad_esperada_pendientes = cantidad_inicial_pendientes + cantidad_inicial_canceladas
+
+    print(f"\nEstado final - Canceladas: {cantidad_final_canceladas}, Pendientes: {cantidad_final_pendientes}")
+
+    # Validar que no queden actividades canceladas
+    assert cantidad_final_canceladas == 0, \
+        f"Aún quedan {cantidad_final_canceladas} actividades canceladas. Se esperaba 0"
+
+    # Validar que la cantidad de pendientes sea la esperada
+    assert cantidad_final_pendientes == cantidad_esperada_pendientes, \
+        f"Pendientes no coincide. Esperado: {cantidad_esperada_pendientes}, Actual: {cantidad_final_pendientes}"
+
+    print(f"✅ Las {cantidad_inicial_canceladas} actividades fueron reactivadas correctamente")
+
+    return True
