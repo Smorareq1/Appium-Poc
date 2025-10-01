@@ -8,12 +8,18 @@ from selenium.common.exceptions import TimeoutException
 from tests.itinerarios.acciones_itinerarios import (
     spin_semana,
     buscar_primer_dia_con_clientes,
+    hacer_click_ver_todos,
     hacer_click_pendientes,
+    hacer_click_visitados,
     hacer_click_primer_cliente,
     realizar_check_in_si_pendiente,
     realizar_venta_directa_si_pendiente,
     realizar_check_out_si_pendiente,
     hacer_click_en_atras
+)
+
+from tests.clientes.acciones_clientes import(
+    pulsar_boton_central_nav
 )
 
 class test_itinerarios:
@@ -68,6 +74,7 @@ class test_itinerarios:
                 print(f"Video de evidencia guardado en: {video_path}")
 
     @pytest.mark.xray("ATC-")
+    #Agregado
     def test_mapa(self,driver,video_recorder):
         print("\n=== TEST: Spin en días de la semana ===")
         try:
@@ -151,7 +158,10 @@ class test_itinerarios:
     @pytest.mark.xray("ATC-")
     def test_filtrar_por_estado(self, driver, video_recorder):
         try:
-            pytest.skip("No se ha implementado la funcionalidad")
+            wait = WebDriverWait(driver, 10)
+            hacer_click_ver_todos(wait)
+            hacer_click_pendientes(driver, wait)
+            hacer_click_visitados(wait)
         except Exception as e:
             pytest.fail(f"TEST FALLÓ {e}")
         finally:

@@ -109,7 +109,92 @@ def hacer_click_pendientes(driver, wait):
     except Exception as e:
         print(f"❌ Error haciendo clic en 'Pendientes': {e}")
         pytest.fail(f"Error al hacer clic en 'Pendientes': {e}")
+def hacer_click_ver_todos(wait):
+    try:
+        print("Buscando boton 'Ver todoos'")
+        xpath_ver_todos = "//*[@content-desc='Ver todos']"
+        boton_ver_todos = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, xpath_ver_todos))
+        )
+        print("Boton ver todos encontrado")
+        boton_ver_todos.click()
+        time.sleep(2)
+        print("Clic en 'Ver todoos' realizado exitosamente")
+    except TimeoutException:
+        print("❌ Error: No se encontró el botón 'Ver todos'")
+        pytest.fail("No se pudo encontrar el botón 'Ver todos'")
+    except Exception as e:
+        print(f"❌ Error haciendo clic en 'Ver todos': {e}")
+        pytest.fail(f"Error al hacer clic en 'Ver todos': {e}")
+def hacer_click_visitados(wait):
+    try:
+        print("Buscando boton 'Visitados'")
+        xpath_visitados = "//*[@content-desc='Visitados']"
+        boton_visitados = wait.until(
+            EC.element_to_be_clickable((AppiumBy.XPATH, xpath_visitados))
+        )
+        print("Boton visitados encontrado")
+        boton_visitados.click()
+        time.sleep(2)
+        print("Clic en 'Visitados' realizado exitosamente")
+    except TimeoutException:
+        print("❌ Error: No se encontró el botón 'Visitados'")
+        pytest.fail("No se pudo encontrar el botón 'Visitados'")
+    except Exception as e:
+        print(f"❌ Error haciendo clic en 'Visitados': {e}")
+        pytest.fail(f"Error al hacer clic en 'Visitados': {e}")
 
+def seleccionar_dia(driver, dia):
+    print(f" Seleccionando día '{dia}'...")
+    day_element = driver.find_element("xpath", f"//*[@content-desc='{dia}']")
+    day_element.click()
+    print(f"✅ Día '{dia}' seleccionado")
+    time.sleep(1)
+    print(" Confirmando selección...")
+    aceptar_button = driver.find_element("xpath", "//*[@content-desc='Aceptar']")
+    aceptar_button.click()
+    print("✅ Fecha confirmada")
+
+def registrar_motivo(driver, wait, motivo_texto, fecha_inicio, comentario):
+    # 1. Clic en botón "Motivo"
+    print("Buscando y haciendo clic en botón Motivo...")
+    boton_motivo = wait.until(
+        EC.element_to_be_clickable((AppiumBy.XPATH, "//*[@content-desc='Motivo\nMotivo']"))
+    )
+    boton_motivo.click()
+    time.sleep(1)
+
+    # 2. Seleccionar el motivo deseado (ej: "Enfermedad")
+    print(f"Seleccionando motivo: {motivo_texto}")
+    opcion_motivo = wait.until(
+        EC.element_to_be_clickable((AppiumBy.ANDROID_UIAUTOMATOR,
+                                    f'new UiSelector().descriptionContains("{motivo_texto}")'))
+    )
+    opcion_motivo.click()
+    time.sleep(1)
+
+    # 3. Clic en fecha inicio
+    print("Haciendo clic en campo de Fecha inicio...")
+    campo_fecha = wait.until(
+        EC.element_to_be_clickable((AppiumBy.XPATH, "//*[@hint='Fecha inicio']"))
+    )
+    campo_fecha.click()
+    time.sleep(1)
+
+    # Seleccionar fecha según parámetro (depende de cómo se renderiza tu datepicker)
+    print(f"Seleccionando fecha: {fecha_inicio}")
+    seleccionar_dia(driver, fecha_inicio)
+    time.sleep(1)
+
+    # 4. Escribir comentario
+    print(f"Escribiendo comentario: {comentario}")
+    campo_comentario = wait.until(
+        EC.presence_of_element_located((AppiumBy.XPATH, "//*[@hint='Comentario']"))
+    )
+    campo_comentario.send_keys(comentario)
+    time.sleep(1)
+
+    print("✅ Registro de motivo completado")
 
 def buscar_primer_dia_con_clientes(driver):
     print("\n--- ACCIÓN: Buscar primer día con clientes (solo búsqueda) ---")
